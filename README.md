@@ -4,8 +4,6 @@ Super Manager game version for the Lagunak Senior Men's A basketball team
 
 
 
-> Nota de balanceo: tu ejemplo `10 + posición + Maider = 13 -> 18` tiene un error matemático. `10 x 1.5 = 15`, no 13. La fórmula correcta sería `15 + 5 = 20`. Lo dejo corregido abajo.
-
 ## 0. REGLAS DE PUNTUACIÓN - Fuente única de verdad
 
 Esta es la base de todo. Sin esto habrá discusiones.
