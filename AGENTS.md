@@ -40,30 +40,30 @@ No usar `animate-expo` ni `write-swift`: no aplican a este stack.
 ## Reglas duras
 
 ### Motor de puntuación (§0 del README)
-- Vive en **funciones puras** en un único módulo (`src/lib/scoring/`). Prohibido duplicar o reinterpretar la lógica en componentes, Server Actions, formularios admin o SQL.
-- Orden fijo y no negociable: `BASE → capitán ×1.5 → suelo Páter → +5 posición → −N racha → +3 MVP → −5 expulsión`.
+- Vive en **funciones puras** en un único módulo (`src/lib/scoring/`). Prohibido duplicar o reinterpretar la lógica en componentes, Server Actions, formularios admin o SQL. La futura página `/normas` (ver §9 del README, la define la spec-05) no calculará: solo mostrará reglas inyectando las constantes del motor vía `{var}` i18n.
+- Orden fijo y no negociable: `BASE → capitán ×1.5 (round_half_up, solo BASE) ó suelo Páter max(_,1)+1 excluyentes → +5 posición (E==A, bloqueado si BASE 0) → −N racha (bloqueado si BASE 0, pero cuenta para racha futura) → +3 MVP (exige haber jugado, empate habilita a todos, nunca se multiplica) → −5 expulsión (por expulsado, BASE intacta)`.
 - Todo desglose en UI (`Arnau 12 +5 −1 = 16`) se deriva de la misma salida del motor. Nunca se recalcula a mano.
 - Cambiar una regla = (1) test que falla, (2) motor, (3) actualizar §0 del README. En ese orden y en el mismo cambio.
 
-### Dominio (resumen ejecutable)
-- Posiciones: `B | E | A | AP | P`, donde `E == A`. Cada jugador tiene exactamente 2 válidas; alinear en una = `+5`.
-- Capitán (Maider): `×1.5` solo sobre BASE y opta al `+3` MVP (máxima valoración real de la jornada).
-- Entrenador (Páter): `max(valor, 1)` + `+1` fijo a cada uno de los 5.
-- Racha: `−1` en la 2ª alineación consecutiva, `−2` en la 3ª… Se rompe si una jornada no lo alineas.
+### Dominio (resumen ejecutable, detalle en §0 + spec-02)
+- Posiciones: `B | E | A | AP | P`, donde `E == A`. Cada jugador tiene exactamente 2 válidas; alinear en una = `+5`, bloqueado si `BASE = 0`.
+- Capitán (Maider): `round_half_up(BASE ×1.5)` solo sobre BASE y opta al `+3` MVP (máxima BASE de plantilla habiendo jugado; empate habilita a todos; nunca se multiplica).
+- Entrenador (Páter): `max(valor, 1)` + `+1` fijo a cada uno de los 5, incluso con `BASE = 0` (`0 → 2`).
+- Racha: `−1` en la 2ª alineación consecutiva, `−2` en la 3ª… Se rompe si una jornada no lo alineas o no envías quinteto. Alinear lesionado/DNP cuenta para racha futura.
 - Lesionado / no convocado / DNP → BASE `= 0` (sigue ocupando slot y se muestra 🚑/❌, nunca se oculta).
-- **Cierre = hora del partido − 3h**, y se valida **en el servidor**. El contador del Home es solo UX; jamás es la puerta.
+- **Cierre = hora del partido − 3h** (`Europe/Madrid`), y se valida **en el servidor**: solo lo recibido estrictamente antes; el segundo exacto o después se rechaza. El contador del Home es solo UX; jamás es la puerta.
 - Alineación válida: 5 jugadores + 1 entrenador + 1 capitán (uno de los 5). Se valida en servidor antes de guardar.
 
 ### Solo móvil
 - **Toda tarea de UI empieza cargando la skill `mobile-native`** (ver § Skills del proyecto).
 - Diseño entre 360 y 430 px de ancho. No hay versión escritorio: nada de hover, tablas anchas ni layouts de dos columnas.
-- Interacción única: **tap-to-select + lista**. Drag & drop prohibido.
+- Interacción única: **tap-to-select + lista**. Drag & drop prohibido. Excepción: `/normas` es lectura con acordeones `tap-to-expand`.
 - Objetivos táctiles ≥ 44×44 px; legibilidad sobre el fondo de pista.
 - Modo Pete (ON/OFF) y tema claro/oscuro son transversales: toda vista respeta `img↔imgPete` y `nombre↔nombrePete`. El Modo Pete es cosmético: **las reglas nunca cambian**.
 
 ### i18n — cero hardcode
-- Ningún string visible en el código: todo en `es/strings.json` con claves jerárquicas (`ui.home.countdown`, `errors.close.passed`).
-- v1 solo `es`, pero escrito como si mañana existiera `eu.json`. Prohibido concatenar frases a mano.
+- Ningún string visible en el código: todo en `es/strings.json` con claves jerárquicas (`ui.home.countdown`, `errors.close.passed`, `ui.normas.*` cuando la cree la spec-05).
+- v1 solo `es`, pero escrito como si mañana existiera `eu.json`. Prohibido concatenar frases a mano. Los números de reglas en la futura `/normas` llegarán como `{var}` desde constantes del motor, nunca como literales duplicados.
 
 ### Supabase (Free Tier)
 - Postgres solo para datos relacionales. Imágenes y memes en `public/` del repo → 0 MB de Storage.
@@ -78,14 +78,15 @@ No usar `animate-expo` ni `write-swift`: no aplican a este stack.
 
 ## Estructura objetivo
 ```
-es/strings.json          # i18n
+es/strings.json          # i18n (la spec-05 añadirá ui.normas.*)
 public/                  # fotos img / imgPete
-src/app/                 # rutas App Router
-src/app/(admin)/         # sección Admin
+app/                     # rutas App Router hoy (JS); tras spec-01 → src/app/*.tsx
+app/normas/page.js       # página Normas (la crea la spec-05; .tsx tras spec-01)
 src/lib/scoring/         # motor §0 (puro) + tests junto al módulo
+src/lib/scoring/constantes.js  # única fuente futura de números para /normas (hereda spec-02)
 src/lib/dominio/         # cierre, rachas, validaciones de alineación
 src/lib/supabase/        # cliente(s) y queries
-src/lib/i18n/
+src/lib/i18n/            # diccionario + traducir (spec-00)
 ```
 
 ## Convenciones

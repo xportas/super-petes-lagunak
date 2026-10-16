@@ -80,13 +80,13 @@ Maider gana si aciertas el crack, Páter gana por consistencia.
 **Onboarding 3 pasos (solo primera vez):**
 1. Elige tu nombre pete.
 2. Crea tu primer quinteto + entrenador + capitán.
-3. Entiende el cierre: `Cierre = Partido -3h`.
+3. Entiende el cierre: `Cierre = Partido -3h` (ver `/normas#cierre`).
 
 ## 2. HOME
 
 | Bloque | Contenido |
 |---|---|
-| Cuenta atrás | `HH:MM:SS hasta cierre` para próxima jornada. Cierre = `hora_partido -3h`. Si cerrado: `Cerrado - vuelve tras el partido`. |
+| Cuenta atrás | `HH:MM:SS hasta cierre` para próxima jornada. Cierre = `hora_partido -3h`. Si cerrado: `Cerrado - vuelve tras el partido`. Icono de ayuda `?` enlaza a `/normas#cierre`. |
 | Próximo partido | Fecha, hora, lugar, rival. |
 | Top 3 Managers | Username ordenados por puntos de la **última jornada**, no acumulado. |
 | Top 3 Jugadores | Jugadores reales ordenados por valoración última jornada. Tap -> ficha. |
@@ -104,7 +104,7 @@ Estados por jugador en el selector, con icono + tooltip:
 * 🚑 Lesionado / ❌ No convocado = `BASE 0` (con Páter `2`, sin `+5` ni `-N`)
 * 📍 Bonus posición `+5` si coincide (se previsualiza)
 
-> Al seleccionar se ve cálculo previo: `ej: 12 (base est.) +5 pos -1 racha = 16`. El cálculo final usa la valoración real post-partido.
+> Al seleccionar se ve cálculo previo: `ej: 12 (base est.) +5 pos -1 racha = 16`. El cálculo final usa la valoración real post-partido. Cada icono enlaza al bloque correspondiente de `/normas` (posición, racha, cierre).
 
 ## 4. FICHA JUGADOR INDIVIDUAL
 
@@ -129,6 +129,8 @@ TOTAL: 67
 
 **Historial:** lista `J1: 52pts (12º), J2: 67pts (3º)...` Tap expande desglose.
 
+> El desglose sigue el orden fijo de §0. Dudas de reglas: ver `/normas#orden`.
+
 ## 6. CLASIFICACIÓN GENERAL
 
 * Puntos acumulados, ranking por `username`.
@@ -136,7 +138,7 @@ TOTAL: 67
 
 ## 7. AJUSTES
 
-* Normativa y reglas (link a §0).
+* Normativa y reglas: entrada `Normas del juego` que abre la página `/normas` (contenido §0 desglosado, ver §9).
 * Modo Pete [ON/OFF]: cambia `img->imgPete` y `nombre->nombrePete`. Normas no cambian.
 * Cambiar contraseña.
 * Tema claro/oscuro.
@@ -158,3 +160,22 @@ Sin notificaciones en v1.
   2. Formulario manual valoración + lesionados/convocados/expulsados/MVP.
 * Usuarios: listar, reset password (al no haber email).
 * Recalcular jornada.
+
+## 9. NORMAS (`/normas`) - Página de reglas desglosadas
+
+Página de lectura prevista (sin acciones ni BD) que desglosa el §0. Fuente de contenido: §0 + `specs/02-motor-puntuacion-y-dominio/spec.md`. No duplicará ni reinterpretará el motor: cuando se implemente (spec-05), los números (`+5`, `−N`, `+3`, `−5`, `x1.5`, `−3h`) se inyectarán desde las constantes de `src/lib/scoring/` vía variables `{var}` de `es/strings.json` (`ui.normas.*`).
+
+Accesos transversales: Ajustes (`Normas del juego`), Onboarding paso 3 (`#cierre`), Home cuenta atrás (`?` → `#cierre`), Equipo (iconos → bloque correspondiente), Mi Resultado (`#orden`).
+
+Bloques en orden fijo (anclas):
+
+1. `#cierre` Cierre: `hora_partido − 3h` en `Europe/Madrid`, validado en servidor. Solo se acepta lo recibido estrictamente antes; el segundo exacto o después se rechaza. El contador del Home es solo UX.
+2. `#base` BASE = valoración FNB tal cual (puede ser negativa). Lesionado / no convocado / DNP → `BASE = 0` (ocupa slot, se muestra 🚑/❌, nunca se oculta).
+3. `#entrenadores` Maider y Páter excluyentes, solo slot de entrenador. Maider: `round_half_up(BASE x 1.5)` solo sobre BASE del capitán (ej: `13 → 20`, `-1 → -1`) + opta a MVP. Páter: `max(valor, 1) + 1` a cada uno de los 5, incluso con `BASE = 0` (`0 → 2`). Nunca se combinan.
+4. `#posicion` `+5` si juega en una de sus 2 válidas (`B | E/A | AP | P`, `E == A`). Bloqueado si `BASE = 0`.
+5. `#racha` `−N` progresivo: 1ª = `0`, 2ª seguida = `−1`, 3ª = `−2`, 4ª = `−3`... Se rompe si una jornada no lo alineas o no envías quinteto. Alinear lesionado/DNP cuenta para la racha aunque puntúe `0`.
+6. `#mvp` `+3` jornada si tu capitán es máxima BASE de la plantilla Lagunak habiendo jugado. Empate en lo alto: todos los empatados habilitan el `+3`. Se suma después del `x1.5`, nunca se multiplica.
+7. `#expulsion` `−5` por cada expulsado del quinteto. Su BASE cuenta con normalidad. Acumula con MVP si coincide.
+8. `#orden` Orden fijo por jugador: `BASE → x1.5 Maider ó suelo+1 Páter → +5 posición → −N racha`; jornada: `+3 MVP → −5 expulsión`. Total puede ser negativo. Dato ausente = error, no `0` provisional.
+
+Nota Modo Pete: cosmético (`img↔imgPete`, `nombre↔nombrePete`). Las reglas nunca cambian.
