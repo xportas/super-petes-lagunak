@@ -155,9 +155,10 @@ Sin notificaciones en v1.
 
 * Partidos/Jornadas: crear rival, lugar, fecha, cálculo auto `cierre = -3h`.
 * Jugadores: CRUD + `posiciones[2], img, imgPete, nombrePete, dorsal`.
-* Resultados: vía dual:
-  1. Pegar `URL FNB` -> scraping auto (ideal).
-  2. Formulario manual valoración + lesionados/convocados/expulsados/MVP.
+* Resultados: triple vía (detalle en `specs/10-scraping-fnb/spec.md`):
+  1. Auto-sync FNB transparente: calendario desde `idTeam 11659` y actas digitales post-partido vía APIs JSON OWC (sin parsear HTML), con Lazy Sync en servidor y throttle.
+  2. Pegar `URL FNB` (`pagina-partido/?id=...`) o botón `Sincronizar FNB ahora` -> pre-rellena el formulario para revisión antes de guardar.
+  3. Formulario manual valoración + lesionados/convocados/expulsados/MVP: garantizado siempre (si la FNB cae o el partido no tiene acta digital, como la J1 `55483`, la liga nunca se bloquea).
 * Usuarios: listar, reset password (al no haber email).
 * Recalcular jornada.
 

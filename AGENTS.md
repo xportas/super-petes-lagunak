@@ -71,6 +71,10 @@ No usar `animate-expo` ni `write-swift`: no aplican a este stack.
 - Auth propia de la app, no Supabase Auth: `username` case-insensitive + hash Argon2/bcrypt + sesión httpOnly + rate-limit. Sin email; reset manual vía Admin.
 - RLS activado en todas las tablas. La clave `service_role` jamás llega al cliente. Secretos solo en `.env.local` (ignorado por git).
 
+### FNB — sincronización automática (ver `specs/10-scraping-fnb/`)
+- Fuente única: `specs/10-scraping-fnb/spec.md` (comportamiento) + `specs/10-scraping-fnb/fnb-api-reference.md` (endpoints OWC verificados 2026-10-16). Prohibido parsear el HTML de `fnbaloncesto.com`.
+- Las specs 03 (modelo/semilla), 09 (admin) y 10 (FNB) deben leer `specs/10-scraping-fnb/` antes de diseñar tablas, seed o panel admin: columnas `fnb_uuid`, `fnb_match_id`, `fnb_universally_id`, `origen_resultado` y Lazy Sync con throttle (sin cron ni demonios). El MVP lo calcula solo el motor §0; el manual nunca se bloquea.
+
 ## Estado actual del repo (importante)
 - Scaffold JS de Next.js 16.4 + Tailwind v4. `next.config.mjs` activa `cacheComponents` y `partialPrefetching`: consulta la doc correspondiente antes de tocar fetching/caché.
 - **Pendiente migrar a TypeScript `strict`** (constitución) y crear la infra de Vitest: es la primera tarea técnica, antes de cualquier feature.
@@ -85,6 +89,7 @@ app/normas/page.js       # página Normas (la crea la spec-05; .tsx tras spec-01
 src/lib/scoring/         # motor §0 (puro) + tests junto al módulo
 src/lib/scoring/constantes.js  # única fuente futura de números para /normas (hereda spec-02)
 src/lib/dominio/         # cierre, rachas, validaciones de alineación
+src/lib/fnb/             # cliente API FNB (ESB + MSSTATS) y mapeo a dominio (dueña spec-10)
 src/lib/supabase/        # cliente(s) y queries
 src/lib/i18n/            # diccionario + traducir (spec-00)
 ```

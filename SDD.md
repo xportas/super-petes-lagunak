@@ -16,7 +16,7 @@ Cada spec tiene el tamaño justo para resolverse en una entrevista de ≤ 6 preg
 
 3. 03-modelo-datos-y-semilla (Supabase)
 
-  Tablas Postgres, RLS, usuario Admin semilla (excluido de rankings) y seed de los ~20 jugadores reales + Maider y Páter.
+  Tablas Postgres, RLS, usuario Admin semilla (excluido de rankings) y seed de los ~20 jugadores reales + Maider y Páter. Debe incluir las columnas de vinculación FNB que exige `specs/10-scraping-fnb/spec.md` (`fnb_uuid` en jugadores/entrenadores; `fnb_match_id`, `fnb_universally_id`, `origen_resultado` y timestamps de sync en jornadas) y sembrar los `uuid` verificados de `specs/10-scraping-fnb/fnb-api-reference.md`.
 
 4. 04-auth-y-onboarding (§1)
 
@@ -44,8 +44,8 @@ Cada spec tiene el tamaño justo para resolverse en una entrevista de ≤ 6 preg
 
 9. 09-admin-jornadas-y-resultados (§8)
 
-  CRUD jornadas (cierre = -3h), CRUD jugadores, reset manual de contraseñas, formulario manual de acta (valoraciones, DNP/lesionados, expulsados, MVP) + botón de recálculo de jornada.
+  CRUD jornadas (cierre = -3h), CRUD jugadores, reset manual de contraseñas, formulario manual de acta (valoraciones, DNP/lesionados, expulsados, MVP) + botón de recálculo de jornada. Consume la sincronización definida en `specs/10-scraping-fnb/spec.md`: botón "Sincronizar FNB ahora", pre-relleno por URL y respeto a `origen_resultado = 'manual'`.
 
-10. 10-scraping-fnb (§8.1, opcional)
+10. 10-scraping-fnb (§8, verificado 2026-10-16)
 
-  Pegar URL de la FNB para pre-rellenar el formulario manual de la spec 08 (si falla la web de la FNB, la liga nunca se bloquea).
+  Fuente única: `specs/10-scraping-fnb/spec.md` + `specs/10-scraping-fnb/fnb-api-reference.md`. Auto-sync de calendario (`idTeam 11659`) y actas digitales vía APIs JSON OWC (ESB + MSSTATS, sin parsear HTML), Lazy Sync en servidor con throttle (6h calendario / 15min resultados, sin cron ni demonios), mapeo por `fnb_uuid`, MVP solo desde el motor §0 y formulario manual garantizado cuando no haya acta digital (caso J1 `55483`).
