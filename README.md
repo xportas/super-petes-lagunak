@@ -70,17 +70,17 @@ Maider gana si aciertas el crack, Páter gana por consistencia.
 ## 1. AUTH + ONBOARDING
 
 **Login:**
-* `username + password` único (case-insensitive). Hash Argon2/bcrypt, rate-limit, sesión móvil persistente.
-* Sin email. ¿Olvidé contraseña? -> no hay auto-reset. Botón `Pedir reset al admin` (flujo cerrado: el admin pone una clave temporal y se la da al usuario por canal privado; este la cambia en Ajustes).
-* Background: pendiente arte Keman + escudo Lagunak.
+* `username + password` único (case-insensitive). Hash Argon2/bcrypt, rate-limit (5 fallos en 15 min → bloqueo 15 min), sesión móvil persistente (30 días exactos renovables, multi-dispositivo).
+* Sin email. ¿Olvidé contraseña? -> no hay auto-reset. Botón `Pedir reset al admin` (solo informativo: indica contactar al admin por canal privado con tu username; no crea ticket ni notificación. El admin pone una clave temporal, revoca sesiones previas y te la da por canal privado; al entrar con ella deberás cambiarla por una distinta en Ajustes antes de jugar; vale hasta completar el cambio).
+* Background: pendiente arte Keman + escudo Lagunak (no bloquea).
 
-**Registro:**
-* Solo `username + password`. Sin selector de rol. Admin es usuario semilla que no juega.
+**Registro (liga cerrada):**
+* `username + password + código de invitación único de liga` vigente y rotable por el admin (se valida antes que el `username`). Sin selector de rol. Admin es usuario semilla que no juega.
+* `username 3-20 [A-Za-z0-9_-]`, único case-insensitive (display preservado). `password` 8–72 con al menos 1 no-espacio. `nombrePete` es solo de jugadores, no de managers.
 
-**Onboarding 3 pasos (solo primera vez):**
-1. Elige tu nombre pete.
-2. Crea tu primer quinteto + entrenador + capitán.
-3. Entiende el cierre: `Cierre = Partido -3h` (ver `/normas#cierre`).
+**Onboarding 2 pasos (solo primera vez, reanudable):**
+1. Crea tu primer quinteto + entrenador + capitán (solo jugadores activos; misma validación que Equipo con posición por slot; si no hay próxima jornada abierta o el cierre ya pasó, se muestra aviso y se continúa al paso 2 para crearlo luego en Equipo).
+2. Entiende el cierre: `Cierre = Partido -3h` (ver `/normas#cierre`). Obligatorio antes de Home; si el cierre ya había pasado al completarlo, esa jornada no cuenta `−10`.
 
 ## 2. HOME
 
@@ -166,7 +166,7 @@ Sin notificaciones en v1.
 
 Página de lectura prevista (sin acciones ni BD) que desglosa el §0. Fuente de contenido: §0 + `specs/02-motor-puntuacion-y-dominio/spec.md`. No duplicará ni reinterpretará el motor: cuando se implemente (spec-05), los números (`+5`, `−N`, `+3`, `−5`, `x1.5`, `−3h`) se inyectarán desde las constantes de `src/lib/scoring/` vía variables `{var}` de `es/strings.json` (`ui.normas.*`).
 
-Accesos transversales: Ajustes (`Normas del juego`), Onboarding paso 3 (`#cierre`), Home cuenta atrás (`?` → `#cierre`), Equipo (iconos → bloque correspondiente), Mi Resultado (`#orden`).
+Accesos transversales: Ajustes (`Normas del juego`), Onboarding paso 2 (`#cierre`), Home cuenta atrás (`?` → `#cierre`), Equipo (iconos → bloque correspondiente), Mi Resultado (`#orden`).
 
 Bloques en orden fijo (anclas):
 

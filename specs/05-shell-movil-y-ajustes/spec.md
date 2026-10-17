@@ -8,8 +8,8 @@
 
 - `README.md §0` es la fuente única de las reglas y `specs/02-motor-puntuacion-y-dominio/spec.md` congela sus ambigüedades (redondeo half-up, ramas Maider/Páter excluyentes, `BASE 0` bloquea `+5/−N` pero no Páter, MVP exige haber jugado, empate habilita a todos, `−5` por expulsado, cierre estricto `< hora−3h` en `Europe/Madrid`).
 - `SDD.md Fase 1 / 05-shell-movil-y-ajustes` ya era dueña de la "vista de normativa (§0)". Esta ampliación la concreta como ruta `/normas` completa con accesos transversales, en lugar de crear una spec nueva que fragmentaría esa propiedad.
-- Decisiones ya cerradas con el usuario para esta ampliación: accesos transversales (Ajustes + Onboarding-3 + ayudas en Home/Equipo/Resultado); números inyectados desde constantes del motor vía `{var}` i18n (nunca literales duplicados); ampliar la 05, no crear spec nueva.
-- **Alcance de este fichero:** solo la página Normas. El resto de la 05 (layout móvil, navegación inferior, conmutador Modo Pete, tema claro/oscuro, cambio de contraseña) queda pendiente de su propia entrevista y no se especifica aquí.
+- Decisiones ya cerradas con el usuario para esta ampliación: accesos transversales (Ajustes + Onboarding-2 + ayudas en Home/Equipo/Resultado); números inyectados desde constantes del motor vía `{var}` i18n (nunca literales duplicados); ampliar la 05, no crear spec nueva.
+- **Alcance de este fichero:** solo la página Normas. El resto de la 05 (layout móvil, navegación inferior, conmutador Modo Pete, tema claro/oscuro, entrada de cambio de contraseña en Ajustes) queda pendiente de su propia entrevista y no se especifica aquí. El comportamiento de cambiar password y clave temporal es dueño de spec-04; la 05 solo pondrá la entrada UI.
 
 ## 2. Requisitos funcionales (EARS)
 
@@ -17,7 +17,7 @@
   Cuando el usuario abra `/normas`, el sistema deberá mostrar las reglas en 8 bloques anclables (`#cierre`, `#base`, `#entrenadores`, `#posicion`, `#racha`, `#mvp`, `#expulsion`, `#orden`) más nota de Modo Pete y línea de fuente, siguiendo el contenido de `README.md §9` y el orden de `spec-02 RF-13`.
 
 - **RF-02 — Accesos transversales:**
-  Cuando el usuario quiera entender una regla desde otra pantalla, el sistema deberá ofrecerle enlace a `/normas`: entrada `Normas del juego` en Ajustes; paso 3 del Onboarding a `#cierre`; icono de ayuda en la cuenta atrás del Home a `#cierre`; iconos de estado del Equipo a su bloque; desglose de Mi Resultado a `#orden`.
+  Cuando el usuario quiera entender una regla desde otra pantalla, el sistema deberá ofrecerle enlace a `/normas`: entrada `Normas del juego` en Ajustes; paso 2 del Onboarding a `#cierre`; icono de ayuda en la cuenta atrás del Home a `#cierre`; iconos de estado del Equipo a su bloque; desglose de Mi Resultado a `#orden`.
 
 - **RF-03 — Lectura pura:**
   Cuando se sirva `/normas`, el sistema no deberá ejecutar Server Actions ni leer BD; será un Server Component estático cacheado.
@@ -47,7 +47,7 @@
 
 ## 4. Fuera de alcance explícito
 
-- Resto de la 05: layout móvil, navegación inferior, implementación del conmutador Modo Pete y del tema claro/oscuro, cambio de contraseña (pendientes de entrevista propia).
+- Resto de la 05: layout móvil, navegación inferior, implementación del conmutador Modo Pete y del tema claro/oscuro, entrada de cambio de contraseña en Ajustes (comportamiento dueño de spec-04, pendientes de entrevista propia).
 - Lógica del motor §0, rachas, cierre y validaciones (spec-02); infra i18n y migración TS (specs-00/01); persistencia, Auth, Admin, scraping (specs-03/04/06–10).
 - Edición de reglas desde la app: la página es lectura; las reglas solo cambian por el flujo test → motor → §0.
 

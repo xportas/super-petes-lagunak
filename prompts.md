@@ -8,7 +8,7 @@ Proponme la constitución de este proyecto: N principios cortos y verificables s
 
 Vamos a especificar la feature [ID] correspondiente a [§0 del @README.md], respetando @CONSTITUTION.md y @AGENTS.md.
 
-NO escribas código. Hazme preguntas de una en una (máx. 6) sobre casos límite, errores y alcance que hoy estén ambiguos en el @README.md. Cuando termine de responderte, genera specs/[ID]/spec.md con:
+NO escribas código. Hazme preguntas de una en una sobre casos límite, errores y alcance que hoy estén ambiguos en el @README.md. Cuando termine de responderte, genera specs/[ID]/spec.md con:
 1. Objetivo y contexto.
 2. Requisitos Funcionales numerados (RF-01, RF-02…) en formato EARS (Cuando… el sistema deberá… / Si… entonces el sistema deberá…).
 3. Casos límite y manejo de errores.

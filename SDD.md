@@ -20,11 +20,11 @@ Cada spec tiene el tamaño justo para resolverse en una entrevista de ≤ 6 preg
 
 4. 04-auth-y-onboarding (§1)
 
-  Registro/login (username case-insensitive + Argon2/bcrypt + sesión httpOnly + rate-limit), flujo "Pedir reset al admin" y Onboarding de 3 pasos (nombre pete, primer quinteto, regla -3h).
+  Registro/login (username case-insensitive + Argon2/bcrypt + sesión httpOnly + rate-limit), flujo "Pedir reset al admin" informativo sin ticket y Onboarding de 2 pasos (primer quinteto posponible si no hay jornada abierta, regla -3h).
 
 5. 05-shell-movil-y-ajustes (§7 y §9)
 
-  Layout móvil (360–430px), navegación inferior, conmutador transversal Modo Pete (img↔imgPete, nombre↔nombrePete), tema claro/oscuro, página `/normas` (7 bloques §0 + #orden, Server Component estático cacheado, accesos desde Ajustes + Onboarding-3 + ayudas Home/Equipo/Resultado, números inyectados desde constantes del motor vía i18n) y cambio de contraseña.
+  Layout móvil (360–430px), navegación inferior, conmutador transversal Modo Pete (img↔imgPete, nombre↔nombrePete), tema claro/oscuro, página `/normas` (7 bloques §0 + #orden, Server Component estático cacheado, accesos desde Ajustes + Onboarding-2 + ayudas Home/Equipo/Resultado, números inyectados desde constantes del motor vía i18n) y entrada de cambio de contraseña en Ajustes (comportamiento dueño de spec-04).
 
 ### Fase 2 — Bucle Principal del Manager (Gameplay)
 
