@@ -10,4 +10,4 @@
 8. **UX Móvil y Modo Pete**: Interacción 100% `tap-to-select` (cero drag&drop), tema claro/oscuro y conmutador global `normal <-> Pete`.
 9. **Cero textos hardcodeados**: Toda cadena de UI se resuelve desde `es/strings.json` mediante claves i18n; prohibidos literales en JSX.
 10. **Puerta de calidad**: Cero `any`, cero errores en `tsc --noEmit`, `eslint` y `next build` en cada entrega.
-11. **Límites de alcance v1**: Sin notificaciones, rol Admin semilla excluido del ranking y carga de jornada con formulario manual garantizado + scraping FNB.
+11. **Límites de alcance v1**: Sin notificaciones, rol Admin semilla excluido del ranking y carga de jornada con formulario manual garantizado + scraping FNB, salvo jornada papel sin acta digital (ej. J1 `55483` sin `universallyid`) que queda en `0` excluido de todo + rompe rachas sin carga manual posterior (decisión spec-09).

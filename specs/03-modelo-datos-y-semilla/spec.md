@@ -15,7 +15,7 @@
 - **Por qué 3 estados:** lesionado (baja médica marcada por Admin y respetada por el sync) vs no_convocado (fuera de lista) vs DNP —`Did Not Play`, convocado pero con 0 minutos por decisión técnica—. Los tres fuerzan `BASE=0`, ocupan slot y cuentan para racha futura, pero el motivo cambia la UI (🚑/❌) y el sync.
 - **Por qué excepción papel:** la J1 `55483` no tiene acta digital (`universallyid=null`, solo foto en papel). Dejarla en error eterno bloquearía la clasificación. Decisión del usuario: esa jornada se detecta en auto, vale 0 para todos, se excluye de todo y rompe rachas. Es excepción a spec-02 y obliga a actualizar spec-02 en el mismo cambio.
 
-Decisiones cerradas con el usuario que esta spec congela: tabla `entrenador` propia con id único inventado si la FNB no da uuid; auth mínima incluida (detalle en spec de auth); semilla plantilla completa con placeholders y plantilla viva con alta/baja; 3 estados; MVP solo calculado; una alineación por manager/jornada editable hasta cierre con instante de inicio; hora guardada y cierre derivado en `Europe/Madrid`; solo crudo/total derivado; ausencia = −10 sin retroactivo para altas tardías; racha derivada del histórico; papel en auto y excluida de todo; semilla mínimo J1+J2 ampliable; rol `manager|admin` + RLS exigido; mapeo solo por `uuid` con dorsal informativo; origen a nivel jornada con timestamps y throttle spec-10; pendientes en panel sin notificaciones.
+Decisiones cerradas con el usuario que esta spec congela: tabla `entrenador` propia con id único inventado si la FNB no da uuid; auth mínima incluida (detalle en spec de auth); semilla plantilla completa con placeholders y plantilla viva con alta/baja; 3 estados; MVP solo calculado; una alineación por manager/jornada editable hasta cierre con instante de inicio; hora guardada y cierre derivado en `Europe/Madrid`; solo crudo/total derivado; ausencia = −10 sin retroactivo para altas tardías; racha derivada del histórico; papel tras gracia 1 día en auto y excluida de todo; semilla mínimo J1+J2 ampliable; rol `manager|admin` + RLS exigido; mapeo por `uuid` con fallback solo por nombre y dorsal nunca mapea; origen a nivel jornada con timestamps y throttle spec-10 (`24h/1h/+3h`); pendientes en panel sin notificaciones.
 
 ## 2. Requisitos funcionales (EARS)
 
@@ -32,16 +32,16 @@ Decisiones cerradas con el usuario que esta spec congela: tabla `entrenador` pro
   Cuando haya usuarios, el sistema deberá distinguir rol `manager|admin` con RLS activado en todas las tablas: el manager solo lee plantilla/jornadas y escribe su propia alineación, el admin escribe todo y la clave `service_role` jamás llega al cliente. El Admin semilla nace con username fijo inicial, no juega, no tiene quinteto y queda excluido de rankings y top 3. Si el Admin intenta alinear o puntuar, entonces el sistema deberá rechazarlo.
 
 - **RF-05 — Jornada con hora y vinculación FNB:**
-  Cuando exista una jornada, el sistema deberá registrar rival, local/visitante, campo y municipio, `hora_partido` en `Europe/Madrid`, `fnb_match_id`, `fnb_universally_id` nullable, marcador oficial, `origen_resultado` (`manual|fnb` a nivel jornada, sin parciales mixtos) y marcas `last_calendar_sync` / `last_result_sync`. El sync deberá respetar throttle spec-10 (calendario 6h; resultados solo si `hora+2h<=ahora` y cada 15min). Si falta la hora, entonces se aplicará spec-02 E-19 (cierre incalculable, bloqueo de guardado).
+  Cuando exista una jornada, el sistema deberá registrar rival, local/visitante, campo y municipio, `hora_partido` en `Europe/Madrid`, `fnb_match_id`, `fnb_universally_id` nullable, marcador oficial, `origen_resultado` (`manual|fnb` a nivel jornada, sin parciales mixtos) y marcas `last_calendar_sync` / `last_result_sync`. El sync deberá respetar throttle spec-10 (calendario 24h; resultados solo si `hora+3h<=ahora` y cada 1h, con lock ante lecturas concurrentes). Si falta la hora, entonces se aplicará spec-02 E-19 (cierre incalculable, bloqueo de guardado).
 
 - **RF-06 — Cierre derivado, nunca fijo:**
   Cuando se necesite el cierre, el sistema deberá derivarlo siempre como `hora_partido − 3h` en `Europe/Madrid`. Si cambia la hora del partido, entonces el cierre deberá recalcularse sin invalidar alineaciones ya guardadas, sin resucitar envíos tardíos ni anular envíos válidos.
 
 - **RF-07 — Resultado crudo por jugador y jornada:**
-  Cuando haya acta, el sistema deberá guardar por cada jugador activo de plantilla su valoración entera, su estado (`jugo|lesionado|no_convocado|dnp`) y su flag `expulsado` bool (el motivo FIBA se resuelve antes de guardar en el sync/manual). Si falta valoración o estado en una jornada normal, entonces el sistema deberá bloquear el cálculo con error sin total ni parcial, salvo excepción RF-11.
+  Cuando haya acta, el sistema deberá guardar por cada jugador activo de plantilla su valoración entera, su estado (`jugo|lesionado|no_convocado|dnp`) y su flag `expulsado` bool (el motivo se resuelve antes de guardar según spec-02 RF-11, incluyendo 5 faltas personales). Si falta valoración o estado en una jornada normal, entonces el sistema deberá bloquear el cálculo con error sin total ni parcial, salvo excepción RF-11.
 
-- **RF-08 — Lesionado previo se respeta:**
-  Si el Admin marcó `lesionado`, entonces el auto-sync no deberá sobrescribirlo a `dnp`/`no_convocado` y su BASE deberá tratarse como `0`.
+- **RF-08 — Lesionado previo se respeta salvo minutos en acta:**
+  Si el Admin marcó `lesionado` y el acta trae cero minutos o ausencia, entonces el auto-sync no deberá sobrescribirlo a `dnp`/`no_convocado` y su BASE deberá tratarse como `0`. Si el acta trae minutos jugados (`timePlayed > 0`), entonces el sistema deberá pasar a `jugo` con `BASE` real.
 
 - **RF-09 — Lesión y expulsión excluyentes:**
   Si un jugador consta como `lesionado|no_convocado|dnp`, entonces nunca deberá constar a la vez como `expulsado`.
@@ -49,8 +49,8 @@ Decisiones cerradas con el usuario que esta spec congela: tabla `entrenador` pro
 - **RF-10 — Posiciones tal cual:**
   Cuando se valide un jugador, el sistema deberá exigir exactamente 2 letras guardadas tal cual. La pareja `["E","A"]` es válida aunque `E==A` a efectos del `+5`. La alineación guardará la letra elegida (`B|E|A|AP|P`) sin normalizar. Si no se cumple, entonces el dato deberá tratarse como inválido y bloquear su validación.
 
-- **RF-11 — Excepción papel en auto y excluida:**
-  Si un partido finalizado tiene `state="1"` pero `universallyid=null` (acta en papel, caso J1 `55483`), entonces el auto deberá marcar esa jornada como papel: valdrá `0` para todos los managers activos entonces, quedará excluida de acumulado, media, evolución, Top de última y Top de jugadores (como si no existiera salvo para romper rachas) y romperá las rachas de todos. Esta regla es excepción a spec-02 RF-17/E-16 y deberá actualizarse en spec-02 en el mismo cambio.
+- **RF-11 — Excepción papel con gracia de 1 día, excluida, sin manual posterior (decisión spec-09):**
+  Si un partido finalizado mantiene `state="1"` pero `universallyid=null` pasado `1 día` (acta en papel, caso J1 `55483`), entonces el auto deberá marcar esa jornada como papel: valdrá `0` para todos los managers activos entonces, quedará excluida de acumulado, media, evolución, Top de última y Top de jugadores (como si no existiera salvo para romper rachas), romperá las rachas de todos y no admitirá carga manual posterior. Dentro de la gracia de `1 día` seguirá pendiente con manual permitido. Esta regla es excepción a spec-02 RF-17/E-16, a `CONSTITUTION.md §11` / `README.md §8` y a spec-10 RF-09, y deberá actualizarse en spec-02 en el mismo cambio.
 
 - **RF-12 — Una alineación editable hasta cierre:**
   Cuando un manager alinee, el sistema deberá guardar una única alineación por manager y jornada con 5 jugadores distintos, posición de alineación por jugador, 1 entrenador y 1 capitán que sea uno de los 5, más el instante de inicio de petición en servidor. El onboarding usa esta misma entidad. Si el instante es estrictamente anterior al cierre, entonces deberá aceptar y solo valer la última enviada; si es igual o posterior, deberá rechazarla. El envío incompleto se rechaza sin guardar.
@@ -68,10 +68,10 @@ Decisiones cerradas con el usuario que esta spec congela: tabla `entrenador` pro
   Cuando se cierre la jornada, el MVP (`+3`) deberá calcularlo exclusivamente el motor §0 sobre máxima BASE habiendo jugado. El sistema no deberá persistir ningún flag de MVP manual ni de la FNB y el formulario manual no tendrá campo MVP; si la FNB trae alguno, deberá ignorarlo.
 
 - **RF-17 — Automático con manual garantizado y mapeo por uuid:**
-  Cuando haya acta digital, el sistema deberá importar calendario y resultados de forma automática por `fnb_uuid` (si falta, fallback solo por nombre normalizado sin tildes case-insensitive y guarda su `uuid` al vuelo). El dorsal es informativo, repetible y nunca se usará para mapear. Si la FNB cae o no hay acta digital, entonces deberá permitir completar la jornada íntegramente a mano y la liga nunca deberá bloquearse.
+  Cuando haya acta digital, el sistema deberá importar calendario y resultados de forma automática por `fnb_uuid` (si falta, fallback solo por nombre normalizado sin tildes case-insensitive y guarda su `uuid` al vuelo; con cero o dos o más coincidencias no auto-vincula y deja pendiente manual). El dorsal es informativo, repetible y nunca se usará para mapear. Si la FNB cae o no hay acta digital dentro de su gracia de `1 día`, entonces deberá permitir completar la jornada íntegramente a mano y la liga nunca deberá bloquearse.
 
 - **RF-18 — Manual bloquea auto salvo reimporte:**
-  Cuando el Admin edite a mano una jornada, el sistema deberá marcar `origen_resultado='manual'` a nivel jornada y el auto-sync nunca deberá sobrescribirla. Si el Admin pulsa explícitamente Re-importar/Re-calcular automático, entonces sí deberá reimportar desde la FNB y recalcular todo lo afectado.
+  Cuando el Admin edite a mano una jornada, el sistema deberá marcar `origen_resultado='manual'` a nivel jornada y el auto-sync nunca deberá sobrescribirla. Si la FNB corrige un acta de jornada ya calculada con `origen_resultado='fnb'`, entonces el auto-sync sí deberá reimportarla y recalcular. Si el Admin pulsa explícitamente Re-importar/Re-calcular automático, entonces sí deberá reimportar desde la FNB y recalcular todo lo afectado.
 
 - **RF-19 — Semilla mínima J1+J2 ampliable:**
   La semilla deberá traer como mínimo 2 jornadas ejemplo: J1 `55483` sin acta (dispara RF-11) y J2 `55488` con acta digital (11 valoraciones ejemplo §0 mapeadas a sus jugadores). Se podrán añadir más jornadas ejemplo/test sin violar la spec. El resto del calendario lo aporta el sync desde `idTeam 11659`.
@@ -88,7 +88,7 @@ Decisiones cerradas con el usuario que esta spec congela: tabla `entrenador` pro
 |---|---|---|---|
 | E-01 | Foto o mote ausente en semilla | Placeholder en `public/` y nombre provisional; la jornada no se bloquea; 0 MB Storage, nunca Supabase Storage | Arte Keman pendiente; la liga no espera al arte |
 | E-02 | `DNP` (convocado, 0 min) vs `no_convocado` vs `lesionado` | Los tres dan `BASE=0`, ocupan slot, bloquean `+5/−N` y cuentan para racha futura; solo `lesionado` frena al sync | Sin motivo se pierde la UI 🚑/❌ y se sobrescribiría una baja médica |
-| E-03 | Jornada papel detectada en auto (`state=1`, `universallyid=null`) | `0` para activos entonces, excluida de acumulado/medias/evolución/tops, rompe rachas | Sin acta no hay BASE; castigar con `−10` sería injusto y bloquear en error eterniza la J1 |
+| E-03 | Jornada papel tras gracia `1 día` (`state=1`, `universallyid=null`) | `0` para activos entonces, excluida de acumulado/medias/evolución/tops, rompe rachas, sin manual posterior; dentro de la gracia sigue pendiente con manual permitido (decisión spec-09) | Sin acta no hay BASE; causa externa no castiga con `−10` ni bloquea eterno |
 | E-04 | Partido futuro sin acta (`state=0`) o dato parcial pendiente en jornada normal | Solo calendario y cierre; error bloqueante sin total ni parcial, nunca `0` provisional | Prohibido inventar puntos sin dato (spec-02 E-16) |
 | E-05 | Jornada normal sin quinteto de un activo | `−10` y rompe sus rachas; no es fila, es ausencia; alta tardía no hereda nada | Penaliza el olvido, distinto del papel que es causa externa |
 | E-06 | Envío en el segundo exacto del cierre o después (instante de inicio) | Rechazo aunque el contador mostrara tiempo; cambio de hora no resucita tardíos ni anula válidos | Cierre estricto en servidor `Europe/Madrid` |
@@ -98,10 +98,10 @@ Decisiones cerradas con el usuario que esta spec congela: tabla `entrenador` pro
 | E-10 | `username` duplicado con distinta capitalización (`Pete`/`pete`) | Rechazo por duplicado | Login es case-insensitive |
 | E-11 | `fnb_uuid` duplicado o jugador nuevo sin `uuid` | Rechazo de duplicado; el nuevo se vincula solo por nombre normalizado, guarda su `uuid` y queda pendiente en panel para completar posiciones/fotos | Sin vínculo estable el sync duplicaría; dorsal no identifica |
 | E-12 | Dorsal repetido en plantilla | Permitido, sin error ni mapeo por dorsal | El dorsal no identifica; identifica el `fnb_uuid` |
-| E-13 | FNB caída, clave rotada o sin acta digital | Calendario y manual siguen operativos; error visible con reintento manual, sin parcial guardado | La liga nunca se bloquea (principio 11) |
-| E-14 | Jornada `manual` ante auto-sync | El auto la salta; solo Re-importar explícito la reimporta y recalcula a nivel jornada | La corrección del Admin prevalece |
+| E-13 | FNB caída, clave rotada o sin acta dentro de gracia | Calendario y manual siguen operativos; error visible con reintento manual, sin parcial guardado | La liga nunca se bloquea (principio 11) |
+| E-14 | Jornada `manual` ante auto-sync | El auto la salta; corrección FNB con origen `fnb` sí auto-actualiza; solo Re-importar explícito reimporta una `manual` y recalcula a nivel jornada | La corrección del Admin prevalece |
 | E-15 | Cambio de hora en la FNB | Recalcula cierre sin invalidar alineaciones | Cierre deriva de la hora vigente |
-| E-16 | Segunda fase / cambio de grupo mismo `idTeam` | Jornadas nuevas sin borrar histórico | La temporada tiene varias competiciones |
+| E-16 | Segunda fase / cambio de grupo mismo `idTeam` | Jornadas nuevas sin borrar histórico, con numeración de liga correlativa y número FNB aparte | La temporada tiene varias competiciones |
 | E-17 | Admin intenta alinear o entrar en ranking | Rechazo / exclusión | Admin semilla no juega |
 | E-18 | Refuerzo mid-season o reactivación tras baja | Entra sin historia; siguiente aparición cuenta como 1.ª; si le faltan posiciones queda pendiente en panel | Un alta reinicia (spec-02 RF-09); sin 2 posiciones no hay `+5` válido |
 

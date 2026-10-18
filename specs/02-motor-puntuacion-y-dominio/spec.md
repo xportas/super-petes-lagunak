@@ -49,8 +49,8 @@ Decisiones cerradas con el usuario que esta spec congela: redondeo a entero half
 - **RF-10 — MVP al capitán que jugó y es máximo de plantilla:**
   Cuando el capitán sea el jugador con máxima BASE forzada entre la plantilla Lagunak de esa jornada, haya jugado (no lesionado/DNP) y su valoración esté presente, el sistema deberá sumar `+3` al total de jornada. Si hay empate en lo alto, entonces cada manager cuyo capitán sea uno de los empatados y haya jugado deberá recibir el `+3`.
 
-- **RF-11 — Expulsión por cada expulsado sin anular BASE:**
-  Cuando uno o más jugadores del quinteto resulten expulsados, el sistema deberá restar `−5` por cada uno al total de jornada y mantener sus BASE y demás conceptos calculados con normalidad. Un expulsado sí puede ser MVP y acumular `+3` y `−5`. Si no hay expulsados en el quinteto, entonces el sistema no deberá restar nada por este concepto.
+- **RF-11 — Expulsión por cada expulsado sin anular BASE (incluye 5 faltas):**
+  Cuando uno o más jugadores del quinteto resulten expulsados, entendiendo por expulsado descalificante (`disqualification > 0`), pelea (`scuffle > 0`), acumulación de 2 o más entre antideportivas y técnicas (`unsportsmanslike + technique + coachTechnical >= 2`) o 5 faltas personales (`personal >= 5`), el sistema deberá restar `−5` por cada uno al total de jornada y mantener sus BASE y demás conceptos calculados con normalidad. Un expulsado sí puede ser MVP y acumular `+3` y `−5`. Si no hay expulsados en el quinteto, entonces el sistema no deberá restar nada por este concepto.
 
 - **RF-12 — Total de jornada con MVP y expulsiones coexistiendo:**
   Cuando se cierre una jornada calculada con quinteto enviado, el sistema deberá obtener el total como suma de los 5 totales de jugador más `+3` por MVP si aplica menos `5` por cada expulsado. Si el resultado es negativo, entonces el sistema deberá mantenerlo negativo sin suelo a cero.
@@ -79,6 +79,9 @@ Decisiones cerradas con el usuario que esta spec congela: redondeo a entero half
 - **RF-20 — Recálculo total ante corrección:**
   Cuando el admin corrija valoración, estado o posiciones válidas, el sistema deberá recalcular todo lo afectado de esa jornada con las reglas vigentes.
 
+- **RF-21 — Excepción papel con gracia (define spec-10 RF-09):**
+  Si una jornada finalizada sigue sin acta digital pasado `1 día` (acta en papel, caso J1 `55483`), entonces el sistema deberá tratarla como papel: `0` para todos, excluida de todo salvo ruptura de rachas, sin admitir carga manual posterior. Esta regla es excepción a RF-17/E-16.
+
 ## 3. Casos límite y manejo de errores
 
 | # | Caso | Comportamiento exigido (QUÉ) | Por qué |
@@ -106,6 +109,7 @@ Decisiones cerradas con el usuario que esta spec congela: redondeo a entero half
 | E-21 | Jugador con distinto número de posiciones válidas (0,1,3+), salvo `["E","A"]` permitido | Dato inválido: bloquea validación de ese jugador | Cada jugador tiene exactamente 2 válidas por §0; `[E,A]` vale aunque sea una casilla efectiva |
 | E-22 | Lesionado/DNP a la vez que expulsado | Combinación inválida: son excluyentes | Un no jugado nunca consta como expulsado |
 | E-23 | Corrección admin de valoración, estado o posiciones | Recalcula todo lo afectado con las reglas vigentes | Lo corregido no deja totales parciales antiguos |
+| E-24 | Jornada papel tras gracia `1 día` sin acta (caso J1 `55483`) | `0` para todos, excluida de todo salvo ruptura de rachas, sin manual posterior; dentro de la gracia sigue pendiente con manual permitido | Causa externa con gracia ante actas tardías |
 
 ## 4. Fuera de alcance explícito
 
@@ -118,8 +122,8 @@ Decisiones cerradas con el usuario que esta spec congela: redondeo a entero half
 
 ## 5. Criterios de finalización (Definition of Done)
 
-- [ ] Existe spec congelada con RF-01–RF-20, E-01–E-23 y la corrección Maider/Páter como entrenadores excluyentes.
-- [ ] Tests Vitest en verde que cubren: BASE negativa y `0` con FNB entero; capitán x1.5 con redondeo half-up (`13→20`, `−1→−1.5→−1`); Páter suelo+1 con BASE `0/negativa` (`0→2`, `−5→2`); bloqueo de `+5/−N` con BASE 0; rachas 1.ª–4.ª y siguientes; ruptura por no alinear; sin quinteto `−10` con reinicio; racha que cuenta aunque lesionado; J1 y alta como 1.ª; MVP simple sobre BASE forzada, empate MVP, MVP que exige jugar, MVP con Maider y con Páter, expulsado MVP (`+3` y `−5`); expulsión simple, doble (`−10`) y con BASE intacta; lesión/expulsión excluyentes; total negativo preservado; E/A intercambiables con `["E","A"]` válido; validación (5 distintos + entrenador + capitán del quinteto con posición, elegibilidad separada, 2 posiciones por jugador); cierre exacto `−3h` en `Europe/Madrid` con instante de inicio y rechazo en el segundo exacto; cambio de hora sin invalidar; dato ausente que impide calcular; recálculo total tras corrección.
+- [ ] Existe spec congelada con RF-01–RF-21, E-01–E-24 y la corrección Maider/Páter como entrenadores excluyentes.
+- [ ] Tests Vitest en verde que cubren: BASE negativa y `0` con FNB entero; capitán x1.5 con redondeo half-up (`13→20`, `−1→−1.5→−1`); Páter suelo+1 con BASE `0/negativa` (`0→2`, `−5→2`); bloqueo de `+5/−N` con BASE 0; rachas 1.ª–4.ª y siguientes; ruptura por no alinear; sin quinteto `−10` con reinicio; racha que cuenta aunque lesionado; J1 y alta como 1.ª; MVP simple sobre BASE forzada, empate MVP, MVP que exige jugar, MVP con Maider y con Páter, expulsado MVP (`+3` y `−5`); expulsión simple, doble (`−10`) y con BASE intacta, incluyendo 5 faltas personales como expulsión; lesión/expulsión excluyentes; total negativo preservado; E/A intercambiables con `["E","A"]` válido; validación (5 distintos + entrenador + capitán del quinteto con posición, elegibilidad separada, 2 posiciones por jugador); cierre exacto `−3h` en `Europe/Madrid` con instante de inicio y rechazo en el segundo exacto; cambio de hora sin invalidar; dato ausente que impide calcular salvo papel tras gracia; recálculo total tras corrección; papel `0` excluida + rompe.
 - [ ] Cobertura unitaria del 100% sobre el cálculo §0, validación de posiciones y cálculo de rachas.
 - [ ] `npx tsc --noEmit` con 0 errores y cero `any`.
 - [ ] `npm run lint` con 0 warnings.

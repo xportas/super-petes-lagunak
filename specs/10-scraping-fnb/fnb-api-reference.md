@@ -186,17 +186,17 @@ Valoraciones reales J2 para LAGUNAK A (`dorsal — name — valoration`):
 - 12 — IKER BALDA AFONSO — **12**
 - 14 — IÑIGO ORTEGA CARCAMO — **7**
 - 15 — XABIER PORTAS GONZALEZ — **2**
-- 16 — MARCOS GOMEZ ARNEDO — **0** (5 faltas, eliminado, no expulsado)
+- 16 — MARCOS GOMEZ ARNEDO — **0** (5 faltas, expulsado con `−5` y BASE intacta por decisión de sesión)
 - 17 — ANDONI ESTIRADO GAISAN — **8**
 - 21 — JAVIER BRINGAS BASTERRA — **1**
 - 22 — OSKAR ZURDO FERNANDEZ — **-1**
 - 23 — ASIER VALENCIA ARBIZU — **13** (máxima BASE → MVP)
 - 30 — MARC CATALAN FEIJOO — **-1**
 
-Reglas de mapeo (detalle en `spec.md RF-05–RF-08`):
+Reglas de mapeo (detalle en `spec.md RF-05–RF-08`, la expulsión la define `spec-02 RF-11`):
 
-- `BASE = trunc(data.valoration)`; `gamePlayed > 0` o `timePlayed > 0` = jugó; ausente o `0/0` = `no_convocado`/`dnp` (`BASE 0`), salvo `lesionado` previo del Admin.
-- Expulsado si `disqualification > 0` o `scuffle > 0` o `(unsportsmanslike + technique + coachTechnical) >= 2`. `personal = 5` solo es eliminado.
+- `BASE = trunc(data.valoration)`; `timePlayed > 0` = jugó; ausente del acta = `no_convocado` (`BASE 0`); presente con cero minutos = `dnp` (`BASE 0`); `lesionado` previo del Admin se respeta con cero minutos o ausencia, pero con minutos pasa a `jugo`. El dorsal nunca se usa para mapear.
+- Expulsado si `disqualification > 0` o `scuffle > 0` o `(unsportsmanslike + technique + coachTechnical) >= 2` o `personal >= 5` (5 faltas es expulsión por decisión de sesión).
 - MVP: solo motor §0 sobre máxima `BASE` habiendo jugado; ignorar flags externos.
 
 ### 3.4. `GET ${ESB_BASE}/FCBQWeb/getTeamCard/11659` — club, equipo, clasificación y licencias
@@ -205,7 +205,7 @@ Devuelve `club`, `team` (con `groups[0].standing` de 8 equipos, LAGUNAK A 4º co
 
 `uuid` permanentes verificados (usar como `fnb_uuid` en el seed de la spec-03):
 
-**Entrenadores:**
+**Entrenadores (nunca se sincronizan; solo referencia para semilla):**
 
 - MAIDER VICENTE LIRAS → `c663ff92-eb38-11e9-83ca-0216824770c2` (`idLicense 69673`)
 - IGNACIO JAVIER PATERNAIN FRIAS (Páter) → `c66dca7c-eb38-11e9-83ca-0216824770c2` (`idLicense 69671`)
@@ -225,6 +225,6 @@ Devuelve `club`, `team` (con `groups[0].standing` de 8 equipos, LAGUNAK A 4º co
 - 30 — MARC CATALAN FEIJOO → `c6684685-eb38-11e9-83ca-0216824770c2`
 - DAVID VITAL PAGOLA → `c668475e-eb38-11e9-83ca-0216824770c2` (`idLicense 69674`, en plantilla, no convocado J2)
 
-### 3.5. Endpoint auxiliar verificado
+### 3.5. Endpoint auxiliar verificado (fuera de uso)
 
-- `GET ${MSSTATS_BASE}/team-stats/team/11659/season/2026` — acumulados de equipo/jugadores (200 OK, útil para medias de Ficha sin recalcular a mano).
+- `GET ${MSSTATS_BASE}/team-stats/team/11659/season/2026` — acumulados de equipo/jugadores (200 OK, pero fuera de uso: las medias de Ficha se derivan solo del motor al leer).

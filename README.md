@@ -24,7 +24,7 @@ Orden de cálculo por jugador, siempre igual:
 A nivel jornada total:
 
 * `+3` si tu capitán es MVP real: máxima `BASE` entre la plantilla Lagunak, habiendo jugado. Si hay empate en lo alto, todos los empatados habilitan el `+3`. El `+3` se suma después del `x1.5`, nunca se multiplica.
-* `-5` por cada jugador de tu quinteto que sea expulsado. Su `BASE` cuenta con normalidad.
+* `-5` por cada jugador de tu quinteto que sea expulsado, incluyendo 5 faltas personales. Su `BASE` cuenta con normalidad.
 * El total puede ser negativo. Si falta valoración o estado de algún jugador del quinteto, no se calcula (error, no `0` provisional).
 
 ### Tabla de repetición - penalización progresiva
@@ -156,9 +156,9 @@ Sin notificaciones en v1.
 * Partidos/Jornadas: crear rival, lugar, fecha, cálculo auto `cierre = -3h`.
 * Jugadores: CRUD + `posiciones[2], img, imgPete, nombrePete, dorsal`.
 * Resultados: triple vía (detalle en `specs/10-scraping-fnb/spec.md`):
-  1. Auto-sync FNB transparente: calendario desde `idTeam 11659` y actas digitales post-partido vía APIs JSON OWC (sin parsear HTML), con Lazy Sync en servidor y throttle.
-  2. Pegar `URL FNB` (`pagina-partido/?id=...`) o botón `Sincronizar FNB ahora` -> pre-rellena el formulario para revisión antes de guardar.
-  3. Formulario manual valoración + lesionados/convocados/expulsados/MVP: garantizado siempre (si la FNB cae o el partido no tiene acta digital, como la J1 `55483`, la liga nunca se bloquea).
+  1. Auto-sync FNB transparente: calendario desde `idTeam 11659` y actas digitales post-partido vía APIs JSON OWC (sin parsear HTML), con Lazy Sync en servidor y throttle (`24h` calendario, `1h` resultados solo si `hora_partido + 3h` y pendiente, con lock).
+  2. Dos botones FNB separados: `Sincronizar calendario FNB` (crea/actualiza futuras sin tocar resultados) y pegar `URL FNB` (`pagina-partido/?id=...` o `?uuid=...`) o botón `Sincronizar acta` -> solo pre-rellena el formulario para revisión antes de guardar.
+  3. Formulario manual valoración + lesionados/convocados/expulsados (sin campo MVP, lo calcula solo el motor §0; 5 faltas personales es expulsión): garantizado si la FNB cae o el acta aún no es definitiva dentro de su gracia de `1 día`. La jornada papel definitiva sin acta digital tras `1 día` (ej. J1 `55483`) queda en `0` excluido de todo + rompe rachas sin carga manual posterior (decisión spec-09); fuera de ese caso la liga nunca se bloquea.
 * Usuarios: listar, reset password (al no haber email).
 * Recalcular jornada.
 
@@ -176,7 +176,7 @@ Bloques en orden fijo (anclas):
 4. `#posicion` `+5` si juega en una de sus 2 válidas (`B | E/A | AP | P`, `E == A`). Bloqueado si `BASE = 0`.
 5. `#racha` `−N` progresivo: 1ª = `0`, 2ª seguida = `−1`, 3ª = `−2`, 4ª = `−3`... Se rompe si una jornada no lo alineas o no envías quinteto. Alinear lesionado/DNP cuenta para la racha aunque puntúe `0`.
 6. `#mvp` `+3` jornada si tu capitán es máxima BASE de la plantilla Lagunak habiendo jugado. Empate en lo alto: todos los empatados habilitan el `+3`. Se suma después del `x1.5`, nunca se multiplica.
-7. `#expulsion` `−5` por cada expulsado del quinteto. Su BASE cuenta con normalidad. Acumula con MVP si coincide.
+7. `#expulsion` `−5` por cada expulsado del quinteto, incluyendo 5 faltas personales. Su BASE cuenta con normalidad. Acumula con MVP si coincide.
 8. `#orden` Orden fijo por jugador: `BASE → x1.5 Maider ó suelo+1 Páter → +5 posición → −N racha`; jornada: `+3 MVP → −5 expulsión`. Total puede ser negativo. Dato ausente = error, no `0` provisional.
 
 Nota Modo Pete: cosmético (`img↔imgPete`, `nombre↔nombrePete`). Las reglas nunca cambian.

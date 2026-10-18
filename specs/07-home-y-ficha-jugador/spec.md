@@ -29,7 +29,7 @@
   Cuando un usuario solicite el Home (`/`), el listado de plantilla (`/jugadores`) o una Ficha de jugador, el sistema deberá verificar que tiene sesión activa. Si no tiene sesión, entonces deberá redirigir a login; si su sesión tiene flag de clave temporal pendiente de cambio o el onboarding incompleto (y no es Admin), entonces deberá redirigir al flujo obligatorio correspondiente (`spec-04`) antes de renderizar la pantalla.
 
 - **RF-02 — Lazy Sync FNB silencioso en Home:**
-  Cuando se cargue el Home en el servidor, el sistema deberá invocar la comprobación de Lazy Sync con el throttle de `spec-10 RF-04` (calendario máx. cada 6h; resultados de jornadas con `hora_partido + 2h <= ahora` pendientes máx. cada 15 min). Si la API de la FNB falla, tarda o devuelve error, entonces el sistema deberá ignorar el fallo en la vista y renderizar el Home con los datos ya persistidos en BD sin bloquear al usuario.
+  Cuando se cargue el Home en el servidor, el sistema deberá invocar la comprobación de Lazy Sync con el throttle de `spec-10 RF-04` (calendario máx. cada 24h; resultados de jornadas con `hora_partido + 3h <= ahora` pendientes máx. cada 1h, con lock). Si la API de la FNB falla, tarda o devuelve error, entonces el sistema deberá ignorar el fallo en la vista y renderizar el Home con los datos ya persistidos en BD sin bloquear al usuario.
 
 ### Home — Cuenta atrás y Próximo partido
 
