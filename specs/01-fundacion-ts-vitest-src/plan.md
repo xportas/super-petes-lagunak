@@ -25,7 +25,7 @@ Placeholders `scoring / dominio / supabase`: solo marcas opacas sin campos (p. e
 | D-02 | App Router | Mover `app/*.js` → `src/app/*.tsx` | Quedarse en `app/` raíz | Estructura objetivo de AGENTS.md: tras 01 → `src/app/*.tsx`; RF-02 exige tipar `layout/page` |
 | D-03 | Qué cuenta como `.js` propio | Solo `src/**` + `src/app/**` + `es/**`; se conservan `*.mjs` de config | Borrar también `next.config.mjs` / `eslint.config.mjs` | E-01 habla de `.js` propios; los `mjs` de config no son código propio y Next/ESLint los esperan |
 | D-04 | `tsconfig` | `strict: true` + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` + `noImplicitReturns` + `resolveJsonModule` + `paths @/*` | `strict` mínimo | RF-03 (cero `any` implícito) necesita `noUncheckedIndexedAccess`; alias `@/*` hereda `jsconfig.json`; `resolveJsonModule` permite derivar `ClaveI18n` del JSON |
-| D-05 | i18n con chequeo en compilación | `import json as const` + tipos `Paths<>` + `ExtractVars<>` + sobrecargas de `traducir` | `next-intl`, codegen dedicado, o solo runtime como en 00 | Sin dependencia nueva, cumple RF-07/RF-08 en `tsc`; `next-intl` sobredimensiona v1 solo-`es`; solo-runtime no impide compilar |
+| D-05 | i18n con chequeo en compilación | `import json as const` + tipos `Paths<>` + `ExtractVars<>` + sobrecargas de `traducir` | `next-intl`, codegen dedicado, o solo runtime | Sin dependencia nueva, cumple RF-07/RF-08 en `tsc`; `next-intl` sobredimensiona v1 solo-`es`; solo-runtime no impide compilar |
 | D-06 | Locale sin diccionario (E-07) | Referencia estática inexistente = error `tsc`; petición dinámica con `string` = error visible + fallback `es` | Hardcodear `es` dentro o lanzar siempre | Es lo que exige E-07 literalmente; prepara `eu.json` sin cambiar firmas |
 | D-07 | Tests | Vitest + `@vitest/coverage-v8`, `environment: 'node'` | Jest, `node:test`, jsdom | Constitución §6 y AGENTS exigen Vitest; fundación es pura + Server Components, no necesita DOM |
 | D-08 | Umbral cobertura | `lines 90%, functions 90%, branches 85%` en `src/lib/**` + `100%` en `i18n/traducir` y `diccionario` | Sin umbral o 100% global | Sin umbral viola RF-05/E-09; 100% global bloquearía los placeholders `never` de spec-02. 100% en i18n anticipa el 100% motor de Constitución §6 |
@@ -105,7 +105,7 @@ La primera sobrecarga da error `tsc` si la clave no existe (E-03) o si falta/sob
 
 ### Funciones puras i18n (únicas reales)
 1. `cargarDiccionario(locale: string): Diccionario` — devuelve el diccionario del locale; si no existe (p. ej. `eu` en v1), error visible en dev + fallback a `es`. Si `es/strings.json` falta o es JSON inválido, lanza fallo visible que impide dar la fundación por completa. **Cubre RF-09 / E-06 / E-07.**
-2. `traducir(locale, clave, params?)` — resuelve clave jerárquica, sustituye solo `{nombre}` válido, ignora params extra (heredado E-03 de 00), valor no-string = error de contenido (E-05), `{malformada` como literal, clave inexistente estática = error `tsc` (E-03), dinámica = devuelve la clave + error dev, `{var}` sin param o param no declarado = error `tsc` (E-04). **Cubre RF-07 / RF-08.**
+2. `traducir(locale, clave, params?)` — resuelve clave jerárquica, sustituye solo `{nombre}` válido, trata valor no-string como error de contenido (E-05) y `{malformada` como literal. En **llamada estática** (`ClaveI18n`), clave inexistente o `{var}` faltante/sobrante falla en compilación `tsc` (E-03, E-04). En **llamada dinámica** (`clave: string`), clave inexistente devuelve la clave + aviso en dev, `{var}` sin param lanza/señala error visible en dev sin frase incompleta y param extra no declarado se ignora en runtime. **Cubre RF-07 / RF-08.**
 
 Ambas puras respecto a UI: sin `window`, sin fetch, sin BD.
 
@@ -122,7 +122,7 @@ Ambas puras respecto a UI: sin `window`, sin fetch, sin BD.
 
 ## 6. Claves i18n nuevas para `es/strings.json`
 
-Solo mínimo preservado de la 00 (**RF-10**). Ninguna clave nueva de dominio en 01:
+Mínimo inicial de la fundación (**RF-10**). Ninguna clave de pantallas futuras en 01:
 
 - `ui.home.countdown` — con `{time}`.
 - `errors.close.passed` — sin variables.
@@ -133,7 +133,7 @@ Prohibido añadir en 01 claves de auth, equipo, ficha, jornada, clasificación, 
 ## 7. Estrategia de tests en Vitest
 
 - `npm test` = `vitest run`; `test:coverage` = `vitest run --coverage`. Suite en verde exigida por **RF-04 / E-08**; cobertura bajo umbral = incompleta (**RF-05 / E-09**).
-- `src/lib/i18n/traducir.test.ts`: interpolación `{time}`/`{nombre}`, clave inexistente dinámica devuelve la clave, valor no-string tratado como malformado, `{malformada` literal, param extra ignorado.
+- `src/lib/i18n/traducir.test.ts`: interpolación `{time}`/`{nombre}`, clave inexistente dinámica devuelve la clave, valor no-string tratado como malformado, `{malformada` literal, param extra en llamada dinámica (`string`) ignorado en runtime, variable faltante señala error sin devolver frase incompleta.
 - `src/lib/i18n/diccionario.test.ts`: `es` resuelve, locale sin diccionario avisa y usa `es`, fixture con JSON ausente/inválido lanza (E-06).
 - `contratos.test.ts` de `scoring/dominio/supabase`: `expect(() => ...).toThrow(/spec-02/)` + `expectTypeOf` de que la firma compila.
 - Tipos en compilación (**RF-07/RF-08**): casos `@ts-expect-error` para clave inexistente, `{var}` faltante y param sobrante. Si compilan sin error, el test de tipos falla.

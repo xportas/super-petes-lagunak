@@ -74,8 +74,8 @@
 - **RF-16 — Lista no tocable con mi fila resaltada:**
   Cuando se muestre la General, ninguna fila deberá ser tocable ni navegar a desgloses (ni la propia ni las ajenas). La fila del manager en sesión deberá distinguirse visualmente del resto. Si alguna fila permite tap para ver quintetos ajenos, entonces se considerará incumplimiento.
 
-- **RF-17 — Colores por puesto con umbrales:**
-  Cuando haya al menos una jornada calculada y no todos los acumulados sean `0`, el sistema deberá pintar medallas por nº de puesto (oro/plata/bronce según puestos `1º/2º/3º` con olímpica) y gradiente rojo a los puestos de cola solo si hay más de 6 managers en el ranking. Si hay 6 o menos, entonces no deberá pintar rojo. Si no hay calculadas o todos van a `0`, entonces deberá mostrar la lista sin colores con estado `Sin datos` donde aplique.
+- **RF-17 — Colores por puesto con umbrales (corte exacto en empates):**
+  Cuando haya al menos una jornada calculada y no todos los acumulados sean `0`, el sistema deberá pintar medallas por nº de puesto (oro/plata/bronce según puestos `1º/2º/3º` con numeración olímpica) y gradiente rojo a la zona de cola solo si hay más de 6 managers ($N > 6$) en el ranking. Cuando $N > 6$, recibirán el gradiente rojo las **últimas 3 filas de la tabla más cualquier manager empatado a puntos con quien ocupe la antepenúltima fila ($N - 2$)** (es decir, todo manager cuya puntuación acumulada sea $\le$ a la del manager en la fila $N - 2$, compartiendo su mismo puesto olímpico o inferior). Si hay 6 o menos managers, entonces no deberá pintar rojo. Si no hay calculadas o todos van a `0`, entonces deberá mostrar la lista sin colores con estado `Sin datos` donde aplique.
 
 ### Transversales
 
@@ -95,7 +95,7 @@
 | E-01 | Arranque sin calculadas, o solo papel | Ambas páginas muestran `Sin datos`, General sin colores | Sin actas no hay puntos ni puestos |
 | E-02 | Todos los acumulados a `0` | Lista visible sin oro/plata/bronce ni rojo | Sin diferencias no hay podio ni cola |
 | E-03 | 6 o menos managers | Medallas por puesto sí, rojo nunca | Sin solape visual con pocos |
-| E-04 | Empate en corte de medallas o cola (ej. tres `3º`) | Color por nº de puesto olímpico, no por fila; puede haber más o menos de 3 filas coloreadas | Coherencia con numeración olímpica |
+| E-04 | Empate en corte de medallas o cola (ej. tres `3º` o empate en la fila $N-2$) | En el podio, color por nº de puesto olímpico (`1º/2º/3º`); en la cola ($N > 6$), llevan rojo las últimas 3 filas más todos los empatados a puntos con la fila $N-2$ | Coherencia matemática exacta con numeración olímpica |
 | E-05 | Fila `−10 Sin envío` | Fila con `−10` y puesto, sin líneas de jugador, expande nota con enlace a normas, suma al acumulado y rompe rachas | Penaliza el olvido sin inventar quinteto |
 | E-06 | Jornada papel | Oculta de Historial y General, `0` excluido, rompe rachas por dentro | Excepción causa externa, no castigo |
 | E-07 | Jornada pendiente o con hueco (sin acta o dato ausente) | Oculta como fila, nunca `0` provisional, no suma | Prohibido inventar puntos |

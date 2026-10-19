@@ -8,7 +8,7 @@ Contexto:
 - Liga cerrada, ~20 jugadores reales, 1 Admin semilla que no juega.
 - Fuente reglas: `README §0` + `CONSTITUTION 5,7,8,9`. Esta spec no redefine puntuación, solo alineación.
 - Desviación consciente de README §3: el ejemplo `12 (base est.) +5 −1 = 16` se sustituye por preview sin base ni total (ver RF-04).
-- Depende de: Jornadas con `hora_partido` y `cierre`, plantilla con `posicionesValidas[2]` y `estado` (disponible/lesionado/no convocado), rachas previas en Dominio (`src/lib/dominio/`), motor puro (`src/lib/scoring/`), `es/strings.json`.
+- Depende de: Jornadas con `hora_partido`, `estado` (`pendiente | calculada | papel`) y `cierre`, plantilla con `posicionesValidas[2]` y `estado` sanitario pre-partido marcado por el Admin (`disponible | lesionado`), rachas previas en Dominio (`src/lib/dominio/`), motor puro (`src/lib/scoring/`), `es/strings.json`.
 
 Por qué: sin alineación válida antes del cierre no hay juego; debe ser táctil, a prueba de errores y sin ambigüedad de cierre ni recálculo manual.
 
@@ -18,19 +18,19 @@ Por qué: sin alineación válida antes del cierre no hay juego; debe ser tácti
 Cuando el manager abre Equipo, el sistema deberá mostrar 5 slots visuales con posición fija `B, E, A, AP, P` + 1 slot entrenador + marca capitán sobre uno de los 5. A efectos de bonus `+5`, `slot E` acepta `E` ó `A` y `slot A` acepta `A` ó `E`.
 
 **RF-02 — Tap-to-select sin duplicados**
-Cuando el manager toca un slot vacío, el sistema deberá abrir lista filtrable por posición válida y por estado (disponible/lesionado/no convocado) para elegir por tap. Si un jugador ya ocupa otro slot, entonces deberá aparecer marcado como ocupado y no elegible. Si toca un slot ocupado, entonces deberá permitir cambiar o vaciar. Prohibido drag&drop.
+Cuando el manager toca un slot vacío en `/equipo`, el sistema deberá abrir lista filtrable por posición válida y por estado sanitario pre-partido del jugador (`disponible | lesionado`, marcado por el Admin en `spec-09 RF-05`; haber sido `dnp` o `no_convocado` en un acta anterior no altera su disponibilidad para la próxima jornada) para elegir por tap. Si un jugador ya ocupa otro slot, entonces deberá aparecer marcado como ocupado y no elegible. Si toca un slot ocupado, entonces deberá permitir cambiar o vaciar. Prohibido drag&drop.
 
 **RF-03 — Bonus posición vía motor**
-Cuando un jugador ocupa un slot y su estado actual es disponible, el sistema deberá previsualizar `📍 +5` llamando a `src/lib/scoring/` si alguna de sus 2 `posicionesValidas` coincide con el slot (`E==A`). Si su estado actual es lesionado / no convocado / DNP, entonces el sistema deberá ocultar el `+5`.
+Cuando un jugador ocupa un slot y su estado pre-partido actual es `disponible`, el sistema deberá previsualizar `📍 +5` llamando a `src/lib/scoring/` si alguna de sus 2 `posicionesValidas` coincide con el slot (`E==A`). Si su estado pre-partido actual es `lesionado` (o si quedó dado de baja tras ser alineado), entonces el sistema deberá ocultar el `+5`.
 
 **RF-04 — Preview sin base ni total**
 Cuando el manager selecciona jugadores y entrenador, el sistema deberá mostrar solo modificadores derivados de `src/lib/scoring/`: `+5 pos` (si aplica), `−N racha` (si aplica) y etiqueta informativa del entrenador (`Maider: x1.5 solo BASE del capitán` ó `Páter: suelo 1 +1 a los 5`, sin números calculados). El sistema nunca mostrará `base est.` ni total estimado.
 
 **RF-05 — Racha desde Dominio**
-Cuando el manager selecciona un jugador disponible, el sistema deberá mostrar `⚠️ −N` obtenido de Dominio según sus alineaciones válidas guardadas consecutivas previas (`1ª=0, 2ª=−1, 3ª=−2…`); si es estreno (`0`), mostrará `✅`. Prohibido calcular la racha en UI.
+Cuando el manager selecciona un jugador con estado pre-partido `disponible`, el sistema deberá mostrar `⚠️ −N` obtenido de Dominio según sus alineaciones válidas guardadas consecutivas en jornadas anteriores cerradas (`1ª=0, 2ª=−1, 3ª=−2…`); si es estreno (`0`), mostrará `✅`. Prohibido calcular la racha en UI.
 
-**RF-06 — Lesionado/DNP alineable con aviso**
-Si el jugador está lesionado / no convocado / DNP, entonces el sistema deberá permitir alinearlo igual, ocultando `+5` y `−N`, mostrando `🚑/❌ BASE 0` y aviso explícito de que ocupará slot y contará para racha futura.
+**RF-06 — Lesionado alineable con aviso**
+Si el jugador tiene estado pre-partido `lesionado` (marcado por el Admin), entonces el sistema deberá permitir alinearlo igual, ocultando `+5` y `−N`, mostrando `🚑 BASE 0` y aviso explícito de que ocupará slot y contará para racha futura.
 
 **RF-07 — Entrenador excluyente**
 Cuando el manager elige entrenador, el sistema deberá exigir exactamente uno (`Maider` ó `Páter`) en el slot de entrenador. Con `Páter`, la etiqueta informativa aplica a los 5 incluido el capitán; con `Maider`, solo al capitán.
@@ -41,17 +41,17 @@ Cuando el manager marca capitán, el sistema deberá exigir que sea uno de los 5
 **RF-09 — Bloqueo preventivo sin borrador**
 Mientras falte algún slot, falte entrenador o falte capitán, el sistema deberá mantener Guardar desactivado mostrando motivo i18n. Si el manager sale sin guardar una alineación válida, entonces los cambios no guardados se perderán (no existe borrador parcial). Al enviar, el servidor deberá re-validar esquema completo (5 IDs distintos, 1 entrenador válido, capitán dentro de los 5).
 
-**RF-10 — Próxima jornada y cierre en servidor**
-Cuando el manager abre Equipo, el sistema deberá resolver como próxima jornada el partido futuro más cercano con `cierre > ahora_servidor` (`cierre = hora_partido − 3h` en `Europe/Madrid`, mostrado siempre en `Europe/Madrid`). Mientras `ahora_servidor < cierre`, deberá permitir guardar y re-guardar ilimitadamente, siendo válido el último recibido. Si `ahora_servidor >= cierre` (segundo exacto incluido), entonces el servidor deberá rechazar con `errors.close.passed`.
+**RF-10 — Jornada activa y cierre en servidor**
+Cuando el manager abre `/equipo`, el sistema deberá resolver como **jornada activa** la primera jornada por orden cronológico que aún no esté en estado `calculada` ni `papel` (mismo criterio que el Home en `spec-07 RF-03`), con `cierre = hora_partido − 3h` en `Europe/Madrid` (mostrado siempre en `Europe/Madrid`). Mientras `ahora_servidor < cierre`, deberá permitir guardar y re-guardar ilimitadamente, siendo válido el último recibido. Si `ahora_servidor >= cierre` (segundo exacto incluido), entonces el servidor deberá rechazar cualquier intento de guardado con `errors.close.passed`.
 
-**RF-10b — Lectura bloqueada tras cierre**
-Mientras la jornada actual esté en `ahora_servidor >= cierre` y aún no tenga siguiente jornada abierta, cuando el manager abra Equipo el sistema deberá mostrar su última alineación válida guardada en modo solo lectura junto al aviso `Cerrado - vuelve tras el partido` y enlace a `/normas#cierre`, sin permitir edición.
+**RF-10b — Lectura bloqueada tras cierre hasta cálculo de la jornada activa**
+Mientras en la jornada activa se cumpla `ahora_servidor >= cierre` y dicha jornada siga `pendiente` (aún no haya pasado a `calculada` ni `papel`), cuando el manager abra `/equipo` el sistema deberá mostrar su última alineación válida guardada para esa jornada en modo solo lectura junto al aviso `Cerrado - vuelve tras el partido` y enlace a `/normas#cierre`, sin permitir edición. En cuanto esa jornada pase a `calculada` o `papel`, `/equipo` promoverá automáticamente la siguiente jornada cronológica ($N+1$) como activa.
 
 **RF-11 — Iconos con ayuda tap-to-expand**
 Cuando se muestran iconos de estado, el sistema deberá abrir por tap (nunca hover) un tooltip i18n con enlace al bloque de `/normas`: `✅ → #base`, `📍 → #posicion`, `⚠️ → #racha`, `🚑/❌ → #base`, `⏱/cierre → #cierre`, `Maider/Páter → #entrenadores`.
 
 **RF-12a — Modo Pete**
-Cuando Modo Pete está ON, el sistema deberá mostrar `imgPete` y `nombrePete` en slots y lista; cuando está OFF, `img` y `nombre`, sin alterar posiciones, rachas ni validaciones.
+Cuando Modo Pete está ON, el sistema deberá mostrar `imgPete` y `nombrePete` de los jugadores en slots y lista; cuando está OFF, `img` y `nombre`, sin alterar posiciones, rachas ni validaciones. Los entrenadores (`Maider` y `Páter`) son invariantes a Modo Pete y mantienen siempre su nombre e imagen fija.
 
 **RF-12b — i18n cero hardcode**
 Cuando se renderiza cualquier texto, etiqueta, motivo de bloqueo o error, el sistema deberá resolverlo desde `es/strings.json` (`ui.equipo.*`, `errors.close.*`, `errors.admin.*`), sin literales en JSX ni concatenaciones manuales.
@@ -69,12 +69,12 @@ Cuando se muestra Equipo, el sistema deberá ajustarse a 360–430px sin scroll 
 - **Jugador pasa a lesionado tras guardar:** la alineación guardada sigue siendo válida; al abrir Equipo se muestra `🚑 BASE 0` sobre ese jugador. Si aún no cerró, el manager puede cambiarlo; si ya cerró, queda así y puntuará `BASE 0` contando racha.
 - **Menos de 5 sanos en plantilla:** nunca bloquea el juego; se puede completar el quinteto con `🚑/❌`.
 - **Doble tap / corte de red al guardar:** guardado idempotente por `(usuario, jornada)`; doble tap produce una sola escritura con el último estado y ante fallo de red muestra error i18n de reintento sin perder la selección en pantalla.
-- **Dos partidos futuros creados:** solo es editable el más cercano no cerrado; el siguiente no aparece hasta cerrarse/jugarse el anterior.
-- **Roles y sesión:** no autenticado → redirige a login; Admin semilla abre Equipo → bloqueado con `errors.admin.no_juega` (Admin no juega).
+- **Múltiples jornadas futuras precargadas (J1..J14):** la jornada activa en `/equipo` es siempre la primera cronológica aún no `calculada` ni `papel`; tras pasar su cierre (`ahora_servidor >= cierre`), `/equipo` permanece mostrando esa jornada en modo solo lectura (`Cerrado - vuelve tras el partido`) hasta que pasa a `calculada` o `papel`, momento en que salta a la siguiente jornada ($N+1$).
+- **Roles y sesión:** no autenticado → redirige a `/login`; clave temporal u onboarding pendiente → redirige a `/cambiar-password` o `/onboarding`; Admin semilla abre `/equipo` → bloqueado con `errors.admin.no_juega` (Admin no juega).
 
 ## 4. Fuera de alcance explícito
 
-- Historial de jornadas pasadas y desglose post-partido con puntos reales (spec-05 Mi Resultado).
+- Historial de jornadas pasadas y desglose post-partido con puntos reales (`spec-08` Mi Resultado).
 - Ver quintetos de otros managers, Top 3 y clasificación general.
 - Paso 2 del Onboarding (reutilizará el componente, se especifica en spec-04).
 - Cálculo final con valoración FNB real, suelo Páter aplicado a BASE real, MVP `+3` y expulsión `−5` (spec-02).

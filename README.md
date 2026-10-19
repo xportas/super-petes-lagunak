@@ -78,9 +78,9 @@ Maider gana si aciertas el crack, Páter gana por consistencia.
 * `username + password + código de invitación único de liga` vigente y rotable por el admin (se valida antes que el `username`). Sin selector de rol. Admin es usuario semilla que no juega.
 * `username 3-20 [A-Za-z0-9_-]`, único case-insensitive (display preservado). `password` 8–72 con al menos 1 no-espacio. `nombrePete` es solo de jugadores, no de managers.
 
-**Onboarding 2 pasos (solo primera vez, reanudable):**
+**Onboarding 2 pasos (solo primera vez, reanudable en `/onboarding`):**
 1. Crea tu primer quinteto + entrenador + capitán (solo jugadores activos; misma validación que Equipo con posición por slot; si no hay próxima jornada abierta o el cierre ya pasó, se muestra aviso y se continúa al paso 2 para crearlo luego en Equipo).
-2. Entiende el cierre: `Cierre = Partido -3h` (ver `/normas#cierre`). Obligatorio antes de Home; si el cierre ya había pasado al completarlo, esa jornada no cuenta `−10`.
+2. Entiende el cierre: `Cierre = Partido -3h` (ver `/normas#cierre`). Obligatorio antes de entrar a `/` (Home); si el cierre ya había pasado al completarlo, esa jornada no cuenta `−10`.
 
 ## 2. HOME
 
@@ -104,7 +104,7 @@ Estados por jugador en el selector, con icono + tooltip:
 * 🚑 Lesionado / ❌ No convocado = `BASE 0` (con Páter `2`, sin `+5` ni `-N`)
 * 📍 Bonus posición `+5` si coincide (se previsualiza)
 
-> Al seleccionar se ve cálculo previo: `ej: 12 (base est.) +5 pos -1 racha = 16`. El cálculo final usa la valoración real post-partido. Cada icono enlaza al bloque correspondiente de `/normas` (posición, racha, cierre).
+> Al seleccionar se previsualizan los modificadores derivados del motor/dominio (`+5 pos` si aplica, `−N racha` si aplica y etiqueta informativa del entrenador, sin `base est.` ni total estimado). El cálculo final usa la valoración real post-partido. Cada icono enlaza al bloque correspondiente de `/normas` (posición, racha, cierre).
 
 ## 4. FICHA JUGADOR INDIVIDUAL
 

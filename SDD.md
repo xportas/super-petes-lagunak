@@ -4,9 +4,9 @@ Cada spec tiene el tamaño justo para resolverse en una entrevista de ≤ 6 preg
 
 ### Fase 0 — Cimientos y Reglas Puras (0% BD, 100% tests unitarios)
 
-1. 01-fundacion-ts-i18n
+1. 01-fundacion-ts-vitest-src
 
-  Migración a TypeScript strict, Vitest, estructura src/ y motor de diccionarios i18n tipado (es/strings.json).
+  Migración directa del scaffold inicial a TypeScript strict (`src/app/*.tsx`), Vitest con cobertura, estructura `src/lib/` con contratos tipados y motor de diccionarios i18n tipado (`es/strings.json`).
 
 2. 02-motor-puntuacion-y-dominio (§0)
 
@@ -44,8 +44,8 @@ Cada spec tiene el tamaño justo para resolverse en una entrevista de ≤ 6 preg
 
 9. 09-admin-jornadas-y-resultados (§8)
 
-  CRUD jornadas (cierre = -3h), CRUD jugadores, reset manual de contraseñas, formulario manual de acta (valoraciones, DNP/lesionados, expulsados, MVP) + botón de recálculo de jornada. Consume la sincronización definida en `specs/10-scraping-fnb/spec.md`: botón "Sincronizar FNB ahora", pre-relleno por URL y respeto a `origen_resultado = 'manual'`.
+  CRUD jornadas (cierre = -3h), CRUD jugadores, reset manual de contraseñas, formulario manual de acta (valoraciones, DNP/lesionados, expulsados; sin campo MVP, que lo calcula solo el motor §0) + botón de recálculo de jornada. Consume la sincronización definida en `specs/10-scraping-fnb/spec.md`: botones separados (`Sincronizar calendario FNB`, `Sincronizar acta` / pegar URL con pre-relleno revisable y `Re-importar desde FNB`) y respeto a `origen_resultado = 'manual'`.
 
 10. 10-scraping-fnb (§8, verificado 2026-10-16)
 
-  Fuente única: `specs/10-scraping-fnb/spec.md` + `specs/10-scraping-fnb/fnb-api-reference.md`. Auto-sync de calendario (`idTeam 11659`) y actas digitales vía APIs JSON OWC (ESB + MSSTATS, sin parsear HTML), Lazy Sync en servidor con throttle (6h calendario / 15min resultados, sin cron ni demonios), mapeo por `fnb_uuid`, MVP solo desde el motor §0 y formulario manual garantizado cuando no haya acta digital (caso J1 `55483`).
+  Fuente única: `specs/10-scraping-fnb/spec.md` + `specs/10-scraping-fnb/fnb-api-reference.md`. Auto-sync de calendario (`idTeam 11659`) y actas digitales vía APIs JSON OWC (ESB + MSSTATS, sin parsear HTML), Lazy Sync en servidor con throttle (24h calendario / 1h resultados tras `hora_partido + 3h`, sin cron ni demonios), mapeo por `fnb_uuid`, MVP solo desde el motor §0 y formulario manual garantizado salvo jornada papel definitiva tras gracia de 1 día (caso J1 `55483`).

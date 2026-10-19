@@ -69,7 +69,7 @@ No usar `animate-expo` ni `write-swift`: no aplican a este stack.
 - Postgres solo para datos relacionales. Imágenes y memes en `public/` del repo → 0 MB de Storage.
 - Sin Realtime, sin cron, sin polling agresivo: lecturas en Server Components (cacheadas) y escrituras puntuales en Server Actions.
 - Auth propia de la app, no Supabase Auth: `username` case-insensitive + hash Argon2/bcrypt + sesión httpOnly + rate-limit. Sin email; reset manual vía Admin.
-- RLS activado en todas las tablas. La clave `service_role` jamás llega al cliente. Secretos solo en `.env.local` (ignorado por git).
+- RLS activado en todas las tablas **sin políticas públicas para `anon`** (`DENY ALL` exterior). Todo acceso a BD se realiza desde el servidor Next.js (Server Components / Server Actions) usando el cliente de servidor con `service_role` (que jamás llega al cliente) tras validar la sesión `httpOnly` y el rol (`manager | admin`) en el backend. Secretos solo en `.env.local` (ignorado por git).
 
 ### FNB — sincronización automática (ver `specs/10-scraping-fnb/`)
 - Fuente única: `specs/10-scraping-fnb/spec.md` (comportamiento) + `specs/10-scraping-fnb/fnb-api-reference.md` (endpoints OWC verificados 2026-10-16). Prohibido parsear el HTML de `fnbaloncesto.com`.
@@ -77,22 +77,31 @@ No usar `animate-expo` ni `write-swift`: no aplican a este stack.
 
 ## Estado actual del repo (importante)
 - Scaffold JS de Next.js 16.4 + Tailwind v4. `next.config.mjs` activa `cacheComponents` y `partialPrefetching`: consulta la doc correspondiente antes de tocar fetching/caché.
-- **Pendiente migrar a TypeScript `strict`** (constitución) y crear la infra de Vitest: es la primera tarea técnica, antes de cualquier feature.
+- **Pendiente migrar a TypeScript `strict`** (constitución) y crear la infra de Vitest (`spec-01`): es la primera tarea técnica, antes de cualquier feature.
 - Aún no hay `src/`, BD ni tests; la estructura de abajo es el destino.
 
 ## Estructura objetivo
 ```
-es/strings.json          # i18n (la spec-05 añadirá ui.normas.*)
-public/                  # fotos img / imgPete
-app/                     # rutas App Router hoy (JS); tras spec-01 → src/app/*.tsx
-app/normas/page.js       # página Normas (la crea la spec-05; .tsx tras spec-01)
+es/strings.json          # i18n (creado en spec-01; spec-05 añade ui.normas.*)
+public/                  # fotos img / imgPete + placeholders
+src/app/                 # rutas App Router en TypeScript tras spec-01 (*.tsx)
+src/app/normas/page.tsx  # página Normas (la crea la spec-05)
 src/lib/scoring/         # motor §0 (puro) + tests junto al módulo
-src/lib/scoring/constantes.js  # única fuente futura de números para /normas (hereda spec-02)
+src/lib/scoring/constantes.ts  # única fuente de números para /normas (spec-02)
 src/lib/dominio/         # cierre, rachas, validaciones de alineación
 src/lib/fnb/             # cliente API FNB (ESB + MSSTATS) y mapeo a dominio (dueña spec-10)
-src/lib/supabase/        # cliente(s) y queries
-src/lib/i18n/            # diccionario + traducir (spec-00)
+src/lib/supabase/        # cliente(s) de servidor y queries
+src/lib/i18n/            # diccionario + traducir tipado (spec-01)
 ```
+
+## Mapa de rutas canónico (App Router)
+- `/` — Home (`spec-07`; `/home` redirige permanentemente a `/`)
+- `/login`, `/registro`, `/cambiar-password`, `/onboarding` — Auth y Onboarding (`spec-04`)
+- `/equipo` — Alineación próxima jornada (`spec-06`)
+- `/jugadores`, `/jugadores/[id]` — Plantilla activa y Ficha individual (`spec-07`)
+- `/mi-resultado`, `/clasificacion` — Mi Resultado + Historial y Clasificación General (`spec-08`)
+- `/ajustes`, `/normas` — Ajustes y Normativa desglosada (`spec-05`)
+- `/admin` — Panel Admin con pestañas (`spec-09`)
 
 ## Convenciones
 - TypeScript `strict`; **cero `any`** (usa `unknown` + narrowing).

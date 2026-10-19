@@ -25,16 +25,16 @@ Nota FNB (`AGENTS.md` vigente): la valoración FNB entra al motor como `number` 
   - **Hacer:** exportar constantes con nombres en español de negocio donde aplique, sin literales duplicados en ningún otro fichero. Cero `any`.
   - **Hecho cuando:** `npx vitest run src/lib/scoring/constantes.test.ts` → verde y `npx tsc --noEmit` → 0 errores.
 
-- [ ] ## T-04 — Test de `rachas` (progresión, ruptura, J1, lesionado cuenta)
+- [ ] ## T-04 — Test de `rachas` (progresión, ruptura, J1, lesionado cuenta, papel rompe)
   - **Toca:** `src/lib/dominio/rachas.test.ts` (crear).
-  - **Cubre:** RF-07, RF-08, RF-09, RF-19. Casos E-05, E-07, E-08, E-09.
-  - **Hacer:** `penalizacion: 1ª→0, 2ª→-1, 3ª→-2, 4ª→-3, 5ª→-4` sin tope; ruptura por no alinear; J1 y alta mid-season = 1ª; lesionado/DNP cuenta para futura aunque puntúe `0`; sin envío = reset.
+  - **Cubre:** RF-07, RF-08, RF-09, RF-19, RF-21. Casos E-05, E-07, E-08, E-09, E-24.
+  - **Hacer:** `penalizacion: 1ª→0, 2ª→-1, 3ª→-2, 4ª→-3, 5ª→-4` sin tope; ruptura por no alinear; J1 y alta mid-season = 1ª; lesionado/DNP cuenta para futura aunque puntúe `0`; sin envío = reset a `0`; jornada `papel` = reset a `0` para todos aunque hubieran alineado.
   - **Hecho cuando:** `npx vitest run src/lib/dominio/rachas.test.ts` → falla (no existe `rachas.ts`).
 
 - [ ] ## T-05 — Implementar `rachas.ts`
   - **Toca:** `src/lib/dominio/rachas.ts` (crear: `siguienteRacha, penalizacionPorRacha`).
-  - **Cubre:** RF-07, RF-08, RF-09.
-  - **Hacer:** funciones puras sobre `rachasPrevias: Map`; sin BD, sin fechas. `BASE 0` bloquea el `-N` pero no el conteo futuro (lo decide `calculo.ts`, aquí solo conteo + tabla).
+  - **Cubre:** RF-07, RF-08, RF-09, RF-19, RF-21.
+  - **Hacer:** funciones puras sobre `rachasPrevias: ReadonlyMap`; sin BD, sin fechas. `BASE 0` bloquea el `-N` pero no el conteo futuro (lo decide `calculo.ts`, aquí solo conteo + tabla + reset por no envío o jornada `papel`).
   - **Hecho cuando:** `npx vitest run src/lib/dominio/rachas.test.ts` → verde y `npm run lint` → 0 warnings en el fichero.
 
 - [ ] ## T-06 — Test de `cierre` (`-3h`, segundo exacto, sin hora)
@@ -61,10 +61,10 @@ Nota FNB (`AGENTS.md` vigente): la valoración FNB entra al motor como `number` 
   - **Hacer:** `z.enum` posiciones, `z.tuple` exactamente 2, `z.number().int()` FNB, `refine` distintos/capitán-en-quinteto/elegibilidad/lesión-expulsión. Errores con claves `errors.alineacion.*` (sin literales en el throw).
   - **Hecho cuando:** `npx vitest run src/lib/dominio/validacion-alineacion.test.ts` → verde y `npx tsc --noEmit` → 0 errores, cero `any`.
 
-- [ ] ## T-10 — Test de `calculo` por jugador (BASE, Yasmine, Páter, bloqueo `0`)
+- [ ] ## T-10 — Test de `calculo` por jugador (BASE, Maider, Páter, bloqueo `0`)
   - **Toca:** `src/lib/scoring/calculo.test.ts` (crear).
   - **Cubre:** RF-01, RF-04, RF-05, RF-06, RF-07, RF-13. Casos E-01–E-06.
-  - **Hacer:** BASE tal cual incl. negativa; lesionado/DNP → `0`; Yasmine solo capitán `13→20`, `-1→-1.5→-1` (half-up), no-capitán sin multiplicador; Páter `0→2`, `-5→2`; `BASE 0` bloquea `+5/-N`; `["E","A"]` siempre `+5`; Yasmine nunca combina suelo, Páter nunca multiplica.
+  - **Hacer:** BASE tal cual incl. negativa; lesionado/DNP → `0`; Maider solo capitán `13→20`, `-1→-1.5→-1` (half-up), no-capitán sin multiplicador; Páter `0→2`, `-5→2`; `BASE 0` bloquea `+5/-N`; `["E","A"]` siempre `+5`; Maider nunca combina suelo, Páter nunca multiplica.
   - **Hecho cuando:** `npx vitest run src/lib/scoring/calculo.test.ts` → falla (no existe `calculo.ts`).
 
 - [ ] ## T-11 — Implementar `calculo.ts` nivel jugador
@@ -73,22 +73,22 @@ Nota FNB (`AGENTS.md` vigente): la valoración FNB entra al motor como `number` 
   - **Hacer:** orden `BASE → x1.5 ó suelo+1 excluyentes → +5 (salvo 0) → -N (salvo 0)`; FNB entera de entrada (el `.5` solo nace del x1.5); `undefined` → throw `errors.calculo.dato-ausente`. Importar números solo desde `constantes.ts`.
   - **Hecho cuando:** `npx vitest run src/lib/scoring/calculo.test.ts` → verde.
 
-- [ ] ## T-12 — Test de jornada: MVP (simple, empate, exige jugar, con Yasmine/Páter, expulsado MVP)
+- [ ] ## T-12 — Test de jornada: MVP (simple, empate, exige jugar, con Maider/Páter, expulsado MVP)
   - **Toca:** `src/lib/scoring/jornada.test.ts` (crear, bloque MVP).
   - **Cubre:** RF-10, RF-13 (rama `+3`). Casos E-10–E-13, E-15, E-03.
-  - **Hacer:** MVP = máxima BASE forzada habiendo jugado; empate habilita a todos; máxima `0`/nadie jugó → sin `+3`; capitán lesionado nunca MVP; con Yasmine `+3` después sin multiplicar; con Páter `+3` independiente; expulsado sí puede ser MVP (`+3` y `-5`).
+  - **Hacer:** MVP = máxima BASE entre quienes jugaron (`estado = 'jugo'`); empate habilita a todos; máxima BASE `0` o negativa habiendo jugado sí da `+3` (los no jugados con `0` forzado no entran en `plantillaJugaronBASE` ni bloquean); solo si 0 jugadores jugaron → sin `+3`; capitán lesionado/DNP nunca MVP; con Maider `+3` después sin multiplicar; con Páter `+3` independiente; expulsado sí puede ser MVP (`+3` y `-5`).
   - **Hecho cuando:** `npx vitest run src/lib/scoring/jornada.test.ts` → falla (no existe `calcularJornada`).
 
-- [ ] ## T-13 — Test de jornada: expulsión, total, orden, dato ausente, sin quinteto, recálculo, desglose
+- [ ] ## T-13 — Test de jornada: expulsión, total, orden, dato ausente, sin quinteto, papel, recálculo, desglose
   - **Toca:** `src/lib/scoring/jornada.test.ts` (ampliar, bloque cierre jornada).
-  - **Cubre:** RF-11, RF-12, RF-13, RF-17, RF-18, RF-19, RF-20. Casos E-14, E-16, E-20, E-23, E-09.
-  - **Hacer:** `-5` por expulsado con BASE intacta, doble → `-10`; total = 5 jugadores `+3` MVP `-5×n`, negativo preservado; orden fijo verificable en el desglose; dato ausente → error sin parciales; sin quinteto → `-10` + reset rachas; corrección admin → recálculo total; desglose suma exactamente RF-12.
+  - **Cubre:** RF-11, RF-12, RF-13, RF-17, RF-18, RF-19, RF-20, RF-21. Casos E-14, E-16, E-20, E-23, E-24, E-09.
+  - **Hacer:** `-5` por expulsado con BASE intacta, doble → `-10`; total = 5 jugadores `+3` MVP `-5×n`, negativo preservado; orden fijo verificable en el desglose; dato ausente → throw con `claveI18n` sin parciales; sin quinteto → `-10` + reset rachas; jornada `papel` → `0` excluida + reset rachas de todos; corrección admin → recálculo total; desglose suma exactamente RF-12.
   - **Hecho cuando:** `npx vitest run src/lib/scoring/jornada.test.ts` → falla en los nuevos casos.
 
 - [ ] ## T-14 — Implementar `calcularJornada` + `recalcularJornada` (desglose como dato)
   - **Toca:** `src/lib/scoring/calculo.ts` (ampliar).
-  - **Cubre:** RF-10–RF-13, RF-17–RF-20.
-  - **Hacer:** `calcularJornada` suma 5 + MVP + expulsiones; `recalcularJornada` = misma vía con datos corregidos (sin parches; el botón es spec-09). `ResultadoJornada` estructurado, nunca string `12 +5 -1 = 16` (las vistas solo lo muestran).
+  - **Cubre:** RF-10–RF-13, RF-17–RF-21.
+  - **Hacer:** `calcularJornada` resuelve ramas `normal` (suma 5 + MVP + expulsiones), `sin-quinteto` (`-10` + reset rachas) y `papel` (`0` + reset rachas de todos); `recalcularJornada` = misma vía con datos corregidos (sin parches; el botón es spec-09). `ResultadoJornada` estructurado, nunca string `12 +5 -1 = 16` (las vistas solo lo muestran).
   - **Hecho cuando:** `npx vitest run src/lib/scoring/` → todo verde (calculo + jornada + constantes).
 
 - [ ] ## T-15 — Añadir claves `errors.*` a `es/strings.json`

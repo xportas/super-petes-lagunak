@@ -26,10 +26,10 @@
 ### Guardias de acceso y sincronización
 
 - **RF-01 — Guardia de sesión, clave temporal y onboarding:**
-  Cuando un usuario solicite el Home (`/`), el listado de plantilla (`/jugadores`) o una Ficha de jugador, el sistema deberá verificar que tiene sesión activa. Si no tiene sesión, entonces deberá redirigir a login; si su sesión tiene flag de clave temporal pendiente de cambio o el onboarding incompleto (y no es Admin), entonces deberá redirigir al flujo obligatorio correspondiente (`spec-04`) antes de renderizar la pantalla.
+  Cuando un usuario solicite el Home (`/`, con `/home` redirigiendo a `/`), el listado de plantilla (`/jugadores`) o una Ficha de jugador (`/jugadores/[id]`), el sistema deberá verificar que tiene sesión activa. Si no tiene sesión, entonces deberá redirigir a `/login`; si su sesión tiene flag de clave temporal pendiente de cambio o el onboarding incompleto (y no es Admin), entonces deberá redirigir a `/cambiar-password` o `/onboarding` respectivamente (`spec-04`) antes de renderizar la pantalla.
 
-- **RF-02 — Lazy Sync FNB silencioso en Home:**
-  Cuando se cargue el Home en el servidor, el sistema deberá invocar la comprobación de Lazy Sync con el throttle de `spec-10 RF-04` (calendario máx. cada 24h; resultados de jornadas con `hora_partido + 3h <= ahora` pendientes máx. cada 1h, con lock). Si la API de la FNB falla, tarda o devuelve error, entonces el sistema deberá ignorar el fallo en la vista y renderizar el Home con los datos ya persistidos en BD sin bloquear al usuario.
+- **RF-02 — Lazy Sync FNB silencioso en Home (compatible con `cacheComponents`):**
+  Cuando se cargue el Home en el servidor (dentro del límite dinámico / `<Suspense>` correspondiente, sin invocar `revalidatePath` durante el render SSR), el sistema deberá invocar la comprobación de Lazy Sync con el throttle de `spec-10 RF-04` (calendario máx. cada 24h; resultados de jornadas con `hora_partido + 3h <= ahora` pendientes máx. cada 1h, con lock). Si la API de la FNB falla, tarda o devuelve error, entonces el sistema deberá ignorar el fallo en la vista y renderizar el Home con los datos ya persistidos en BD sin bloquear al usuario.
 
 ### Home — Cuenta atrás y Próximo partido
 
@@ -67,15 +67,15 @@
 - **RF-12 — Listado de plantilla activa (`/jugadores`):**
   Cuando el usuario abra `/jugadores`, el sistema deberá listar todos los jugadores reales con estado `activo` en plantilla (excluyendo siempre a `Maider` y `Páter` y a las bajas inactivas), ordenados por dorsal ascendente (los sin dorsal al final) y desempate alfabético por `nombre` real. Cada fila deberá mostrar foto (`img`/`imgPete`), nombre (`nombre`/`nombrePete`), dorsal (o `Sin dorsal`), posiciones `[x,y]` (o `Posición pendiente`) e icono de estado actual (`✅ / 🚑 / ❌`), y al tocarla deberá abrir su Ficha individual.
 
-- **RF-13 — Ruta de Ficha y jugador inexistente o entrenador:**
-  Cuando el usuario acceda a la ruta de Ficha de un jugador existente (activo o dado de baja), el sistema deberá mostrar su ficha en modo solo lectura (sin botón/CTA de alinear). Si el jugador está dado de baja (`inactivo`), deberá mostrar además una etiqueta visible de `Baja`. Si el identificador no existe o corresponde a un entrenador (`Maider`/`Páter`), entonces deberá mostrar estado `Jugador no encontrado` con enlace para volver a `/jugadores` o al Home.
+- **RF-13 — Ruta de Ficha (`/jugadores/[id]`) y jugador inexistente o entrenador:**
+  Cuando el usuario acceda a `/jugadores/[id]` de un jugador existente (activo o dado de baja), el sistema deberá mostrar su ficha en modo solo lectura (sin botón/CTA de alinear). Si el jugador está dado de baja (`inactivo`), deberá mostrar además una etiqueta visible de `Baja`. Si el identificador `id` no existe o corresponde a un entrenador (`Maider`/`Páter`), entonces deberá mostrar estado `Jugador no encontrado` con enlace para volver a `/jugadores` o a `/`.
 
 - **RF-14 — Cabecera de identidad con placeholders explícitos:**
   Cuando se renderice la Ficha, el sistema deberá mostrar foto (`img` o `imgPete`), nombre (`nombre` o `nombrePete`), dorsal, posiciones válidas `[x,y]` y descripción faltosa. Si falta la imagen correspondiente al modo activo, el dorsal, las 2 posiciones (caso refuerzo pendiente de completar en Admin, `spec-03 RF-21`) o la descripción, entonces el sistema deberá mostrar su placeholder explícito (avatar genérico en `public/`, `Sin dorsal`, `Posición pendiente`, `Sin descripción`), nunca dejando el campo en blanco ni ocultándolo en silencio.
 
 - **RF-15 — Media temporada y Última valoración:**
   Cuando se renderice la Ficha, el sistema deberá mostrar:
-  1. `Media temporada`: media aritmética de `BASE` calculada exclusivamente sobre las jornadas `calculadas` en las que el jugador tuvo `estado = 'jugo'` (excluyendo `lesionado`, `no_convocado`, `dnp` y jornadas en `papel`), redondeada a **1 decimal con `round_half_up`** (formato español, ej. `7,3`). Si el jugador tiene `0` partidos jugados en jornadas `calculadas`, mostrará `Sin datos`.
+  1. `Media temporada`: media aritmética de `BASE` calculada exclusivamente sobre las jornadas `calculadas` en las que el jugador tuvo `estado = 'jugo'` (excluyendo `lesionado`, `no_convocado`, `dnp` y jornadas en `papel`), redondeada a **1 decimal con `round_half_up` (`Math.floor(media * 10 + 0.5) / 10`)** en formato español (ej. `7,3`). Si el jugador tiene `0` partidos jugados en jornadas `calculadas`, mostrará `Sin datos`.
   2. `Última valoración`: `BASE` del jugador en la última jornada `calculada` en la que formaba parte de la plantilla, acompañada de su icono de estado (`✅` si `jugo` —incluso si hizo `0`—, `🚑` si `lesionado`, `❌` si `no_convocado` o `dnp`). Si no existe ninguna jornada `calculada` desde su alta, mostrará `Sin datos`.
 
 - **RF-16 — Evolución por jornada (tabla + mini-gráfica lineal):**
@@ -134,7 +134,7 @@
 
 ## 5. Criterios de finalización (Definition of Done)
 
-- [ ] Existe `specs/07-home-y-ficha-jugador/spec.md` congelada con RF-01–RF-20 y E-01–E-16, y `specs/06-alineacion-equipo/spec.md` tiene corregida la errata `0 pts → −10 pts` por no enviar quinteto.
+- [ ] Existe `specs/07-home-y-ficha-jugador/spec.md` congelada con RF-01–RF-20 y E-01–E-16.
 - [ ] Guardia activa: sin sesión redirige a login; con clave temporal u onboarding incompleto redirige a su flujo correspondiente antes de mostrar Home, `/jugadores` o Ficha.
 - [ ] En Home, la jornada activa muestra `HH:MM:SS` en vivo antes del cierre (`hora_partido − 3h Europe/Madrid`), pasa a `Cerrado - vuelve tras el partido` al cumplirse el cierre, y salta a la siguiente jornada solo cuando la actual queda `calculada` o `papel`; sin jornada futura muestra el último partido + `Sin próxima jornada`. `?` enlaza a `/normas#cierre`.
 - [ ] El bloque de partido muestra fecha/hora (`Europe/Madrid`), local/visitante, lugar y rival, o `Por confirmar` si falta lugar/rival.

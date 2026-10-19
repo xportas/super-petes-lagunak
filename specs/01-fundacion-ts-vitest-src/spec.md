@@ -2,16 +2,16 @@
 
 ## 1. Objetivo y contexto
 
-**Objetivo:** reactivar ya la fundación TypeScript `strict` con Vitest y estructura `src/lib/` completa, partiendo de la 00 JS como paso intermedio a migrar.
+**Objetivo:** levantar directamente la fundación TypeScript `strict` con Vitest, motor i18n tipado (`es/strings.json`) y estructura `src/lib/` completa partiendo del scaffold inicial del repositorio.
 
 **Contexto:**
 
-- La 00 (`00-fundacion-js-i18n`) dejó base JS con `app/` en raíz, `jsconfig.json` con alias `@/*` y solo `src/lib/i18n/` real con `es/strings.json` mínimo e interpolación `{var}` simple.
-- `CONSTITUTION.md §1/§10` y `AGENTS.md` (restaurado a TypeScript `strict`, cero `any`) exigen `tsc --noEmit`, `eslint`, `next build` y Vitest sobre motor §0, rachas y validaciones. La 00 derogó temporalmente TS; esta 01 levanta esa derogación.
-- **Por qué migración total:** se evita la convivencia JS+TS (`allowJs`) que perpetúa deuda y ambigüedad sobre qué puerta aplica. Todo lo propio pasa a TS de una vez.
+- El repo hoy es un scaffold JS de Next.js 16.4 + Tailwind v4 con `app/layout.js` y `app/page.js` demo, `jsconfig.json` con alias `@/*` y `next.config.mjs` con `cacheComponents` y `partialPrefetching`.
+- `CONSTITUTION.md §1/§6/§9/§10` y `AGENTS.md` exigen TypeScript `strict`, cero `any`, `tsc --noEmit`, `eslint`, `next build`, cero hardcode (`es/strings.json`) y Vitest con cobertura sobre motor §0, rachas y validaciones.
+- **Por qué migración directa a TS (sin paso intermedio JS):** se evita crear módulos `.js` para borrarlos a continuación y se elimina la convivencia JS+TS (`allowJs`). Todo el código propio nace en TypeScript `strict` desde esta primera spec.
 - **Por qué Vitest con cobertura desde ya:** sin umbral, la infra se degrada; con umbral, las siguientes specs (motor §0, dominio) heredan una red mínima exigible.
 - **Por qué contratos placeholder tipados:** fija `scoring / dominio / supabase / i18n` para que los agentes no reinventen rutas ni firmas; la lógica real la aportan sus specs.
-- **Por qué i18n con chequeo en compilación:** en JS el error era solo runtime en desarrollo; con TS la clave inexistente o el `{var}` faltante debe impedir compilar, que es lo que exige el cero-hardcode.
+- **Por qué i18n con chequeo en compilación:** con TS la clave inexistente o el `{var}` faltante/sobrante debe impedir compilar en la sobrecarga estática, además de avisar en runtime si se invoca dinámicamente.
 
 ## 2. Requisitos funcionales (EARS)
 
@@ -37,13 +37,13 @@
   Cuando se solicite un texto mediante su clave, el sistema deberá verificar en compilación que la clave existe en el diccionario del locale. Si la clave no existe, entonces la compilación deberá fallar.
 
 - **RF-08 — Variables `{var}` tipadas:**
-  Cuando el valor del diccionario declare variables `{nombre}`, el sistema deberá exigir en compilación los parámetros con esos mismos nombres. Si falta un parámetro o sobra uno no declarado, entonces la compilación deberá fallar.
+  Cuando el valor del diccionario declare variables `{nombre}`, el sistema deberá exigir en compilación los parámetros con esos mismos nombres en llamadas estáticas (`ClaveI18n`), haciendo fallar `tsc` si falta un parámetro declarado o sobra uno no declarado. En llamadas dinámicas (`clave: string`), si falta un parámetro declarado deberá señalar error visible en desarrollo sin devolver una frase silenciosamente incompleta, y si sobra un parámetro extra no declarado lo ignorará en runtime sin error.
 
 - **RF-09 — Locale preparado para `eu.json`:**
   Cuando se solicite un texto, el sistema deberá resolverlo a partir del locale indicado sin cambiar el modo de petición al añadir nuevos diccionarios. Si el locale no dispone de diccionario, entonces se aplicará lo definido en §3.
 
-- **RF-10 — Diccionario mínimo preservado:**
-  Cuando se migre a TS, el sistema deberá conservar al menos las claves `ui.home.countdown` (con `{time}`), `errors.close.passed` y el ejemplo con variable definidos en la 00.
+- **RF-10 — Diccionario mínimo inicial:**
+  Cuando se complete la fundación, el sistema deberá proveer `es/strings.json` con al menos las claves `ui.home.countdown` (con `{time}`), `errors.close.passed` y `ui.ejemplo.saludo` (con `{nombre}`).
 
 ## 3. Casos límite y manejo de errores
 
@@ -51,16 +51,16 @@
 |---|---|---|---|
 | E-01 | Queda algún `.js` propio o `jsconfig.json` | Incumplimiento de RF-01; no se da por completa | Migración total, sin convivencia |
 | E-02 | `any` explícito o implícito | Fallo de verificación; exige `unknown` + narrowing | Puerta cero `any` de AGENTS |
-| E-03 | Clave i18n inexistente | Fallo en compilación | Cero-hardcode desde compilación, no solo runtime |
-| E-04 | `{var}` declarada sin parámetro, o parámetro no declarado | Fallo en compilación | Evita frases incompletas o llamadas desacopladas |
+| E-03 | Clave i18n inexistente | Fallo en compilación en llamada estática; en llamada dinámica (`string`), error visible en desarrollo + devuelve la propia clave como fallback | Cero-hardcode desde compilación sin tumbar el render dinámico |
+| E-04 | `{var}` declarada sin parámetro, o parámetro no declarado | En llamada estática, fallo en compilación (`tsc`) tanto si falta como si sobra; en llamada dinámica (`string`), error visible en desarrollo si falta parámetro y se ignora en runtime si sobra | Evita frases incompletas y llamadas estáticas desacopladas |
 | E-05 | Valor del diccionario no string | Error de contenido; impide dar por completa | El diccionario v1 solo admite strings |
-| E-06 | `es/strings.json` ausente o JSON inválido | Fallo visible que impide completar la fundación | Heredado de la 00; sin diccionario no hay garantía |
+| E-06 | `es/strings.json` ausente o JSON inválido | Fallo visible que impide completar la fundación | Sin diccionario no hay garantía de cero-hardcode |
 | E-07 | Locale sin diccionario (ej. `eu` en v1) | Fallo en compilación si se referencia estáticamente; error visible + fallback a `es` si la petición es dinámica | Prepara `eu.json` sin hardcodear `es` |
 | E-08 | Suite Vitest con algún test en rojo | Fundación incompleta aunque `build` pase | `npm test` verde es parte de la puerta |
 | E-09 | Cobertura bajo umbral | Fundación incompleta aunque todo pase en verde | El umbral es la red mínima para motor/dominio |
 | E-10 | Contratos placeholder con lógica de negocio real | Incumplimiento de alcance; la lógica la aportan sus specs | Esta 01 solo fija contratos que compilan |
 | E-11 | Plural/género/fecha localizada | Fuera de alcance; se formula como frase completa en `es` | README no lo pide en v1 |
-| E-12 | Concatenación manual de frases visibles | Incumplimiento por revisión manual aunque `tsc/lint` pasen | Prohibición heredada de la 00 |
+| E-12 | Concatenación manual de frases visibles | Incumplimiento por revisión manual aunque `tsc/lint` pasen | Toda frase con `{var}` debe vivir completa en `es/strings.json` |
 
 ## 4. Fuera de alcance explícito
 
@@ -86,5 +86,5 @@
 - [ ] `npm run build` termina en verde.
 - [ ] Existen `src/lib/scoring/`, `src/lib/dominio/`, `src/lib/supabase/`, `src/lib/i18n/` con contratos que compilan, sin lógica de negocio real salvo `i18n`.
 - [ ] Clave i18n inexistente o `{var}` incorrecto impide compilar.
-- [ ] `es/strings.json` conserva el mínimo de la 00 y `eu` sin diccionario se comporta según E-07.
+- [ ] `es/strings.json` contiene el mínimo inicial (`ui.home.countdown`, `errors.close.passed`, `ui.ejemplo.saludo`) y `eu` sin diccionario se comporta según E-07.
 - [ ] Con diccionario ausente o inválido, la fundación no se considera completa.

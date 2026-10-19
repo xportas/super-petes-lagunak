@@ -21,8 +21,8 @@
 ### Jornadas / Partidos
 - **RF-01 — Crear jornada mínima con nº auto:**
   Cuando el Admin cree una jornada, el sistema deberá exigir rival, `hora_partido` en `Europe/Madrid` y condición local/visitante, y generar nº `Jx` auto correlativo editable. Campo/municipio son opcionales. Si falta rival, hora u local/visitante, entonces deberá rechazar sin guardar.
-- **RF-02 — Todo editable + borrado siempre con recálculo:**
-  Cuando el Admin edite rival, lugar, fecha/hora, nº o marcador de cualquier jornada (futura, cerrada o calculada), o la elimine aunque tenga alineaciones o resultados, el sistema deberá guardar/eliminar y recalcular todo lo afectado con reglas vigentes. Si cambia la hora, entonces el cierre se recalcula sin resucitar envíos tardíos ni anular válidos. No existe estado "desactivada".
+- **RF-02 — Todo editable + borrado siempre con recálculo (y descarte de `fnb_match_id`):**
+  Cuando el Admin edite rival, lugar, fecha/hora, nº o marcador de cualquier jornada (futura, cerrada o calculada), o la elimine aunque tenga alineaciones o resultados, el sistema deberá guardar/eliminar y recalcular todo lo afectado con reglas vigentes. Si la jornada eliminada tenía `fnb_match_id`, el sistema deberá registrar ese `fnb_match_id` como ignorado/descartado en BD para que el auto-sync de calendario (`spec-10 RF-02`) no vuelva a crearla automáticamente. Si cambia la hora, entonces el cierre se recalcula sin resucitar envíos tardíos ni anular válidos. No existe estado "desactivada".
 - **RF-03 — Cierre siempre derivado:**
   Cuando se necesite el cierre, el sistema deberá derivarlo siempre como `hora_partido − 3h` en `Europe/Madrid`. El panel nunca deberá ofrecer campo de cierre manual.
 
@@ -36,13 +36,13 @@
 
 ### Resultados triple vía
 - **RF-07 — Dos botones FNB separados, pre-relleno sin auto-guardado:**
-  Cuando el Admin pulse `Sincronizar calendario FNB`, el sistema deberá crear/actualizar jornadas futuras desde `idTeam 11659` sin tocar resultados. Cuando pegue `URL pagina-partido/?id={idMatch}` o pulse `Sincronizar acta`, el sistema deberá descargar ese partido y solo pre-rellenar el formulario para revisión, nunca guardar directo. Si la URL es inválida, no es de `LAGUNAK A 11659`, el `fnb_match_id` ya pertenece a otra jornada, o la FNB no responde, entonces deberá mostrar error sin guardar nada parcial.
-- **RF-08 — Formulario manual por plantilla vigente con 0 forzado:**
-  Cuando el Admin complete a mano, el sistema deberá listar la plantilla vigente en la fecha de esa jornada (activos entonces + bajas que jugaron entonces; altas posteriores no aparecen) y permitir por cada uno valoración entera (negativos permitidos) + estado `jugo|lesionado|no_convocado|dnp` + flag `expulsado` solo si `jugo`. Al elegir no-jugado, la valoración se fijará a `0` bloqueada. Si marca `lesionado|no_convocado|dnp` + `expulsado`, entonces deberá rechazar por excluyentes. Si falta valoración/estado de alguno vigente, entonces deberá rechazar el guardado sin borrador parcial. El manual está garantizado siempre salvo jornada ya marcada `papel` definitiva (excepción §1).
+  Cuando el Admin pulse `Sincronizar calendario FNB`, el sistema deberá crear/actualizar jornadas futuras desde `idTeam 11659` (omitiendo cualquier `fnb_match_id` previamente eliminado por el Admin en RF-02) sin tocar resultados. Cuando pegue `URL pagina-partido/?id={idMatch}` (o `?uuid={universallyid}`) o pulse `Sincronizar acta`, el sistema deberá descargar ese partido y solo pre-rellenar el formulario para revisión, nunca guardar directo en BD. Si la URL es inválida, no es de `LAGUNAK A 11659`, el `fnb_match_id` ya pertenece a otra jornada, o la FNB no responde, entonces deberá mostrar error sin guardar nada parcial.
+- **RF-08 — Formulario manual por plantilla vigente (incluyendo bajas alineadas) con 0 forzado:**
+  Cuando el Admin complete a mano, el sistema deberá listar la plantilla vigente en esa jornada (**activos en la fecha de la jornada + bajas que jugaron entonces + cualquier jugador dado de baja que figure en al menos una alineación guardada de esa jornada**, el cual aparece preseleccionado como `no_convocado` con `BASE = 0` para no bloquear el cálculo por dato ausente; altas posteriores no aparecen) y permitir por cada uno valoración entera (negativos permitidos) + estado `jugo|lesionado|no_convocado|dnp` + flag `expulsado` solo si `jugo`. Al elegir no-jugado, la valoración se fijará a `0` bloqueada. Si marca `lesionado|no_convocado|dnp` + `expulsado`, entonces deberá rechazar por excluyentes. Si falta valoración/estado de alguno vigente, entonces deberá rechazar el guardado sin borrador parcial. El manual está garantizado siempre salvo jornada ya marcada `papel` definitiva (excepción §1).
 - **RF-09 — Sin campo MVP:**
   El formulario manual no deberá tener campo MVP ni persistir flag FNB. Cuando se cierre la jornada, el `+3` lo calculará exclusivamente el motor §0 sobre máxima BASE habiendo jugado.
-- **RF-10 — Manual bloquea auto salvo Re-importar explícito:**
-  Cuando el Admin guarde a mano, el sistema deberá marcar `origen_resultado='manual'` a nivel jornada y el auto-sync deberá saltarla. Si la FNB corrige un acta de jornada ya calculada con `origen_resultado='fnb'`, entonces el auto-sync sí deberá reimportarla y recalcular. Cuando pulse explícito `Re-importar desde FNB` (acción separada de RF-07, con confirmación), entonces sí deberá reimportar y recalcular todo lo afectado aunque hubiera edición manual.
+- **RF-10 — Origen del resultado (`fnb` vs `manual`) y botón Re-importar explícito:**
+  Cuando el Admin guarde el formulario tras haber usado el pre-relleno FNB (RF-07) **sin modificar ningún valor** respecto al acta descargada, el sistema deberá marcar `origen_resultado='fnb'` (permitiendo que el auto-sync actualice futuras correcciones oficiales de la FNB). Si el Admin introduce datos a mano o modifica cualquier valor del pre-relleno antes de guardar, el sistema deberá marcar `origen_resultado='manual'` a nivel jornada y el auto-sync deberá saltarla. Si la FNB corrige un acta de jornada ya calculada con `origen_resultado='fnb'`, entonces el auto-sync sí deberá reimportarla y recalcular. Cuando el Admin pulse explícito `Re-importar desde FNB` (3.ª acción separada de RF-07, con confirmación), entonces sí deberá descargar de la FNB, sobrescribir el acta, devolver `origen_resultado` a `'fnb'` y recalcular todo lo afectado aunque hubiera edición manual.
 
 ### Recalcular
 - **RF-11 — Recalcular solo revalida y marca:**
@@ -66,9 +66,9 @@
 |---|---|---|---|
 | E-01 | Crear sin rival/hora/local-visitante | Rechazo sin guardar | Sin hora no hay cierre (spec-02 E-19) |
 | E-02 | Cambiar hora tras cierre | Recalcula cierre, conserva válidas, no resucita tardías | Cierre deriva de hora vigente |
-| E-03 | Eliminar con dependencias | Permite borrar y recalcula todo lo afectado | Decisión usuario todo-editable |
+| E-03 | Eliminar con dependencias (incluida jornada FNB) | Permite borrar, recalcula todo lo afectado y registra `fnb_match_id` como ignorado para que el sync no la recree | Decisión usuario todo-editable sin resurrección por sync |
 | E-04 | Partido futuro `state=0` | Solo calendario + cierre, no pide acta ni calcula | Aún no hay nada que importar |
-| E-05 | Partido sin acta tras gracia 1 día (J1 `55483`) | Guarda marcador, marca `papel`: `0` activos entonces, excluida de acumulado/media/evolución/tops, rompe rachas, sin carga manual posterior; dentro de la gracia sigue pendiente con manual permitido | Excepción usuario causa externa con gracia ante actas tardías |
+| E-05 | Partido sin acta tras gracia 1 día (`ahora >= hora_partido + 24h`, J1 `55483`) | Guarda marcador, marca `papel`: `0` activos entonces, excluida de acumulado/media/evolución/tops, rompe rachas a `0`, sin carga manual posterior; mientras `ahora < hora_partido + 24h` sigue `pendiente` con manual permitido | Excepción usuario causa externa con gracia determinista de 24h desde `hora_partido` |
 | E-06 | Jornada normal sin acta o incompleta | Error bloqueante + `pendiente`, oculta de Historial/General hasta completar | Prohibido `0` provisional |
 | E-07 | Valoración no entera FNB | Trunca a entero | spec-10 RF-06 |
 | E-08 | `lesionado` previo ante sync | Se respeta con cero minutos o ausencia; si el acta trae minutos pasa a `jugo` | Acta con minutos demuestra que jugó |
@@ -85,7 +85,7 @@
 
 - DDL, tipos SQL, migraciones, clientes Supabase, `service_role` como secreto y Server Actions/SSR como mecanismo (solo se exige QUÉ + RLS activado).
 - Pantallas manager (Home, Equipo, Ficha, Mi Resultado, Clasificación, Ajustes, `/normas`): dueñas specs 04–08.
-- Motor §0, rachas como cálculo y cierre como validación (spec-02); throttle/parseo OWC (spec-10); fundación TS/Vitest/i18n (specs-00/01).
+- Motor §0, rachas como cálculo y cierre como validación (spec-02); throttle/parseo OWC (spec-10); fundación TS/Vitest/i18n (spec-01).
 - Desactivar/borrar managers, cambiar roles, multi-admin, borrado de cuenta por usuario.
 - Notificaciones, email, auto-reset, chat, escritorio, app nativa, Realtime, cron, polling agresivo, Puppeteer/Playwright.
 - Mapa de tiros, play-by-play, fotos traídas de FNB (viven en `public/`), comparadores, exportar.
