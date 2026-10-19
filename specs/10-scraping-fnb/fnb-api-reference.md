@@ -126,9 +126,17 @@ Calendario real extraído el `2026-10-16` (resumen):
 | 5 | `55501` | `2026-11-01 12:15:00` | MEGACALZADO ARDOI – LAGUNAK A | Pendiente | Pendiente |
 | … | … | …hasta J14 `2027-01-24 12:00:00`… | … | … | … |
 
-### 3.2. `GET ${ESB_BASE}/FCBQWeb/fitxaPartit/{idMatch}` — ficha de un partido
+### 3.2. `GET ${ESB_BASE}/FCBQWeb/fitxaPartit/{idMatch}` — ficha de un partido y resolución de URL
 
-Para el flujo "pegar URL": se extrae `id=55488` de `pagina-partido/?id=55488&tab=1` (o `uuid=` si es `?uuid=...`) y se llama a `/FCBQWeb/fitxaPartit/55488` para obtener `messageData.match.universallyid`.
+Para el flujo "pegar URL" en Admin (`spec-09 RF-07`, `spec-10 RF-11`):
+
+1. **Si la URL trae `?id={idMatch}`** (ej. `pagina-partido/?id=55488&tab=1`):
+   - Se llama a `GET ${ESB_BASE}/FCBQWeb/fitxaPartit/{idMatch}`, cuyo `messageData` devuelve `{ match: { idMatch, universallyid, idLocalTeam, nameLocalTeam, idVisitorTeam, nameVisitorTeam, matchDay, state, localScore, visitorScore, nameField, nameTown, numMatchDay } }` (mismos nombres de propiedades que un elemento de `Match/getByTeamAllSeason/11659`).
+   - Se verifica que `match.idLocalTeam === "11659" || match.idVisitorTeam === "11659"`. Si no pertenece a `LAGUNAK A`, se rechaza.
+   - Si `match.universallyid` existe, se descarga el acta en `GET ${MSSTATS_BASE}/getJsonWithMatchStats/${match.universallyid}?currentSeason=true`.
+2. **Si la URL trae `?uuid={universallyid}`** (sin `?id=`):
+   - Se consulta `GET ${ESB_BASE}/Match/getByTeamAllSeason/11659` y se busca el partido cuyo `universallyid === uuid`.
+   - Si no aparece en la temporada de `11659`, se rechaza por no pertenecer a `LAGUNAK A`. Si aparece, se toman su `idMatch` y metadatos de partido y se descarga `GET ${MSSTATS_BASE}/getJsonWithMatchStats/${universallyid}?currentSeason=true`.
 
 ### 3.3. `GET ${MSSTATS_BASE}/getJsonWithMatchStats/{universallyid}?currentSeason=true` — acta digital
 

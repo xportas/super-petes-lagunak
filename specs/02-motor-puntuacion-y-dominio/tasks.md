@@ -7,11 +7,11 @@ Precondición global: `01-fundacion-ts-vitest-src` en verde (TS `strict`, Vitest
 
 Nota FNB (`AGENTS.md` vigente): la valoración FNB entra al motor como `number` entero ya resuelto. Prohibido parsear HTML de `fnbaloncesto.com`. El MVP lo calcula solo el motor §0. `src/lib/fnb/` es dueña de la spec-10 y no se toca aquí. Sin tablas Supabase en esta spec (dueña spec-03: `fnb_uuid`, `fnb_match_id`, `origen_resultado`, Lazy Sync).
 
-- [ ] ## T-01 — Precondiciones y hueco de trabajo
-  - **Toca:** ninguno (solo lectura: `tsconfig.json`, `vitest.config.ts`, `package.json`, `src/lib/scoring/`, `src/lib/dominio/`, `es/strings.json`).
+- [ ] ## T-01 — Precondiciones, `zod` y reemplazo de contratos de `spec-01`
+  - **Toca:** `package.json`, `vitest.config.ts`, eliminar `src/lib/scoring/contratos.ts`, `src/lib/scoring/contratos.test.ts`, `src/lib/dominio/contratos.ts`, `src/lib/dominio/contratos.test.ts`.
   - **Cubre:** DoD base (sin RF de negocio).
-  - **Hacer:** comprobar TS `strict` + alias `@/*`, Vitest ejecutable, placeholders `scoring/dominio` vacíos sin lógica, `es/strings.json` con mínimo de 01. Confirmar que no existen `src/lib/fnb/` ni tablas (son specs 10/03).
-  - **Hecho cuando:** `npx tsc --noEmit` → 0 errores y `npm test` → verde en la base sin tests de esta 02.
+  - **Hacer:** comprobar TS `strict` + alias `@/*`, instalar `zod` en `package.json`, actualizar `vitest.config.ts` para exigir 100% de cobertura en `src/lib/scoring/**` y `src/lib/dominio/**`, y retirar los `contratos.ts` / `contratos.test.ts` temporales de `spec-01` para sustituirlos por las implementaciones reales reexportadas en `index.ts`.
+  - **Hecho cuando:** `zod` está instalado y `npx tsc --noEmit` → 0 errores.
 
 - [ ] ## T-02 — Test de `constantes` (snapshot anti-divergencia)
   - **Toca:** `src/lib/scoring/constantes.test.ts` (crear).
@@ -85,17 +85,17 @@ Nota FNB (`AGENTS.md` vigente): la valoración FNB entra al motor como `number` 
   - **Hacer:** `-5` por expulsado con BASE intacta, doble → `-10`; total = 5 jugadores `+3` MVP `-5×n`, negativo preservado; orden fijo verificable en el desglose; dato ausente → throw con `claveI18n` sin parciales; sin quinteto → `-10` + reset rachas; jornada `papel` → `0` excluida + reset rachas de todos; corrección admin → recálculo total; desglose suma exactamente RF-12.
   - **Hecho cuando:** `npx vitest run src/lib/scoring/jornada.test.ts` → falla en los nuevos casos.
 
-- [ ] ## T-14 — Implementar `calcularJornada` + `recalcularJornada` (desglose como dato)
-  - **Toca:** `src/lib/scoring/calculo.ts` (ampliar).
+- [ ] ## T-14 — Implementar `calcularJornada` + `recalcularJornada` + `agregador-temporada` (desglose y rankings como dato)
+  - **Toca:** `src/lib/scoring/calculo.ts`, `src/lib/scoring/agregador-temporada.ts`, `src/lib/scoring/tipos.ts`, `src/lib/scoring/index.ts`, `src/lib/dominio/tipos.ts`, `src/lib/dominio/index.ts`.
   - **Cubre:** RF-10–RF-13, RF-17–RF-21.
-  - **Hacer:** `calcularJornada` resuelve ramas `normal` (suma 5 + MVP + expulsiones), `sin-quinteto` (`-10` + reset rachas) y `papel` (`0` + reset rachas de todos); `recalcularJornada` = misma vía con datos corregidos (sin parches; el botón es spec-09). `ResultadoJornada` estructurado, nunca string `12 +5 -1 = 16` (las vistas solo lo muestran).
+  - **Hacer:** `calcularJornada` resuelve ramas `normal` (suma 5 + MVP + expulsiones), `sin-quinteto` (`-10` + reset rachas) y `papel` (`0` + reset rachas de todos); `recalcularJornada` = misma vía con datos corregidos; `agregador-temporada.ts` ordena por `hora_partido ASC, numero_jornada ASC` y deriva rachas por `(manager, jugador)` (conservando envíos válidos en jornadas `invalidada`), puestos olímpicos históricos `Pº`, Top 3 y medias a 1 decimal `round_half_up` sobre `estado = 'jugo'`. `ResultadoJornada` estructurado, nunca string `12 +5 -1 = 16` (las vistas solo lo muestran).
   - **Hecho cuando:** `npx vitest run src/lib/scoring/` → todo verde (calculo + jornada + constantes).
 
 - [ ] ## T-15 — Añadir claves `errors.*` a `es/strings.json`
   - **Toca:** `es/strings.json` (modificar, solo añadir).
   - **Cubre:** RF-02, RF-03, RF-14–RF-17 (soporte cero-hardcode de E-16–E-19).
-  - **Hacer:** `errors.calculo.dato-ausente`, `errors.alineacion.duplicados|sin-capitan|capitan-fuera|sin-posicion|entrenador-invalido|entrenador-en-quinteto|elegibilidad|posiciones-invalidas|lesion-expulsion-excluyentes`, `errors.cierre.pasado|sin-hora|hora-invalida`. Texto plano, sin HTML. No añadir `ui.normas.*` (dueña spec-05).
-  - **Hecho cuando:** `node -e "JSON.parse(require('fs').readFileSync('es/strings.json','utf8'))"` → ok y `grep -c errors.alineacion es/strings.json` → 9 claves presentes.
+  - **Hacer:** `errors.calculo.dato-ausente`, `errors.alineacion.duplicados|sin-capitan|capitan-fuera|sin-posicion|entrenador-invalido|entrenador-en-quinteto|elegibilidad|posiciones-invalidas|jugador-inactivo|lesion-expulsion-excluyentes`, `errors.close.passed|missing_time|invalid_time`. Texto plano, sin HTML. No añadir `ui.normas.*` (dueña spec-05).
+  - **Hecho cuando:** `node -e "JSON.parse(require('fs').readFileSync('es/strings.json','utf8'))"` → ok y `grep -c errors.alineacion es/strings.json` → 10 claves presentes.
 
 - [ ] ## T-16 — Puerta de calidad final de la 02
   - **Toca:** solo ajustes mínimos si la puerta lo exige (sin páginas, sin SQL, sin `src/lib/fnb/`).

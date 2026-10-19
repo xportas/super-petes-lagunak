@@ -15,7 +15,7 @@ En esta 01 no hay modelo relacional. Cero tablas Supabase, cero migraciones, cer
 - `Vars<K>`: unión de `{nombres}` extraída por tipo template-literal desde el valor de cada clave. Cubre **RF-08 / E-04**.
 - `Params<K> = Record<Vars<K>, string | number>`. Sin `any`; entradas externas como `unknown` + narrowing. Cubre **RF-03**.
 
-Placeholders `scoring / dominio / supabase`: solo marcas opacas sin campos (p. ej. `string & { readonly __marca: 'pendiente-spec-02' }`). Prohibido definir aquí `Jugador`, `Jornada`, `Quinteto`, `valoracionFNB`, posiciones o cierre: lo define la spec-02. Evita **E-10**.
+Placeholders `scoring / dominio / supabase / fnb`: solo marcas opacas sin campos (p. ej. `string & { readonly __marca: 'pendiente-spec-02' }`). Prohibido definir aquí `Jugador`, `Jornada`, `Quinteto`, `valoracionFNB`, posiciones o cierre: lo define la spec-02. Evita **E-10**.
 
 ## 2. Decisiones justificadas
 
@@ -36,18 +36,19 @@ Placeholders `scoring / dominio / supabase`: solo marcas opacas sin campos (p. e
 
 ## 3. Archivos exactos a crear / modificar / eliminar
 
-Respetando estructura objetivo de AGENTS.md. No se toca `public/`, no se crea `app/normas/*` (spec-05) ni `eu.json`.
+Respetando estructura objetivo de AGENTS.md. Se crean los placeholders de jugadores en `public/players/placeholder.webp` y `public/players/placeholder-pete.webp` (partiendo de un `.webp` válido); no se crea `app/normas/*` (spec-05) ni `eu.json`.
 
 ### Eliminar (RF-01)
 - `jsconfig.json`
-- `app/layout.js`, `app/page.js`, `app/globals.css` (tras mover; no duplicar)
+- `app/layout.js`, `app/page.js`, `app/globals.css`, `app/favicon.ico` y el directorio raíz `app/` completo (tras mover a `src/app/`; no dejar `app/` en la raíz para evitar que Next.js ignore `src/app/`)
 
 ### Crear
 - `tsconfig.json` — única config TS, alias `@/*` → `./*`. **Cubre RF-01.**
 - `vitest.config.ts` — alias `@`, `include: src/**/*.test.ts(x)`, cobertura v8 con umbrales D-08. **Cubre RF-04/RF-05.**
 - `src/app/layout.tsx` — `RootLayout({ children: React.ReactNode })`, `Metadata`, `lang="es"`. **Cubre RF-02.**
 - `src/app/page.tsx` — Server Component mínimo que usa `traducir('es', 'ui.home.countdown', { time })`. **Cubre RF-02 + RF-10.**
-- `src/app/globals.css` — movido sin cambios visuales.
+- `src/app/globals.css` y `src/app/favicon.ico` — movidos desde `app/` sin cambios visuales.
+- `public/players/placeholder.webp` y `public/players/placeholder-pete.webp` — placeholders estáticos requeridos por `spec-03`/`07`/`09`. **Cubre RF-06.**
 - `es/strings.json` — mínimo RF-10 (ver §6).
 - `src/lib/i18n/tipos.ts` — `Locale, Diccionario, ClaveI18n, Vars, Params`. **RF-07/RF-08/RF-09.**
 - `src/lib/i18n/diccionario.ts` — `cargarDiccionario`. **RF-09.**
@@ -56,12 +57,14 @@ Respetando estructura objetivo de AGENTS.md. No se toca `public/`, no se crea `a
 - `src/lib/scoring/tipos.ts`, `contratos.ts`, `index.ts` — tipos opacos + firmas `never`. **RF-06.**
 - `src/lib/dominio/tipos.ts`, `contratos.ts`, `index.ts` — firmas `calcularCierre`, `validarQuinteto` como `never`. **RF-06.**
 - `src/lib/supabase/tipos.ts`, `cliente.ts`, `index.ts` — `crearClienteSupabase(): never`. **RF-06.**
+- `src/lib/fnb/tipos.ts`, `contratos.ts`, `index.ts` — `sincronizarCalendarioFNB(): never`, `sincronizarResultadosFNB(): never`. **RF-06.**
 - Tests (al menos uno por módulo, **RF-04**):
   - `src/lib/i18n/traducir.test.ts`
   - `src/lib/i18n/diccionario.test.ts`
   - `src/lib/scoring/contratos.test.ts`
   - `src/lib/dominio/contratos.test.ts`
   - `src/lib/supabase/cliente.test.ts`
+  - `src/lib/fnb/contratos.test.ts`
   - Asserts de tipos con `expectTypeOf` + `@ts-expect-error` para RF-07/RF-08 (pueden vivir dentro de los `.test.ts` anteriores).
 
 No crear en 01: `src/lib/scoring/constantes.ts` (la crea spec-02 como única fuente de números para `/normas`), `eu.json`, migraciones SQL, Server Actions.
@@ -113,6 +116,7 @@ Ambas puras respecto a UI: sin `window`, sin fetch, sin BD.
 - `scoring.calcularPuntuacion(...args: unknown[]): never` — lanza `no implementado — spec-02`.
 - `dominio.calcularCierre(horaPartido: unknown): never`, `dominio.validarQuinteto(quinteto: unknown): never`.
 - `supabase.crearClienteSupabase(): never`.
+- `fnb.sincronizarCalendarioFNB(): never`, `fnb.sincronizarResultadosFNB(): never` — lanzan `no implementado — spec-10`.
 
 ### Server Actions
 0 afectadas. Esta fundación no muta nada.

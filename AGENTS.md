@@ -52,6 +52,7 @@ No usar `animate-expo` ni `write-swift`: no aplican a este stack.
 - Racha: `−1` en la 2ª alineación consecutiva, `−2` en la 3ª… Se rompe si una jornada no lo alineas o no envías quinteto. Alinear lesionado/DNP cuenta para racha futura.
 - Lesionado / no convocado / DNP → BASE `= 0` (sigue ocupando slot y se muestra 🚑/❌, nunca se oculta).
 - **Cierre = hora del partido − 3h** (`Europe/Madrid`), y se valida **en el servidor**: solo lo recibido estrictamente antes; el segundo exacto o después se rechaza. El contador del Home es solo UX; jamás es la puerta.
+- **Orden cronológico canónico**: toda resolución de jornada activa, cálculo secuencial de rachas, evolución y puestos históricos se ordena por `hora_partido ASC, numero_jornada ASC` (`DESC` en listado de Historial). Estados de jornada: `pendiente | calculada | papel | invalidada` (una `calculada` que quede incompleta tras edición o re-sync pasa a `invalidada`, nunca regresa a `pendiente`).
 - Alineación válida: 5 jugadores + 1 entrenador + 1 capitán (uno de los 5). Se valida en servidor antes de guardar.
 
 ### Solo móvil
@@ -83,13 +84,14 @@ No usar `animate-expo` ni `write-swift`: no aplican a este stack.
 ## Estructura objetivo
 ```
 es/strings.json          # i18n (creado en spec-01; spec-05 añade ui.normas.*)
-public/                  # fotos img / imgPete + placeholders
+public/                  # fotos img / imgPete + placeholders (players/placeholder*.webp, coaches/*.webp)
+src/proxy.ts             # guardas de ruta y renovación sliding de cookie en Next.js 16.4 (middleware.ts está deprecado)
 src/app/                 # rutas App Router en TypeScript tras spec-01 (*.tsx)
 src/app/normas/page.tsx  # página Normas (la crea la spec-05)
-src/lib/scoring/         # motor §0 (puro) + tests junto al módulo
+src/lib/scoring/         # motor §0 (puro) + agregador de temporada + tests junto al módulo
 src/lib/scoring/constantes.ts  # única fuente de números para /normas (spec-02)
 src/lib/dominio/         # cierre, rachas, validaciones de alineación
-src/lib/fnb/             # cliente API FNB (ESB + MSSTATS) y mapeo a dominio (dueña spec-10)
+src/lib/fnb/             # cliente API FNB (ESB + MSSTATS) y mapeo a dominio (placeholder en spec-01; dueña spec-10)
 src/lib/supabase/        # cliente(s) de servidor y queries
 src/lib/i18n/            # diccionario + traducir tipado (spec-01)
 ```

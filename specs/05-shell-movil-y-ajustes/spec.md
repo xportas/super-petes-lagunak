@@ -29,8 +29,8 @@
 - **RF-03 — Conmutador Modo Pete (`ON/OFF`) persistido en cookie:**
   Cuando el usuario active o desactive el Modo Pete desde `/ajustes`, el sistema deberá persistir la preferencia en una cookie (`modo_pete = '1' | '0'`, por defecto `'0'`) accesible tanto en servidor como en cliente, y conmutar inmediatamente en toda la app `img ↔ imgPete` y `nombre ↔ nombrePete` de los **jugadores**. El Modo Pete es estrictamente cosmético: nunca altera posiciones, rachas, validaciones, orden de desempate ni reglas, y nunca altera el `username` de los managers ni el nombre/foto de `Maider` y `Páter`.
 
-- **RF-04 — Conmutador Tema (`Claro/Oscuro`) persistido en cookie:**
-  Cuando el usuario cambie el tema entre claro y oscuro desde `/ajustes`, el sistema deberá persistir la preferencia en una cookie (`tema = 'light' | 'dark'`, por defecto `'dark'`) y aplicar la clase/atributo de tema en el documento raíz (`<html>`) en SSR y cliente sin parpadeo visual (*flash*) al recargar.
+- **RF-04 — Conmutador Tema (`Claro/Oscuro`) persistido en cookie (compatible con `cacheComponents`):**
+  Cuando el usuario cambie el tema entre claro y oscuro desde `/ajustes`, el sistema deberá persistir la preferencia en una cookie (`tema = 'light' | 'dark'`, por defecto `'dark'`) y aplicar la clase/atributo de tema en el documento raíz (`<html>`) sin parpadeo visual (*flash*) al recargar. Para no invocar `await cookies()` en el nivel superior de `RootLayout` (lo cual impediría el prerender estático de `/normas` con `cacheComponents: true` en Next.js 16.4), `<html>` usará `suppressHydrationWarning` junto con un script inline síncrono mínimo en `<head>` que lea la cookie `tema` (fallback `'dark'`) antes del primer pintado, mientras que la lectura en servidor de las preferencias en `/ajustes` y vistas dinámicas se realizará dentro de su límite `<Suspense>`.
 
 ### Pantalla de Ajustes (`/ajustes`)
 

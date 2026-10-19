@@ -1,16 +1,22 @@
-1. Mapa de división recomendado (9 Specs en 4 fases)
+1. Mapa de división recomendado (10 Specs en 4 fases)
 
-Cada spec tiene el tamaño justo para resolverse en una entrevista de ≤ 6 preguntas y entregarse como PR atómica:
+Cada spec mantiene su identificador fijo (`01` a `10`) y tiene el tamaño justo para resolverse en una entrevista de ≤ 6 preguntas y entregarse como PR atómica.
+
+> **Orden de ejecución recomendado (sin bloqueos de dependencias):**
+> - **Fase 0:** `01` → `02`
+> - **Fase 1:** `03` → `05` → `06` (crea el selector de quinteto reutilizable) → `04` (reutiliza el selector de `06` en el Paso 1 del Onboarding)
+> - **Fase 2:** `10` (implementa `src/lib/fnb/`) → `07` (consume Lazy Sync de `10` en Home) → `08`
+> - **Fase 3:** `09` (consume `src/lib/fnb/` de `10` para los botones FNB del panel Admin)
 
 ### Fase 0 — Cimientos y Reglas Puras (0% BD, 100% tests unitarios)
 
 1. 01-fundacion-ts-vitest-src
 
-  Migración directa del scaffold inicial a TypeScript strict (`src/app/*.tsx`), Vitest con cobertura, estructura `src/lib/` con contratos tipados y motor de diccionarios i18n tipado (`es/strings.json`).
+  Migración directa del scaffold inicial a TypeScript strict (`src/app/*.tsx`), Vitest con cobertura, estructura `src/lib/` completa (`scoring`, `dominio`, `supabase`, `fnb`, `i18n`) con contratos tipados, placeholders gráficos en `public/players/` y motor de diccionarios i18n tipado (`es/strings.json`).
 
 2. 02-motor-puntuacion-y-dominio (§0)
 
-  Función pura de puntuación (BASE → Maider ×1.5 → Páter suelo 1 + +1 fijo → posición +5 → racha -N → MVP +3 → expulsión -5), desglose textual/estructurado, equivalencia E == A, cálculo de rachas consecutivas y validación de cierre (partido - 3h).
+  Función pura de puntuación (BASE → Maider ×1.5 → Páter suelo 1 + +1 fijo → posición +5 → racha -N → MVP +3 → expulsión -5), desglose estructurado, equivalencia E == A, cálculo de rachas consecutivas, agregador puro de temporada/liga (rachas por manager, puestos olímpicos históricos, medias y Top 3) y validación de cierre (partido - 3h).
 
 ### Fase 1 — Persistencia, Identidad y Shell Móvil
 

@@ -8,7 +8,12 @@ Precondición: asume hecha `01-fundacion-ts-vitest-src`
 `es/strings.json` mínimo, `tsconfig` con alias `@/*`). Esta 02 rellena
 `scoring/` + `dominio/` con lógica real. No crea config ni BD.
 
-## 1. Archivos exactos a crear / modificar
+## 1. Archivos exactos a crear / modificar / eliminar
+
+### Eliminar (reemplazo de placeholders de `spec-01`)
+
+- `src/lib/scoring/contratos.ts` y `src/lib/scoring/contratos.test.ts`
+- `src/lib/dominio/contratos.ts` y `src/lib/dominio/contratos.test.ts`
 
 ### Crear
 
@@ -18,30 +23,35 @@ Precondición: asume hecha `01-fundacion-ts-vitest-src`
   `forzarBASE, aplicarEntrenador, bonusPosicion, penalizacionRacha, esMVP,
   calcularJugador, calcularJornada, recalcularJornada`.
   Cubre RF-01, RF-04–RF-13, RF-17–RF-21.
-- `src/lib/dominio/cierre.ts` — `calcularCierre, estaCerrado`.
+- `src/lib/scoring/agregador-temporada.ts` — agregación pura multi-jornada (`hora_partido ASC, numero_jornada ASC`):
+  `calcularTemporadaLiga, calcularMediaJugador, resolverTop3Managers, resolverTop3Jugadores`.
+  Cubre RF-08, RF-09, RF-18, RF-19, RF-21.
+- `src/lib/dominio/cierre.ts` — `calcularCierre, estaCerrado, ordenarJornadasCronologicamente`.
   Cubre RF-16.
-- `src/lib/dominio/rachas.ts` — `siguienteRacha, penalizacionPorRacha`.
+- `src/lib/dominio/rachas.ts` — `siguienteRacha, penalizacionPorRacha, derivarRachasManager`.
   Cubre RF-08, RF-09, RF-19, RF-21.
 - `src/lib/dominio/validacion-alineacion.ts` — schema Zod + `validarAlineacion`.
   Cubre RF-02, RF-03, RF-14, RF-15.
 - Tests junto al módulo (colocación exigida por `AGENTS.md`):
   - `src/lib/scoring/calculo.test.ts` — RF-01, RF-04–RF-08, RF-10–RF-13
-  - `src/lib/scoring/jornada.test.ts` — integración orden RF-13 + total RF-12 + RF-19 + RF-21
+  - `src/lib/scoring/jornada.test.ts` — integración orden RF-13 + total RF-12 + RF-19 + RF-21 + agregador de temporada (`RF-18`)
   - `src/lib/scoring/constantes.test.ts` — snapshot anti-divergencia `/normas`
-  - `src/lib/dominio/rachas.test.ts` — RF-08, RF-09, RF-19, RF-21
-  - `src/lib/dominio/validacion-alineacion.test.ts` — RF-02, RF-03, RF-14, RF-15
+  - `src/lib/dominio/rachas.test.ts` — RF-08, RF-09, RF-19, RF-21 (incluyendo jornada `invalidada` y orden por `hora_partido ASC`)
+  - `src/lib/dominio/validacion-alineacion.test.ts` — RF-02, RF-03, RF-14, RF-15 (incluyendo rechazo de `inactivo` o posiciones pendientes al guardar)
   - `src/lib/dominio/cierre.test.ts` — RF-16
 
 ### Modificar
 
-- `es/strings.json` — solo añadir claves `errors.*` de §6.
+- `package.json` — instalar `zod` como dependencia de producción.
+- `vitest.config.ts` — actualizar umbrales de cobertura al **100%** en `src/lib/scoring/**` y `src/lib/dominio/**` (`CONSTITUTION.md §6`).
+- `src/lib/scoring/tipos.ts` y `src/lib/scoring/index.ts` — sustituir marcas opacas de `spec-01` por tipos y reexportaciones reales del motor.
+- `src/lib/dominio/tipos.ts` y `src/lib/dominio/index.ts` — sustituir marcas opacas de `spec-01` por tipos y reexportaciones reales de dominio.
+- `es/strings.json` — añadir claves `errors.*` de §5 (`errors.calculo.*`, `errors.alineacion.*`, `errors.close.*`).
   No tocar `ui.normas.*` (lo crea la spec-05). Cubre E-16–E-19 sin hardcode.
 
 ### No crear ni modificar en esta spec
 
-- `vitest.config.ts`, `tsconfig.json`, `package.json`, `src/lib/i18n/*`,
-  `src/lib/supabase/*` — dueños specs 01/03. No se tocan salvo que
-  `lint/build/test` lo exija para pasar en verde.
+- `tsconfig.json`, `src/lib/i18n/*`, `src/lib/supabase/*`, `src/lib/fnb/*` — dueños specs 01/03/10. No se tocan salvo que `lint/build/test` lo exija para pasar en verde.
 - Sin SQL, sin migraciones, sin RLS, sin Server Actions, sin páginas.
   El botón "recalcular" es spec-09; aquí solo la regla pura RF-20.
 
@@ -54,12 +64,14 @@ Todo `unknown` + narrowing en bordes; ningún `any` explícito ni implícito.
 // scoring / dominio — esbozo de diseño, no implementación final
 type Posicion = 'B' | 'E' | 'A' | 'AP' | 'P'; // RF-15
 type EntrenadorId = 'maider' | 'pater'; // minúsculas sin tilde en código; display vía i18n. RF-02/RF-03
-type EstadoJuego = 'disponible' | 'lesionado' | 'no-convocado' | 'dnp'; // RF-01
+type EstadoSanitario = 'disponible' | 'lesionado'; // estado pre-partido en ficha/equipo (spec-03 RF-01)
+type EstadoJuego = 'jugo' | 'lesionado' | 'no_convocado' | 'dnp'; // estado en acta de jornada, RF-01/RF-10
+type EstadoJornada = 'pendiente' | 'calculada' | 'papel' | 'invalidada'; // RF-09/RF-18/RF-21
 type EntradaJugador = {
   jugadorId: string;
   valoracionFNB: number | undefined; // undefined = dato ausente -> error RF-17, nunca 0 provisional
   estado: EstadoJuego;
-  expulsado: boolean; // separado; invariante: noJugo && expulsado = inválido (E-22)
+  expulsado: boolean; // separado; invariante: estado !== 'jugo' && expulsado = inválido (E-22)
   posicionAlineacion: Posicion; // RF-14
   posicionesValidas: readonly [Posicion, Posicion]; // exactamente 2, RF-15
 };
@@ -113,7 +125,7 @@ type ResultadoJornada = {
 ### Funciones puras (únicas con lógica en esta spec)
 
 1. `forzarBASE(valoracion: number | undefined, estado: EstadoJuego): number`
-   DNP/lesionado/no-convocado -> `0`; en otro caso valoración tal cual (negativo permitido).
+   `dnp | lesionado | no_convocado` -> `0`; si `estado === 'jugo'`, valoración tal cual (negativo permitido).
    `undefined` -> throw `errors.calculo.dato-ausente`, sin parciales. RF-01, RF-17, E-01/E-16.
 2. `aplicarEntrenador(base: number, esCapitan: boolean, entrenador: EntrenadorId): number`
    Maider + capitán -> `redondeoHalfUp(base * 1.5)`; Maider + no-capitán -> `base`.
@@ -177,8 +189,8 @@ pero sin estas claves el motor haría throw con literales. `ui.normas.*` queda p
 - `errors.calculo.dato-ausente` — RF-17, E-16 (variable opcional `{jugador}`).
 - `errors.alineacion.duplicados` / `sin-capitan` / `capitan-fuera` / `sin-posicion` /
   `entrenador-invalido` / `entrenador-en-quinteto` / `elegibilidad` /
-  `posiciones-invalidas` / `lesion-expulsion-excluyentes` — RF-02/RF-03/RF-14/RF-15, E-17/E-21/E-22.
-- `errors.cierre.pasado` / `sin-hora` / `hora-invalida` — RF-16, E-18/E-19.
+  `posiciones-invalidas` / `jugador-inactivo` / `lesion-expulsion-excluyentes` — RF-02/RF-03/RF-14/RF-15, E-17/E-21/E-22.
+- `errors.close.passed` / `errors.close.missing_time` / `errors.close.invalid_time` — RF-16, E-18/E-19 (unificado bajo `errors.close.*` con `spec-01`, `spec-04` y `spec-06`).
 
 Texto plano, sin HTML, sin plurales, frases completas (prohibida concatenación).
 

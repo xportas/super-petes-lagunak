@@ -10,7 +10,7 @@
 - `CONSTITUTION.md §1/§6/§9/§10` y `AGENTS.md` exigen TypeScript `strict`, cero `any`, `tsc --noEmit`, `eslint`, `next build`, cero hardcode (`es/strings.json`) y Vitest con cobertura sobre motor §0, rachas y validaciones.
 - **Por qué migración directa a TS (sin paso intermedio JS):** se evita crear módulos `.js` para borrarlos a continuación y se elimina la convivencia JS+TS (`allowJs`). Todo el código propio nace en TypeScript `strict` desde esta primera spec.
 - **Por qué Vitest con cobertura desde ya:** sin umbral, la infra se degrada; con umbral, las siguientes specs (motor §0, dominio) heredan una red mínima exigible.
-- **Por qué contratos placeholder tipados:** fija `scoring / dominio / supabase / i18n` para que los agentes no reinventen rutas ni firmas; la lógica real la aportan sus specs.
+- **Por qué contratos placeholder tipados:** fija `scoring / dominio / supabase / fnb / i18n` para que los agentes no reinventen rutas ni firmas; la lógica real la aportan sus specs.
 - **Por qué i18n con chequeo en compilación:** con TS la clave inexistente o el `{var}` faltante/sobrante debe impedir compilar en la sobrecarga estática, además de avisar en runtime si se invoca dinámicamente.
 
 ## 2. Requisitos funcionales (EARS)
@@ -30,8 +30,8 @@
 - **RF-05 — Cobertura exigible:**
   Cuando se ejecute la suite con medición de cobertura, el sistema deberá cumplir el umbral definido para los módulos de fundación; si no lo cumple, entonces la fundación no se considerará completa.
 
-- **RF-06 — Estructura `src/lib/` completa con contratos:**
-  Cuando se aplique la fundación, el sistema deberá proveer los módulos `src/lib/scoring/`, `src/lib/dominio/`, `src/lib/supabase/` y `src/lib/i18n/` con contratos tipados que compilan, sin lógica de negocio real salvo `i18n`.
+- **RF-06 — Estructura `src/lib/` completa con contratos y placeholders gráficos:**
+  Cuando se aplique la fundación, el sistema deberá proveer los módulos `src/lib/scoring/`, `src/lib/dominio/`, `src/lib/supabase/`, `src/lib/fnb/` y `src/lib/i18n/` con contratos tipados que compilan, sin lógica de negocio real salvo `i18n`, además de los archivos estáticos `public/players/placeholder.webp` y `public/players/placeholder-pete.webp`.
 
 - **RF-07 — i18n tipado con chequeo en compilación:**
   Cuando se solicite un texto mediante su clave, el sistema deberá verificar en compilación que la clave existe en el diccionario del locale. Si la clave no existe, entonces la compilación deberá fallar.
@@ -84,7 +84,7 @@
 - [ ] `npm test` termina en verde con al menos un test por módulo de fundación.
 - [ ] La cobertura de los módulos de fundación cumple el umbral definido.
 - [ ] `npm run build` termina en verde.
-- [ ] Existen `src/lib/scoring/`, `src/lib/dominio/`, `src/lib/supabase/`, `src/lib/i18n/` con contratos que compilan, sin lógica de negocio real salvo `i18n`.
+- [ ] Existen `src/lib/scoring/`, `src/lib/dominio/`, `src/lib/supabase/`, `src/lib/fnb/`, `src/lib/i18n/` con contratos que compilan, sin lógica de negocio real salvo `i18n`, y existen `public/players/placeholder.webp` y `public/players/placeholder-pete.webp`.
 - [ ] Clave i18n inexistente o `{var}` incorrecto impide compilar.
 - [ ] `es/strings.json` contiene el mínimo inicial (`ui.home.countdown`, `errors.close.passed`, `ui.ejemplo.saludo`) y `eu` sin diccionario se comporta según E-07.
 - [ ] Con diccionario ausente o inválido, la fundación no se considera completa.

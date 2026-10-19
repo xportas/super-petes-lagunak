@@ -37,10 +37,10 @@
   Cuando exista al menos una jornada calculada elegible para el manager, el sistema deberá mostrar arriba un bloque destacado con el desglose completo de su última jornada calculada. Si no existe ninguna, entonces deberá mostrar estado `Sin datos` en lugar del bloque.
 
 - **RF-05 — Historial descendente solo con calculadas y −10:**
-  Cuando se liste el Historial, el sistema deberá mostrar las jornadas en orden descendente (más reciente primero), incluyendo únicamente jornadas calculadas normales y jornadas normales sin envío (`−10`). Si una jornada está pendiente de cálculo, tiene dato ausente o es papel, entonces no deberá aparecer como fila.
+  Cuando se liste el Historial, el sistema deberá mostrar las jornadas en orden cronológico descendente (`hora_partido DESC, numero_jornada DESC`, más reciente primero), incluyendo únicamente jornadas en estado `calculada` normales y jornadas `calculada` sin envío (`−10`) donde el manager ya era elegible (`onboarding_completado_at < cierre`). Si una jornada está en estado `pendiente`, `invalidada` o `papel`, entonces no deberá aparecer como fila de puntos.
 
 - **RF-06 — Fila colapsada con puesto acumulado:**
-  Cuando se muestre cada fila del Historial, el sistema deberá presentar `Jx: N pts (Pº)` donde `Pº` es el puesto en la general acumulada tras esa jornada, calculado entre todos los managers actuales (los dados de alta después cuentan con `0` en jornadas viejas), con numeración olímpica y desempate alfabético case-insensitive. Si hay recálculo retroactivo de una jornada vieja, entonces los puestos de esa jornada y las posteriores deberán actualizarse al leer.
+  Cuando se muestre cada fila del Historial, el sistema deberá presentar `Jx: N pts (Pº)` donde `Pº` es el puesto en la general acumulada tras esa jornada (siguiendo el orden `hora_partido ASC, numero_jornada ASC`), calculado entre todos los managers actuales (los dados de alta después cuentan con `0` en jornadas viejas), con numeración olímpica y desempate alfabético case-insensitive. Si hay recálculo retroactivo de una jornada vieja, entonces los puestos de esa jornada y las posteriores deberán actualizarse al leer.
 
 - **RF-07 — Acordeón exclusivo con tap:**
   Cuando el manager toque una fila con desglose, el sistema deberá expandir su desglose completo y colapsar cualquier otra jornada abierta (una sola abierta cada vez). Si toca la fila abierta, entonces deberá colapsarla. Todo por tap, nunca hover.
@@ -57,8 +57,8 @@
 - **RF-11 — Detalle por jugador completo y ceros explícitos:**
   Cuando se muestre cada línea de jugador, el sistema deberá incluir posición de slot alineada, marca de capitán cuando aplique e icono de estado (`✅` jugó aunque `BASE` sea `0`, `🚑` lesionado, `❌` no convocado/DNP). Los conceptos con valor `0` deberán mostrarse con `0` explícito, no omitirse. Si hay expulsados, entonces cada jugador expulsado deberá quedar señalado en su línea además del `−5` a nivel jornada.
 
-- **RF-12 — Papel oculta, pendiente oculta, dato ausente con aviso:**
-  Si una jornada es papel, entonces el sistema deberá ocultarla del Historial y excluirla del acumulado, aunque rompa rachas por dentro. Si una jornada está pendiente o tiene dato ausente que impide el cálculo, entonces deberá ocultarla como fila sin usar `0` provisional. Si una jornada que ya era calculada queda invalidada por dato ausente tras una corrección, entonces el sistema deberá ocultarla como fila y mostrar aviso visible de jornada excluida por dato incompleto, sin bloquear el resto del Historial ni inventar su total.
+- **RF-12 — Papel oculta, pendiente oculta, `invalidada` con aviso:**
+  Si una jornada está en estado `papel` o `pendiente`, entonces el sistema deberá ocultarla del Historial sin mostrar aviso y excluirla del acumulado (aunque `papel` rompa rachas por dentro). Si una jornada que ya había sido `calculada` pasó a estado `invalidada` (por dato ausente o jugador en bandeja `Pendientes` tras una corrección o re-sync, `spec-09 RF-11`), entonces el sistema deberá ocultarla como fila de puntos, excluirla temporalmente del acumulado y mostrar en `/mi-resultado` un aviso visible de jornada excluida por dato incompleto, sin bloquear el resto del Historial ni inventar su total (mientras esté `invalidada`, sus alineaciones válidas guardadas siguen contando para las rachas de las jornadas posteriores).
 
 - **RF-13 — Sin retroactivo en filas propias:**
   Cuando un manager se dé de alta a mitad de temporada o complete su onboarding tarde, el sistema deberá mostrar en su Historial solo jornadas desde su primera jornada elegible, sin filas de jornadas anteriores ni como `0` ni como `−10`. Si mira el puesto histórico de otros en jornadas viejas, entonces él contará con `0` en ese cálculo aunque no tenga fila propia allí.
@@ -66,7 +66,7 @@
 ### Clasificación General (`/clasificacion`)
 
 - **RF-14 — Acumulado solo calculadas más −10:**
-  Cuando se calcule la General, el sistema deberá sumar por manager únicamente jornadas calculadas normales, incluyendo `−10` por no envío. Las jornadas papel y las pendientes o invalidadas por dato ausente no deberán sumar nada. Si el recálculo del Admin cambia una jornada, entonces los acumulados deberán actualizarse al leer sin aviso especial.
+  Cuando se calcule la General, el sistema deberá sumar por manager únicamente jornadas en estado `calculada` normales, incluyendo `−10` por no envío (cuando el manager ya era elegible antes del cierre). Las jornadas en estado `papel`, `pendiente` o `invalidada` no deberán sumar nada. Si el recálculo del Admin cambia una jornada, entonces los acumulados deberán actualizarse al leer sin aviso especial.
 
 - **RF-15 — Orden, olímpica y Admin excluido:**
   Cuando se ordene la General, el sistema deberá ordenar por acumulado descendente con numeración olímpica en empates y desempate alfabético por `username` case-insensitive. El Admin semilla nunca deberá aparecer en el ranking. Si un manager nuevo aún no tiene ninguna calculada elegible, entonces deberá aparecer ya con `0` pts pudiendo adelantar a acumulados negativos.
