@@ -39,8 +39,6 @@ Convierte specs/[ID]/spec.md y specs/[ID]/plan.md en specs/[ID]/tasks.md: una li
 
 ## Implementación
 
-Implementa SOLO la tarea Tn. Tests primero. Ejecuta la suite y muéstrame el resultado. Marca Tn como hecha y PÁRATE.
-
 Implementa las tareas T-01 a T-03 de specs/[ID]/tasks.md siguiendo estrictamente spec.md, plan.md, @CONSTITUTION.md y @AGENTS.md (recuerda cargar la skill mobile-native si tocas UI). No des por terminada la tarea hasta pasar la puerta de calidad (tsc --noEmit, npm run lint, npm test, npm run build) y marca las tareas completadas en tasks.md.
 
 ## Validación

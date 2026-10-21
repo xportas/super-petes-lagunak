@@ -1,0 +1,279 @@
+{
+  "ui": {
+    "home": {
+      "countdown": "Cierre en {time}",
+      "cuenta_atras": "Cierre en {time}",
+      "cerrado": "Cerrado - vuelve tras el partido",
+      "sin_proxima": "Sin próxima jornada",
+      "por_confirmar": "Por confirmar",
+      "ver_plantilla": "Ver toda la plantilla",
+      "top_managers": "Top 3 Managers",
+      "top_jugadores": "Top 3 Jugadores",
+      "sin_datos": "Sin datos",
+      "ultimo_partido": "Último partido"
+    },
+    "jugadores": {
+      "titulo": "Plantilla",
+      "sin_dorsal": "Sin dorsal",
+      "posicion_pendiente": "Posición pendiente",
+      "no_encontrado": "Jugador no encontrado",
+      "baja": "Baja",
+      "volver": "Volver"
+    },
+    "ficha": {
+      "media": "Media temporada",
+      "ultima": "Última valoración",
+      "evolucion": "Evolución",
+      "estado": "Estado actual",
+      "disponible": "✅ Disponible",
+      "lesionado": "🚑 Lesionado",
+      "baja": "❌ Baja",
+      "sin_penalizacion": "✅ Sin penalización (0)",
+      "racha": "⚠️ −{n}",
+      "no_aplica": "No aplica",
+      "sin_dorsal": "Sin dorsal",
+      "sin_descripcion": "Sin descripción"
+    },
+    "ejemplo": {
+      "saludo": "Hola, {nombre}"
+    },
+    "auth": {
+      "login_titulo": "Entrar",
+      "registro_titulo": "Crear cuenta",
+      "username": "Nombre de usuario",
+      "password": "Contraseña",
+      "codigo_invitacion": "Código de invitación",
+      "entrar": "Entrar",
+      "crear_cuenta": "Crear cuenta",
+      "pedir_reset": "Pedir reset al admin",
+      "reset_info": "Contacta al admin por privado con tu username {username}",
+      "cambiar_titulo": "Cambiar contraseña",
+      "actual": "Contraseña actual",
+      "nueva": "Nueva contraseña",
+      "guardar": "Guardar",
+      "cerrar_sesion": "Cerrar sesión"
+    },
+    "onboarding": {
+      "titulo": "Bienvenido a la liga",
+      "paso1_titulo": "Crea tu primer quinteto",
+      "paso1_sin_jornada": "Sin jornada abierta, podrás alinear en Equipo",
+      "paso1_cierre_pasado": "Cierre pasado, podrás alinear en Equipo",
+      "ir_paso2": "Continuar al paso 2",
+      "volver_paso1": "Volver al paso 1",
+      "paso2_titulo": "Entiende el cierre",
+      "paso2_texto": "El quinteto cierra {horas} horas antes del partido.",
+      "paso2_enlace": "/normas#cierre",
+      "confirmar": "He entendido, entrar"
+    },
+    "shell": {
+      "contenedor_desc": "Contenedor principal de la aplicación",
+      "volver": "Volver"
+    },
+    "nav": {
+      "home": "Home",
+      "equipo": "Equipo",
+      "resultados": "Resultados",
+      "clasificacion": "Clasificación",
+      "ajustes": "Ajustes",
+      "admin": "Admin",
+      "jugadores": "Jugadores",
+      "normas": "Normas"
+    },
+    "ajustes": {
+      "titulo": "Ajustes",
+      "normas": "Normas del juego",
+      "modo_pete": "Modo Pete",
+      "modo_pete_on": "ON",
+      "modo_pete_off": "OFF",
+      "tema": "Tema",
+      "tema_claro": "Claro",
+      "tema_oscuro": "Oscuro",
+      "cambiar_password": "Cambiar contraseña",
+      "idioma": "Idioma: {idioma}",
+      "cerrar_sesion": "Cerrar sesión"
+    },
+    "normas": {
+      "titulo": "Normas del juego",
+      "fuente": "Fuente: reglas de puntuación del README, sección cero. Los números llegan del motor.",
+      "nota_pete": "Modo Pete es solo cosmético: cambia fotos y motes de jugadores. Las reglas nunca cambian.",
+      "cierre_titulo": "Cierre",
+      "cierre_texto": "El cierre es {horas} horas antes del partido ({zona}), validado en servidor. Solo se acepta lo recibido estrictamente antes; el segundo exacto o después se rechaza. El contador del Home es solo UX.",
+      "base_titulo": "BASE",
+      "base_texto": "La BASE es la valoración FNB tal cual. Si estás lesionado, no convocado o DNP, la BASE es cero y ocupa slot.",
+      "entrenadores_titulo": "Entrenadores",
+      "entrenadores_texto": "Maider y Páter son excluyentes y solo van en el slot de entrenador. Maider aplica round_half_up sobre la BASE del capitán con factor x {factorNum} entre {factorDen} (ejemplo: {ejBase} llega a {ejCapitan}) y opta a MVP. Páter aplica suelo más fijo a cada uno de los cinco, incluso con BASE cero (ejemplo: {ejBaseCero} llega a {ejPater}). Nunca se combinan.",
+      "posicion_titulo": "Posición",
+      "posicion_texto": "Si juegas en una de tus dos válidas (B, E, A, AP, P; E y A cuentan como la misma), sumas {bonus}. Bloqueado si la BASE es cero.",
+      "racha_titulo": "Racha",
+      "racha_texto": "La repetición resta de forma progresiva según la aparición consecutiva. La segunda seguida resta {segunda}, la tercera resta {tercera} y así. Se rompe si una jornada no lo alineas o no envías quinteto. Alinear lesionado o DNP cuenta para la racha futura aunque puntúe cero.",
+      "mvp_titulo": "MVP",
+      "mvp_texto": "Si tu capitán es máxima BASE de la plantilla habiendo jugado, sumas {bonus}. Si hay empate en lo alto, todos los empatados habilitan el bonus. Se suma después del factor, nunca se multiplica.",
+      "expulsion_titulo": "Expulsión",
+      "expulsion_texto": "Cada expulsado de tu quinteto, incluyendo cinco faltas personales, resta {penalizacion}. Su BASE cuenta con normalidad. Acumula con MVP si coincide.",
+      "orden_titulo": "Orden",
+      "orden_texto": "Orden fijo por jugador: BASE, efecto Maider o suelo Páter, bonus de posición, resta de racha; por jornada: bonus MVP y resta por expulsión. El total puede ser negativo. Dato ausente es error, no provisional. Sin quinteto válido, {sinQuinteto}.",
+      "ejemplo_nombre": "Arnau",
+      "ejemplo_nombre_pete": "El Faltoso"
+    },
+    "resultados": {
+      "titulo": "Mi resultado",
+      "destacada_titulo": "Última jornada calculada",
+      "historial_titulo": "Historial",
+      "sin_datos": "Sin datos",
+      "fila_puntos": "{puntos} pts ({puesto}º)",
+      "sin_envio": "Sin envío",
+      "nota_sin_envio": "No enviaste quinteto a tiempo. Cuenta {penalizacion} y rompe rachas.",
+      "aviso_excluida": "J{numero} excluida por dato incompleto. Se revisará.",
+      "ver_normas": "Ver normas",
+      "jornada": "J{numero}",
+      "icono_jugo": "✅",
+      "icono_lesionado": "🚑",
+      "icono_ausente": "❌",
+      "base": "BASE {base}",
+      "efecto_entrenador": "Efecto entrenador {valor}",
+      "subtotal": "Subtotal {subtotal}",
+      "expulsado": "Expulsado",
+      "total": "TOTAL: {total}",
+      "mvp": "+{bonus} MVP",
+      "expulsion": "{penalizacion} expulsión",
+      "expulsion_pl": "{penalizacion} expulsiones",
+      "posicion": "+{bonus} pos",
+      "racha": "{penalizacion} racha",
+      "capitan": "Capitán"
+    },
+    "clasificacion": {
+      "titulo": "Clasificación",
+      "sin_datos": "Sin datos",
+      "tu_fila": "Tú"
+    },
+    "comun": {
+      "reintentar": "Reintentar",
+      "cargando": "Cargando…"
+    },
+    "equipo": {
+      "titulo": "Mi quinteto",      "jornada": "J{num} · {rival}",
+      "cierre_en": "Cierre en {time}",
+      "cerrado": "Cerrado - vuelve tras el partido",
+      "cerrado_enlace": "Ver cierre",
+      "vacio_cerrado": "Sin quinteto enviado",
+      "guardar": "Guardar quinteto",
+      "guardando": "Guardando…",
+      "reintentar": "Reintentar",
+      "motivo": {
+        "falta_slot": "Te falta {slot}",
+        "falta_entrenador": "Elige entrenador",
+        "falta_capitan": "Elige capitán entre los 5",
+        "hay_inactivo": "{nombre} es baja: sustitúyelo",
+        "cerrado": "Fuera de plazo"
+      },
+      "slot": {
+        "vacio": "Toca para elegir {slot}",
+        "cambiar": "Cambiar",
+        "vaciar": "Vaciar",
+        "capitan": "Capitán",
+        "es_capitan": "Es capitán"
+      },
+      "selector": {
+        "titulo": "Elige {slot}",
+        "filtro_todos": "Todos",
+        "ocupado": "En {slot}",
+        "solo_disponibles": "Solo disponibles",
+        "vacio": "Sin jugadores elegibles",
+        "cerrar": "Cerrar"
+      },
+      "preview": {
+        "mas5": "📍 +{bonus}",
+        "racha": "⚠️ −{n}",
+        "estreno": "✅",
+        "base0_lesion": "🚑 BASE 0",
+        "base0_baja": "❌ BASE 0"
+      },
+      "aviso": {
+        "lesion_ocupa": "Ocupa slot y cuenta para racha futura",
+        "baja_conserva": "Sigue válida si no re-guardas"
+      },
+      "entrenador": {
+        "titulo": "Entrenador",
+        "maider": "Maider",
+        "pater": "Páter",
+        "maider_info": "Maider: x{factor} solo BASE del capitán",
+        "pater_info": "Páter: suelo 1 +1 a los 5"
+      },
+      "ayuda": {
+        "base": "Ver base",
+        "posicion": "Ver posición",
+        "racha": "Ver racha",
+        "cierre": "Ver cierre",
+        "entrenadores": "Ver entrenadores"
+      }
+    }
+  },
+  "errors": {
+    "resultados": {
+      "bd": "No se pudo cargar. Reintenta.",
+      "admin_sin_historial": "El admin no juega: sin historial."
+    },
+    "close": {
+      "passed": "Cierre pasado",
+      "missing_time": "Falta la hora del partido",
+      "invalid_time": "Hora del partido no válida"
+    },
+    "equipo": {
+      "duplicado": "Jugador repetido",
+      "incompleto": "Alineación incompleta",
+      "capitan_fuera": "Capitán fuera del quinteto",
+      "no_elegible": "Jugador no elegible",
+      "red": "Error de red, reintenta sin perder tu selección"
+    },
+    "admin": {
+      "no_juega": "El admin no juega"
+    },
+    "calculo": {
+      "dato_ausente": "Falta la valoración o el estado de un jugador",
+      "posiciones_invalidas": "Posiciones válidas incorrectas",
+      "lesion_expulsion_excluyentes": "Lesionado y expulsado son excluyentes"
+    },
+    "alineacion": {
+      "duplicados": "Hay jugadores duplicados en el quinteto",
+      "sin_capitan": "Falta el capitán",
+      "capitan_fuera": "El capitán no pertenece al quinteto",
+      "sin_posicion": "Falta la posición de un jugador",
+      "posicion_invalida": "Posición de alineación no válida",
+      "entrenador_invalido": "Entrenador no válido",
+      "entrenador_en_quinteto": "El entrenador no puede ocupar slot de jugador",
+      "jugador_en_slot_entrenador": "Un jugador no puede ocupar el slot de entrenador",
+      "jugador_inactivo": "Hay un jugador inactivo en el quinteto",
+      "jugador_pendiente": "Hay un jugador pendiente sin posiciones válidas"
+    },
+    "jornada": {
+      "papel_sin_manual": "Jornada en papel sin carga manual",
+      "sin_quinteto": "Sin quinteto válido enviado"
+    },
+    "db": {
+      "username_duplicado": "Ese username ya está registrado",
+      "fnb_uuid_duplicado": "Ese fnb_uuid ya está vinculado",
+      "posiciones_invalidas": "Posiciones válidas incorrectas",
+      "jugador_pendiente_bloquea": "Hay un jugador pendiente que bloquea el cálculo",
+      "tercer_entrenador": "Solo Maider y Páter son entrenadores válidos",
+      "admin_no_juega": "El admin no puede alinear ni puntuar",
+      "jornada_papel_sin_manual": "Jornada en papel sin carga manual posterior",
+      "sin_hora": "Falta la hora del partido"
+    },
+    "semilla": {
+      "incompleta": "Semilla incompleta"
+    },
+    "auth": {
+      "invitacion": "Código de invitación inválido",
+      "username_formato": "Username 3-20 [A-Za-z0-9_-]",
+      "username_duplicado": "Ese username ya está registrado",
+      "password_formato": "Contraseña 8-72 con al menos 1 carácter no-espacio",
+      "credenciales": "Usuario o contraseña incorrectos",
+      "bloqueado_15m": "Demasiados intentos. Prueba en {minutos} minutos",
+      "temporal_distinta": "La nueva debe ser distinta de la temporal",
+      "nueva_distinta": "La nueva debe ser distinta de la actual",
+      "temporal_invalida": "Clave temporal inválida"
+    },
+    "carga": "Error al cargar",
+    "reintentar": "Reintentar"
+  }
+}

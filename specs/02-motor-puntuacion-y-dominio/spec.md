@@ -79,8 +79,8 @@ Decisiones cerradas con el usuario que esta spec congela: redondeo a entero half
 - **RF-20 — Recálculo total ante corrección:**
   Cuando el admin corrija valoración, estado o posiciones válidas, el sistema deberá recalcular todo lo afectado de esa jornada con las reglas vigentes.
 
-- **RF-21 — Excepción papel con gracia (define spec-10 RF-09):**
-  Si una jornada finalizada sigue sin acta digital pasado `1 día` (acta en papel, caso J1 `55483`), entonces el sistema deberá tratarla como papel: `0` para todos, excluida de todo salvo ruptura de rachas, sin admitir carga manual posterior. Esta regla es excepción a RF-17/E-16.
+- **RF-21 — Excepción papel con gracia (define spec-10 RF-09, detalla spec-03 RF-11):**
+  Si una jornada finalizada sigue sin acta digital pasado `1 día` (`hora_partido + 24h`, `state="1"` con `universallyid=null`, caso J1 `55483`), entonces el sistema deberá tratarla como papel: `0` para todos los managers activos entonces, excluida de acumulado, media, evolución, Top de última y Top de jugadores (como si no existiera salvo para romper rachas a `0`), sin admitir carga manual posterior. Dentro de la gracia de `24h` sigue `pendiente` con manual permitido (decisión spec-09). Esta regla es excepción a RF-17/E-16.
 
 ## 3. Casos límite y manejo de errores
 
@@ -109,7 +109,7 @@ Decisiones cerradas con el usuario que esta spec congela: redondeo a entero half
 | E-21 | Jugador con distinto número de posiciones válidas (0,1,3+), salvo `["E","A"]` permitido | Dato inválido: bloquea validación de ese jugador | Cada jugador tiene exactamente 2 válidas por §0; `[E,A]` vale aunque sea una casilla efectiva |
 | E-22 | Lesionado/DNP a la vez que expulsado | Combinación inválida: son excluyentes | Un no jugado nunca consta como expulsado |
 | E-23 | Corrección admin de valoración, estado o posiciones | Recalcula todo lo afectado con las reglas vigentes | Lo corregido no deja totales parciales antiguos |
-| E-24 | Jornada papel tras gracia `1 día` sin acta (caso J1 `55483`) | `0` para todos, excluida de todo salvo ruptura de rachas, sin manual posterior; dentro de la gracia sigue pendiente con manual permitido | Causa externa con gracia ante actas tardías |
+| E-24 | Jornada papel tras gracia `1 día` (`hora+24h`, `state=1`, `universallyid=null`, caso J1 `55483`) | `0` para activos entonces, excluida de acumulado/medias/evolución/tops, rompe rachas a `0`, sin manual posterior; dentro de la gracia sigue `pendiente` con manual permitido (decisión spec-09) | Causa externa con gracia ante actas tardías |
 
 ## 4. Fuera de alcance explícito
 
