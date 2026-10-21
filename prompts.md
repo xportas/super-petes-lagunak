@@ -35,9 +35,7 @@ A partir de specs/[ID]/spec.md y @CONSTITUTION.md, genera specs/[ID]/plan.md con
 
 ## Tareas
 
-Divide el plan en tareas de <30 min, ordenadas por dependencia, cada una con sus RF y una línea 'Hecho cuando:' verificable. Con checkboxes.
-
-Convierte specs/[ID]/spec.md y specs/[ID]/plan.md en specs/[ID]/tasks.md: una lista ordenada de tareas pequeñas y atómicas (T-01, T-02…). Cada tarea debe indicar qué archivos toca, qué RF cubre y cómo se verifica con un comando o test. Empieza siempre por los tests del motor/dominio cuando aplique.
+Convierte specs/[ID]/spec.md y specs/[ID]/plan.md en specs/[ID]/tasks.md: una lista ordenada de tareas pequeñas y atómicas (T-01, T-02…). Cada tarea debe indicar qué RF cubre y cómo se verifica con un comando o test. Empieza siempre por los tests del motor/dominio cuando aplique. Cada tarea debe tener un 'Hecho cuando:' verificable. Con checkboxes.
 
 ## Implementación
 
