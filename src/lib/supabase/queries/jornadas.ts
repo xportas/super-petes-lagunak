@@ -15,15 +15,25 @@ function aFecha(valor: unknown): Date | null {
   return null;
 }
 
+function campo(
+  fila: Record<string, unknown>,
+  snake: string,
+  camel: string,
+): unknown {
+  const porSnake = fila[snake];
+  return porSnake !== undefined ? porSnake : fila[camel];
+}
+
 function aJornada(fila: Record<string, unknown>): JornadaRow | null {
-  const hora = aFecha(fila["horaPartido"]);
+  const hora = aFecha(campo(fila, "hora_partido", "horaPartido"));
   if (hora === null) {
     return null;
   }
   if (typeof fila["id"] !== "string") {
     return null;
   }
-  if (typeof fila["numeroJornada"] !== "number") {
+  const numeroJornada = campo(fila, "numero_jornada", "numeroJornada");
+  if (typeof numeroJornada !== "number") {
     return null;
   }
   if (typeof fila["rival"] !== "string") {
@@ -38,15 +48,40 @@ function aJornada(fila: Record<string, unknown>): JornadaRow | null {
   ) {
     return null;
   }
+  const numeroJornadaFnb = campo(
+    fila,
+    "numero_jornada_fnb",
+    "numeroJornadaFnb",
+  );
+  const esLocal = campo(fila, "es_local", "esLocal");
+  const fnbMatchId = campo(fila, "fnb_match_id", "fnbMatchId");
+  const fnbUniversallyId = campo(
+    fila,
+    "fnb_universally_id",
+    "fnbUniversallyId",
+  );
+  const marcadorLocal = campo(fila, "marcador_local", "marcadorLocal");
+  const marcadorVisitante = campo(
+    fila,
+    "marcador_visitante",
+    "marcadorVisitante",
+  );
+  const origenResultado = campo(fila, "origen_resultado", "origenResultado");
+  const lastCalendarSync = campo(
+    fila,
+    "last_calendar_sync",
+    "lastCalendarSync",
+  );
+  const lastResultSync = campo(fila, "last_result_sync", "lastResultSync");
   return {
     id: fila["id"] as string,
-    numeroJornada: fila["numeroJornada"] as number,
+    numeroJornada: numeroJornada as number,
     numeroJornadaFnb:
-      typeof fila["numeroJornadaFnb"] === "number"
-        ? (fila["numeroJornadaFnb"] as number)
+      typeof numeroJornadaFnb === "number"
+        ? (numeroJornadaFnb as number)
         : null,
     rival: fila["rival"] as string,
-    esLocal: fila["esLocal"] === true,
+    esLocal: esLocal === true,
     campo: typeof fila["campo"] === "string" ? (fila["campo"] as string) : null,
     municipio:
       typeof fila["municipio"] === "string"
@@ -55,27 +90,25 @@ function aJornada(fila: Record<string, unknown>): JornadaRow | null {
     horaPartido: hora,
     estado,
     fnbMatchId:
-      typeof fila["fnbMatchId"] === "string"
-        ? (fila["fnbMatchId"] as string)
-        : null,
+      typeof fnbMatchId === "string" ? (fnbMatchId as string) : null,
     fnbUniversallyId:
-      typeof fila["fnbUniversallyId"] === "string"
-        ? (fila["fnbUniversallyId"] as string)
+      typeof fnbUniversallyId === "string"
+        ? (fnbUniversallyId as string)
         : null,
     marcadorLocal:
-      typeof fila["marcadorLocal"] === "number"
-        ? (fila["marcadorLocal"] as number)
+      typeof marcadorLocal === "number"
+        ? (marcadorLocal as number)
         : null,
     marcadorVisitante:
-      typeof fila["marcadorVisitante"] === "number"
-        ? (fila["marcadorVisitante"] as number)
+      typeof marcadorVisitante === "number"
+        ? (marcadorVisitante as number)
         : null,
     origenResultado:
-      fila["origenResultado"] === "manual" || fila["origenResultado"] === "fnb"
-        ? (fila["origenResultado"] as "manual" | "fnb")
+      origenResultado === "manual" || origenResultado === "fnb"
+        ? (origenResultado as "manual" | "fnb")
         : null,
-    lastCalendarSync: aFecha(fila["lastCalendarSync"]),
-    lastResultSync: aFecha(fila["lastResultSync"]),
+    lastCalendarSync: aFecha(lastCalendarSync),
+    lastResultSync: aFecha(lastResultSync),
   };
 }
 
@@ -137,17 +170,17 @@ export async function crearJornadaDB(
   const { data, error } = (await db
     .from("jornada")
     .insert({
-      numeroJornada: args.numeroJornada,
-      numeroJornadaFnb: args.numeroJornadaFnb,
+      numero_jornada: args.numeroJornada,
+      numero_jornada_fnb: args.numeroJornadaFnb,
       rival: args.rival,
-      esLocal: args.esLocal,
+      es_local: args.esLocal,
       campo: args.campo,
       municipio: args.municipio,
-      horaPartido: args.horaPartido.toISOString(),
+      hora_partido: args.horaPartido.toISOString(),
       estado: "pendiente",
-      marcadorLocal: args.marcadorLocal,
-      marcadorVisitante: args.marcadorVisitante,
-      origenResultado: null,
+      marcador_local: args.marcadorLocal,
+      marcador_visitante: args.marcadorVisitante,
+      origen_resultado: null,
     })
     .select("*")
     .single()) as unknown as {
@@ -174,16 +207,16 @@ export async function actualizarJornadaDB(
   const db = cliente ?? obtenerClienteService();
   const fila: Record<string, unknown> = {};
   if (patch.numeroJornada !== undefined) {
-    fila["numeroJornada"] = patch.numeroJornada;
+    fila["numero_jornada"] = patch.numeroJornada;
   }
   if (patch.numeroJornadaFnb !== undefined) {
-    fila["numeroJornadaFnb"] = patch.numeroJornadaFnb;
+    fila["numero_jornada_fnb"] = patch.numeroJornadaFnb;
   }
   if (patch.rival !== undefined) {
     fila["rival"] = patch.rival;
   }
   if (patch.esLocal !== undefined) {
-    fila["esLocal"] = patch.esLocal;
+    fila["es_local"] = patch.esLocal;
   }
   if (patch.campo !== undefined) {
     fila["campo"] = patch.campo;
@@ -192,19 +225,19 @@ export async function actualizarJornadaDB(
     fila["municipio"] = patch.municipio;
   }
   if (patch.horaPartido !== undefined) {
-    fila["horaPartido"] = patch.horaPartido.toISOString();
+    fila["hora_partido"] = patch.horaPartido.toISOString();
   }
   if (patch.marcadorLocal !== undefined) {
-    fila["marcadorLocal"] = patch.marcadorLocal;
+    fila["marcador_local"] = patch.marcadorLocal;
   }
   if (patch.marcadorVisitante !== undefined) {
-    fila["marcadorVisitante"] = patch.marcadorVisitante;
+    fila["marcador_visitante"] = patch.marcadorVisitante;
   }
   if (patch.estado !== undefined) {
     fila["estado"] = patch.estado;
   }
   if (patch.origenResultado !== undefined) {
-    fila["origenResultado"] = patch.origenResultado;
+    fila["origen_resultado"] = patch.origenResultado;
   }
   const { data, error } = (await db
     .from("jornada")

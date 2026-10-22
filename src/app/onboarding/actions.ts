@@ -73,17 +73,19 @@ export async function guardarQuintetoOnboarding(
     return { ok: false, codigo: "ADMIN" };
   }
   const db = obtenerClienteService();
-  const { data: jornadas } = await db.from("jornada").select("*");
+  const { data: jornadas } = await db.from("jornada").select("id,numero_jornada,hora_partido,estado");
   const lista = ((jornadas ?? []) as Array<{
     readonly id: string;
-    readonly numeroJornada: number;
-    readonly horaPartido: string | Date;
+    readonly numero_jornada?: number;
+    readonly numeroJornada?: number;
+    readonly hora_partido?: string | Date;
+    readonly horaPartido?: string | Date;
     readonly estado: string;
   }>)
     .map((j) => ({
       jornadaId: j.id,
-      numeroJornada: j.numeroJornada,
-      horaPartido: aFecha(j.horaPartido),
+      numeroJornada: j.numero_jornada ?? j.numeroJornada ?? 0,
+      horaPartido: aFecha(j.hora_partido ?? j.horaPartido),
       estado: j.estado as "pendiente" | "calculada" | "papel" | "invalidada",
     }))
     .filter((j) => j.horaPartido !== null);
@@ -108,7 +110,7 @@ export async function guardarQuintetoOnboarding(
   }
   const { data: jugadores } = await db
     .from("jugador")
-    .select("id,activo,posicionesValidas")
+    .select("id,activo,posiciones_validas")
     .eq("activo", true);
   const plantilla = new Map<
     string,
@@ -117,11 +119,12 @@ export async function guardarQuintetoOnboarding(
   for (const j of (jugadores ?? []) as Array<{
     readonly id: string;
     readonly activo: boolean;
-    readonly posicionesValidas: readonly [Posicion, Posicion] | null;
+    readonly posiciones_validas?: readonly [Posicion, Posicion] | null;
+    readonly posicionesValidas?: readonly [Posicion, Posicion] | null;
   }>) {
     plantilla.set(j.id, {
       activo: j.activo,
-      posicionesValidas: j.posicionesValidas,
+      posicionesValidas: j.posiciones_validas ?? j.posicionesValidas ?? null,
     });
   }
   const validado = validarQuinteto(entrada, plantilla);
@@ -135,16 +138,16 @@ export async function guardarQuintetoOnboarding(
   await db
     .from("alineacion")
     .delete()
-    .eq("managerId", ctx.id)
-    .eq("jornadaId", proxima.jornadaId);
+    .eq("manager_id", ctx.id)
+    .eq("jornada_id", proxima.jornadaId);
   const { data: creada, error } = await db
     .from("alineacion")
     .insert({
-      managerId: ctx.id,
-      jornadaId: proxima.jornadaId,
+      manager_id: ctx.id,
+      jornada_id: proxima.jornadaId,
       entrenador: quinteto.entrenador,
-      capitanJugadorId: quinteto.capitanId,
-      instanteInicio: ahora.toISOString(),
+      capitan_jugador_id: quinteto.capitanId,
+      instante_inicio: ahora.toISOString(),
     })
     .select("id")
     .single();
@@ -153,9 +156,9 @@ export async function guardarQuintetoOnboarding(
   }
   const id = (creada as { readonly id: string }).id;
   const filas = quinteto.jugadorIds.map((jugadorId) => ({
-    alineacionId: id,
-    jugadorId,
-    posicionAlineada: quinteto.posicionPorJugador[jugadorId],
+    alineacion_id: id,
+    jugador_id: jugadorId,
+    posicion_alineada: quinteto.posicionPorJugador[jugadorId],
   }));
   const { error: errorSel } = await db
     .from("alineacion_seleccion")

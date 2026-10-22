@@ -97,16 +97,16 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
   const db = obtenerClienteService();
   const { data: filasAlineacion } = await db
     .from("alineacion")
-    .select("id,managerId,jornadaId,entrenador,capitanJugadorId");
+    .select("id,manager_id,jornada_id,entrenador,capitan_jugador_id");
   const { data: filasSeleccion } = await db
     .from("alineacion_seleccion")
-    .select("alineacionId,jugadorId,posicionAlineada");
+    .select("alineacion_id,jugador_id,posicion_alineada");
   const { data: filasActa } = await db
     .from("resultado_jugador")
-    .select("jornadaId,jugadorId,valoracion,estado,expulsado");
+    .select("jornada_id,jugador_id,valoracion,estado,expulsado");
   const { data: filasJugador } = await db
     .from("jugador")
-    .select("id,nombre,nombrePete,posicionesValidas");
+    .select("id,nombre,nombre_pete,posiciones_validas");
 
   const alineaciones: AlineacionTotales[] = [];
   for (const f of ((filasAlineacion ?? []) as unknown as Array<
@@ -115,13 +115,16 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
     if (typeof f["id"] !== "string") {
       continue;
     }
-    if (typeof f["managerId"] !== "string") {
+    const managerId = f["manager_id"] ?? f["managerId"];
+    if (typeof managerId !== "string") {
       continue;
     }
-    if (typeof f["jornadaId"] !== "string") {
+    const jornadaId = f["jornada_id"] ?? f["jornadaId"];
+    if (typeof jornadaId !== "string") {
       continue;
     }
-    if (typeof f["capitanJugadorId"] !== "string") {
+    const capitanJugadorId = f["capitan_jugador_id"] ?? f["capitanJugadorId"];
+    if (typeof capitanJugadorId !== "string") {
       continue;
     }
     const entrenador = esquemaEntrenador.safeParse(f["entrenador"]);
@@ -130,10 +133,10 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
     }
     alineaciones.push({
       id: f["id"] as string,
-      managerId: f["managerId"] as string,
-      jornadaId: f["jornadaId"] as string,
+      managerId: managerId as string,
+      jornadaId: jornadaId as string,
       entrenador: entrenador.data,
-      capitanJugadorId: f["capitanJugadorId"] as string,
+      capitanJugadorId: capitanJugadorId as string,
     });
   }
 
@@ -141,19 +144,21 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
   for (const f of ((filasSeleccion ?? []) as unknown as Array<
     Record<string, unknown>
   >)) {
-    if (typeof f["alineacionId"] !== "string") {
+    const alineacionId = f["alineacion_id"] ?? f["alineacionId"];
+    if (typeof alineacionId !== "string") {
       continue;
     }
-    if (typeof f["jugadorId"] !== "string") {
+    const jugadorId = f["jugador_id"] ?? f["jugadorId"];
+    if (typeof jugadorId !== "string") {
       continue;
     }
-    const pos = esquemaPosicion.safeParse(f["posicionAlineada"]);
+    const pos = esquemaPosicion.safeParse(f["posicion_alineada"] ?? f["posicionAlineada"]);
     if (!pos.success) {
       continue;
     }
     selecciones.push({
-      alineacionId: f["alineacionId"] as string,
-      jugadorId: f["jugadorId"] as string,
+      alineacionId: alineacionId as string,
+      jugadorId: jugadorId as string,
       posicionAlineada: pos.data,
     });
   }
@@ -162,10 +167,12 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
   for (const f of ((filasActa ?? []) as unknown as Array<
     Record<string, unknown>
   >)) {
-    if (typeof f["jornadaId"] !== "string") {
+    const jornadaId = f["jornada_id"] ?? f["jornadaId"];
+    if (typeof jornadaId !== "string") {
       continue;
     }
-    if (typeof f["jugadorId"] !== "string") {
+    const jugadorId = f["jugador_id"] ?? f["jugadorId"];
+    if (typeof jugadorId !== "string") {
       continue;
     }
     if (typeof f["valoracion"] !== "number") {
@@ -180,12 +187,12 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
     ) {
       continue;
     }
-    let porJornada = actas.get(f["jornadaId"] as string);
+    let porJornada = actas.get(jornadaId as string);
     if (porJornada === undefined) {
       porJornada = new Map<string, ActaJugadorTotales>();
-      actas.set(f["jornadaId"] as string, porJornada);
+      actas.set(jornadaId as string, porJornada);
     }
-    porJornada.set(f["jugadorId"] as string, {
+    porJornada.set(jugadorId as string, {
       valoracion: f["valoracion"] as number,
       estado,
       expulsado: f["expulsado"] === true,
@@ -206,16 +213,17 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
     if (typeof f["id"] !== "string") {
       continue;
     }
-    const validas = esquemaPosicionesValidas.safeParse(f["posicionesValidas"]);
+    const validas = esquemaPosicionesValidas.safeParse(f["posiciones_validas"] ?? f["posicionesValidas"]);
     posiciones.set(f["id"] as string, {
       posicionesValidas: validas.success ? validas.data : null,
     });
     if (typeof f["nombre"] === "string") {
+      const nombrePete = f["nombre_pete"] ?? f["nombrePete"];
       nombres.set(f["id"] as string, {
         nombre: f["nombre"] as string,
         nombrePete:
-          typeof f["nombrePete"] === "string"
-            ? (f["nombrePete"] as string)
+          typeof nombrePete === "string"
+            ? (nombrePete as string)
             : null,
       });
     }

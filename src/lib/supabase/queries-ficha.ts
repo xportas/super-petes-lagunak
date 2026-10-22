@@ -19,6 +19,11 @@ function aFecha(valor: unknown): Date | null {
   return null;
 }
 
+function v(fila: Record<string, unknown>, snake: string, camel: string): unknown {
+  const porSnake = fila[snake];
+  return porSnake !== undefined ? porSnake : fila[camel];
+}
+
 function esEntrenadorNombre(nombre: string): boolean {
   const n = nombre.trim().toLowerCase();
   return n === "maider" || n === "pater";
@@ -27,15 +32,15 @@ function esEntrenadorNombre(nombre: string): boolean {
 function aJugador(fila: Record<string, unknown>): JugadorRow | null {
   const id = fila["id"];
   const nombre = fila["nombre"];
-  const nombreFnb = fila["nombreFnb"];
+  const nombreFnb = v(fila, "nombre_fnb", "nombreFnb");
   if (typeof id !== "string" || typeof nombre !== "string") {
     return null;
   }
-  const fechaAlta = aFecha(fila["fechaAlta"]);
+  const fechaAlta = aFecha(v(fila, "fecha_alta", "fechaAlta"));
   if (fechaAlta === null) {
     return null;
   }
-  const pos = fila["posicionesValidas"];
+  const pos = v(fila, "posiciones_validas", "posicionesValidas");
   const posicionesValidas =
     Array.isArray(pos) &&
     pos.length === 2 &&
@@ -43,30 +48,29 @@ function aJugador(fila: Record<string, unknown>): JugadorRow | null {
     typeof pos[1] === "string"
       ? (pos as unknown as JugadorRow["posicionesValidas"])
       : null;
+  const nombrePete = v(fila, "nombre_pete", "nombrePete");
+  const imgPete = v(fila, "img_pete", "imgPete");
+  const fnbUuid = v(fila, "fnb_uuid", "fnbUuid");
+  const estadoSanitario = v(fila, "estado_sanitario", "estadoSanitario");
+  const fechaBaja = v(fila, "fecha_baja", "fechaBaja");
   return {
     id,
     nombre,
     nombreFnb: typeof nombreFnb === "string" ? nombreFnb : nombre,
     dorsal: typeof fila["dorsal"] === "number" ? (fila["dorsal"] as number) : null,
     posicionesValidas,
-    nombrePete:
-      typeof fila["nombrePete"] === "string"
-        ? (fila["nombrePete"] as string)
-        : null,
+    nombrePete: typeof nombrePete === "string" ? (nombrePete as string) : null,
     img: typeof fila["img"] === "string" ? (fila["img"] as string) : "",
-    imgPete:
-      typeof fila["imgPete"] === "string" ? (fila["imgPete"] as string) : "",
+    imgPete: typeof imgPete === "string" ? (imgPete as string) : "",
     descripcion:
       typeof fila["descripcion"] === "string"
         ? (fila["descripcion"] as string)
         : "",
-    fnbUuid:
-      typeof fila["fnbUuid"] === "string" ? (fila["fnbUuid"] as string) : null,
-    estadoSanitario:
-      fila["estadoSanitario"] === "lesionado" ? "lesionado" : "disponible",
+    fnbUuid: typeof fnbUuid === "string" ? (fnbUuid as string) : null,
+    estadoSanitario: estadoSanitario === "lesionado" ? "lesionado" : "disponible",
     activo: fila["activo"] === true,
     fechaAlta,
-    fechaBaja: aFecha(fila["fechaBaja"]),
+    fechaBaja: aFecha(fechaBaja),
   };
 }
 
@@ -172,7 +176,7 @@ export async function leerActasJugador(
   const { data: filasResultados, error } = (await db
     .from("resultado_jugador")
     .select("*")
-    .eq("jugadorId", jugadorId)) as unknown as {
+    .eq("jugador_id", jugadorId)) as unknown as {
     readonly data: unknown;
     readonly error: { readonly message: string } | null;
   };
@@ -184,13 +188,13 @@ export async function leerActasJugador(
   >)
     .filter(
       (r) =>
-        typeof r["jornadaId"] === "string" &&
+        typeof (r["jornada_id"] ?? r["jornadaId"]) === "string" &&
         typeof r["valoracion"] === "number",
     )
     .map(
       (r) =>
         ({
-          jornadaId: r["jornadaId"] as string,
+          jornadaId: (r["jornada_id"] ?? r["jornadaId"]) as string,
           jugadorId: jugadorId,
           valoracion: r["valoracion"] as number,
           estado:
@@ -221,11 +225,12 @@ export async function leerActasJugador(
   for (const f of ((filasJornadas ?? []) as unknown as Array<
     Record<string, unknown>
   >)) {
-    const hora = aFecha(f["horaPartido"]);
+    const hora = aFecha(v(f, "hora_partido", "horaPartido"));
+    const numeroJornada = v(f, "numero_jornada", "numeroJornada");
     if (
       hora === null ||
       typeof f["id"] !== "string" ||
-      typeof f["numeroJornada"] !== "number"
+      typeof numeroJornada !== "number"
     ) {
       continue;
     }
@@ -238,40 +243,47 @@ export async function leerActasJugador(
     ) {
       continue;
     }
+    const numeroJornadaFnb = v(f, "numero_jornada_fnb", "numeroJornadaFnb");
+    const esLocal = v(f, "es_local", "esLocal");
+    const fnbMatchId = v(f, "fnb_match_id", "fnbMatchId");
+    const fnbUniversallyId = v(f, "fnb_universally_id", "fnbUniversallyId");
+    const marcadorLocal = v(f, "marcador_local", "marcadorLocal");
+    const marcadorVisitante = v(f, "marcador_visitante", "marcadorVisitante");
+    const origenResultado = v(f, "origen_resultado", "origenResultado");
     porId.set(f["id"] as string, {
       id: f["id"] as string,
-      numeroJornada: f["numeroJornada"] as number,
+      numeroJornada: numeroJornada as number,
       numeroJornadaFnb:
-        typeof f["numeroJornadaFnb"] === "number"
-          ? (f["numeroJornadaFnb"] as number)
+        typeof numeroJornadaFnb === "number"
+          ? (numeroJornadaFnb as number)
           : null,
       rival: typeof f["rival"] === "string" ? (f["rival"] as string) : "",
-      esLocal: f["esLocal"] === true,
+      esLocal: esLocal === true,
       campo: typeof f["campo"] === "string" ? (f["campo"] as string) : null,
       municipio:
         typeof f["municipio"] === "string" ? (f["municipio"] as string) : null,
       horaPartido: hora,
       estado,
       fnbMatchId:
-        typeof f["fnbMatchId"] === "string" ? (f["fnbMatchId"] as string) : null,
+        typeof fnbMatchId === "string" ? (fnbMatchId as string) : null,
       fnbUniversallyId:
-        typeof f["fnbUniversallyId"] === "string"
-          ? (f["fnbUniversallyId"] as string)
+        typeof fnbUniversallyId === "string"
+          ? (fnbUniversallyId as string)
           : null,
       marcadorLocal:
-        typeof f["marcadorLocal"] === "number"
-          ? (f["marcadorLocal"] as number)
+        typeof marcadorLocal === "number"
+          ? (marcadorLocal as number)
           : null,
       marcadorVisitante:
-        typeof f["marcadorVisitante"] === "number"
-          ? (f["marcadorVisitante"] as number)
+        typeof marcadorVisitante === "number"
+          ? (marcadorVisitante as number)
           : null,
       origenResultado:
-        f["origenResultado"] === "manual" || f["origenResultado"] === "fnb"
-          ? (f["origenResultado"] as "manual" | "fnb")
+        origenResultado === "manual" || origenResultado === "fnb"
+          ? (origenResultado as "manual" | "fnb")
           : null,
-      lastCalendarSync: aFecha(f["lastCalendarSync"]),
-      lastResultSync: aFecha(f["lastResultSync"]),
+      lastCalendarSync: aFecha(v(f, "last_calendar_sync", "lastCalendarSync")),
+      lastResultSync: aFecha(v(f, "last_result_sync", "lastResultSync")),
     });
   }
   const salida: ActaFicha[] = [];

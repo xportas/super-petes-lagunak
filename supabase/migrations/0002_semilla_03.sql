@@ -30,12 +30,8 @@ INSERT INTO jornada (numero_jornada, numero_jornada_fnb, rival, es_local, campo,
 ON CONFLICT (numero_jornada) DO NOTHING;
 
 -- Acta J2: 11 valoraciones + VITAL no_convocado
-WITH j AS (SELECT id FROM jornada WHERE fnb_match_id = '55488')
-INSERT INTO resultado_jugador (jornada_id, jugador_id, valoracion, estado, expulsado)
-SELECT j.id, ju.id, v.valoracion, v.estado, v.expulsado
-FROM j
-JOIN jugador ju ON ju.fnb_uuid::text = v.fnb_uuid
-JOIN (VALUES
+WITH j AS (SELECT id FROM jornada WHERE fnb_match_id = '55488'),
+v(fnb_uuid, valoracion, estado, expulsado) AS (VALUES
   ('c66dee66-eb38-11e9-83ca-0216824770c2', 1, 'jugo'::text, false),
   ('c663ea09-eb38-11e9-83ca-0216824770c2', 6, 'jugo'::text, false),
   ('c66df5a9-eb38-11e9-83ca-0216824770c2', 12, 'jugo'::text, false),
@@ -48,5 +44,9 @@ JOIN (VALUES
   ('c66df3c0-eb38-11e9-83ca-0216824770c2', 13, 'jugo'::text, false),
   ('c6684685-eb38-11e9-83ca-0216824770c2', -1, 'jugo'::text, false),
   ('c668475e-eb38-11e9-83ca-0216824770c2', 0, 'no_convocado'::text, false)
-) AS v(fnb_uuid, valoracion, estado, expulsado) ON true
+)
+INSERT INTO resultado_jugador (jornada_id, jugador_id, valoracion, estado, expulsado)
+SELECT j.id, ju.id, v.valoracion, v.estado::text, v.expulsado
+FROM j, jugador ju, v
+WHERE ju.fnb_uuid::text = v.fnb_uuid
 ON CONFLICT (jornada_id, jugador_id) DO NOTHING;

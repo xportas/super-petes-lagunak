@@ -115,16 +115,20 @@ async function ContenidoHome(): Promise<React.JSX.Element> {
   const posiciones = new Map<string, readonly [Posicion, Posicion] | null>();
   try {
     const db = obtenerClienteService();
-    const { data } = await db.from("jugador").select("id,nombre,nombrePete,posicionesValidas");
+    const { data } = await db.from("jugador").select("id,nombre,nombre_pete,posiciones_validas");
     for (const f of ((data ?? []) as unknown as Array<{
       readonly id: string;
       readonly nombre: string;
-      readonly nombrePete: string | null;
-      readonly posicionesValidas: readonly [Posicion, Posicion] | null;
+      readonly nombre_pete?: string | null;
+      readonly nombrePete?: string | null;
+      readonly posiciones_validas?: readonly [Posicion, Posicion] | null;
+      readonly posicionesValidas?: readonly [Posicion, Posicion] | null;
     }>)) {
       if (typeof f.id === "string" && typeof f.nombre === "string") {
-        nombres.set(f.id, { nombre: f.nombre, nombrePete: f.nombrePete });
-        posiciones.set(f.id, f.posicionesValidas);
+        const nombrePete = f.nombre_pete ?? f.nombrePete ?? null;
+        const posicionesValidas = f.posiciones_validas ?? f.posicionesValidas ?? null;
+        nombres.set(f.id, { nombre: f.nombre, nombrePete });
+        posiciones.set(f.id, posicionesValidas);
       }
     }
   } catch {
@@ -164,24 +168,53 @@ async function ContenidoHome(): Promise<React.JSX.Element> {
       const db = obtenerClienteService();
       const { data: filasAlineTodas } = await db
         .from("alineacion")
-        .select("id,managerId,jornadaId,entrenador,capitanJugadorId,instanteInicio");
-      const todas = ((filasAlineTodas ?? []) as unknown as Array<{
+        .select("id,manager_id,jornada_id,entrenador,capitan_jugador_id,instante_inicio");
+      const todas = (((filasAlineTodas ?? []) as unknown as Array<{
         readonly id: string;
-        readonly managerId: string;
-        readonly jornadaId: string;
+        readonly manager_id?: string;
+        readonly managerId?: string;
+        readonly jornada_id?: string;
+        readonly jornadaId?: string;
         readonly entrenador: string;
-        readonly capitanJugadorId: string;
-      }>);
+        readonly capitan_jugador_id?: string;
+        readonly capitanJugadorId?: string;
+      }>).map((a) => ({
+        id: a.id,
+        managerId: a.manager_id ?? a.managerId ?? "",
+        jornadaId: a.jornada_id ?? a.jornadaId ?? "",
+        entrenador: a.entrenador,
+        capitanJugadorId: a.capitan_jugador_id ?? a.capitanJugadorId ?? "",
+      }))).filter(
+        (
+          a,
+        ): a is {
+          readonly id: string;
+          readonly managerId: string;
+          readonly jornadaId: string;
+          readonly entrenador: string;
+          readonly capitanJugadorId: string;
+        } => a.managerId !== "" && a.jornadaId !== "" && a.capitanJugadorId !== "",
+      );
       const idsTodas = todas.map((a) => a.id);
       let selsTodas: Array<{ readonly alineacionId: string; readonly jugadorId: string }> = [];
       if (idsTodas.length > 0) {
         const { data: filasSel } = await db
           .from("alineacion_seleccion")
-          .select("alineacionId,jugadorId");
-        selsTodas = ((filasSel ?? []) as unknown as Array<{
-          readonly alineacionId: string;
-          readonly jugadorId: string;
-        }>);
+          .select("alineacion_id,jugador_id,posicion_alineada");
+        selsTodas = (((filasSel ?? []) as unknown as Array<{
+          readonly alineacion_id?: string;
+          readonly alineacionId?: string;
+          readonly jugador_id?: string;
+          readonly jugadorId?: string;
+        }>).map((s) => ({
+          alineacionId: s.alineacion_id ?? s.alineacionId ?? "",
+          jugadorId: s.jugador_id ?? s.jugadorId ?? "",
+        }))).filter(
+          (
+            s,
+          ): s is { readonly alineacionId: string; readonly jugadorId: string } =>
+            s.alineacionId !== "" && s.jugadorId !== "",
+        );
       }
       const porJornada = new Map<string, { id: string; managerId: string; entrenador: string; capitan: string }>();
       for (const a of todas) {
@@ -313,7 +346,7 @@ async function ContenidoHome(): Promise<React.JSX.Element> {
             valida = false;
             break;
           }
-          const posicionAlineada = (s as { posicionAlineada?: unknown }).posicionAlineada;
+          const posicionAlineada = (s as { posicion_alineada?: unknown; posicionAlineada?: unknown }).posicion_alineada ?? (s as { posicionAlineada?: unknown }).posicionAlineada;
           if (
             posicionAlineada !== "B" &&
             posicionAlineada !== "E" &&

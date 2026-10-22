@@ -84,17 +84,19 @@ async function ContenidoOnboarding(props: {
     const db = obtenerClienteService();
     const { data: filas } = await db
       .from("jornada")
-      .select("id,numeroJornada,horaPartido,estado");
+      .select("id,numero_jornada,hora_partido,estado");
     const candidatas = ((filas ?? []) as Array<{
       readonly id: string;
-      readonly numeroJornada: number;
-      readonly horaPartido: string;
+      readonly numero_jornada?: number;
+      readonly numeroJornada?: number;
+      readonly hora_partido?: string;
+      readonly horaPartido?: string;
       readonly estado: string;
     }>)
       .map((j) => ({
         jornadaId: j.id,
-        numeroJornada: j.numeroJornada,
-        horaPartido: aFecha(j.horaPartido) ?? new Date("invalid"),
+        numeroJornada: j.numero_jornada ?? j.numeroJornada ?? 0,
+        horaPartido: aFecha(j.hora_partido ?? j.horaPartido) ?? new Date("invalid"),
         estado: j.estado as "pendiente" | "calculada" | "papel" | "invalidada",
       }))
       .filter((j) => aFecha(j.horaPartido) !== null);
@@ -123,37 +125,49 @@ async function ContenidoOnboarding(props: {
     }
     const { data: plantilla } = await db
       .from("jugador")
-      .select("id,nombre,nombrePete,activo,posicionesValidas");
+      .select("id,nombre,nombre_pete,activo,posiciones_validas");
     jugadores = ((plantilla ?? []) as Array<{
       readonly id: string;
       readonly nombre: string;
-      readonly nombrePete: string | null;
+      readonly nombre_pete?: string | null;
+      readonly nombrePete?: string | null;
       readonly activo: boolean;
-      readonly posicionesValidas: readonly [string, string] | null;
+      readonly posiciones_validas?: readonly [string, string] | null;
+      readonly posicionesValidas?: readonly [string, string] | null;
     }>)
-      .filter((j) => j.activo && j.posicionesValidas !== null)
-      .map((j) => ({ id: j.id, nombre: j.nombre, nombrePete: j.nombrePete }));
+      .filter((j) => j.activo && (j.posiciones_validas ?? j.posicionesValidas) !== null)
+      .map((j) => ({ id: j.id, nombre: j.nombre, nombrePete: j.nombre_pete ?? j.nombrePete ?? null }));
     if (jornada !== null) {
       const { data: aline } = await db
         .from("alineacion")
-        .select("id,entrenador,capitanJugadorId")
-        .eq("managerId", usuario.id)
-        .eq("jornadaId", jornada.jornadaId)
+        .select("id,entrenador,capitan_jugador_id")
+        .eq("manager_id", usuario.id)
+        .eq("jornada_id", jornada.jornadaId)
         .maybeSingle();
       if (aline !== null) {
         const fila = aline as {
           readonly id: string;
           readonly entrenador: string;
-          readonly capitanJugadorId: string;
+          readonly capitan_jugador_id?: string;
+          readonly capitanJugadorId?: string;
         };
+        const capitanId = fila.capitan_jugador_id ?? fila.capitanJugadorId ?? "";
         const { data: sels } = await db
           .from("alineacion_seleccion")
-          .select("jugadorId,posicionAlineada")
-          .eq("alineacionId", fila.id);
-        const lista = ((sels ?? []) as Array<{
-          readonly jugadorId: string;
-          readonly posicionAlineada: string;
-        }>);
+          .select("jugador_id,posicion_alineada")
+          .eq("alineacion_id", fila.id);
+        const lista = (((sels ?? []) as Array<{
+          readonly jugador_id?: string;
+          readonly jugadorId?: string;
+          readonly posicion_alineada?: string;
+          readonly posicionAlineada?: string;
+        }>).map((s) => ({
+          jugadorId: s.jugador_id ?? s.jugadorId ?? "",
+          posicionAlineada: s.posicion_alineada ?? s.posicionAlineada ?? "",
+        }))).filter(
+          (s): s is { readonly jugadorId: string; readonly posicionAlineada: string } =>
+            s.jugadorId !== "" && s.posicionAlineada !== "",
+        );
         if (lista.length === 5) {
           tieneQuinteto = true;
           const posicionPorJugador: Record<string, string> = {};
@@ -164,7 +178,7 @@ async function ContenidoOnboarding(props: {
             jugadorIds: lista.map((s) => s.jugadorId),
             posicionPorJugador,
             entrenador: fila.entrenador,
-            capitanId: fila.capitanJugadorId,
+            capitanId,
           };
         }
       }

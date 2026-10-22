@@ -34,8 +34,13 @@ function aFecha(valor: unknown): Date | null {
   return null;
 }
 
+function v(fila: Record<string, unknown>, snake: string, camel: string): unknown {
+  const porSnake = fila[snake];
+  return porSnake !== undefined ? porSnake : fila[camel];
+}
+
 function aJornada(fila: Record<string, unknown>): JornadaRow | null {
-  const hora = aFecha(fila["horaPartido"]);
+  const hora = aFecha(v(fila, "hora_partido", "horaPartido"));
   if (hora === null) {
     return null;
   }
@@ -49,19 +54,26 @@ function aJornada(fila: Record<string, unknown>): JornadaRow | null {
     return null;
   }
   const id = fila["id"];
-  const numeroJornada = fila["numeroJornada"];
+  const numeroJornada = v(fila, "numero_jornada", "numeroJornada");
   if (typeof id !== "string" || typeof numeroJornada !== "number") {
     return null;
   }
+  const numeroJornadaFnb = v(fila, "numero_jornada_fnb", "numeroJornadaFnb");
+  const esLocal = v(fila, "es_local", "esLocal");
+  const fnbMatchId = v(fila, "fnb_match_id", "fnbMatchId");
+  const fnbUniversallyId = v(fila, "fnb_universally_id", "fnbUniversallyId");
+  const marcadorLocal = v(fila, "marcador_local", "marcadorLocal");
+  const marcadorVisitante = v(fila, "marcador_visitante", "marcadorVisitante");
+  const origenResultado = v(fila, "origen_resultado", "origenResultado");
   return {
     id,
     numeroJornada,
     numeroJornadaFnb:
-      typeof fila["numeroJornadaFnb"] === "number"
-        ? (fila["numeroJornadaFnb"] as number)
+      typeof numeroJornadaFnb === "number"
+        ? (numeroJornadaFnb as number)
         : null,
     rival: typeof fila["rival"] === "string" ? (fila["rival"] as string) : "",
-    esLocal: fila["esLocal"] === true,
+    esLocal: esLocal === true,
     campo:
       typeof fila["campo"] === "string" ? (fila["campo"] as string) : null,
     municipio:
@@ -71,28 +83,65 @@ function aJornada(fila: Record<string, unknown>): JornadaRow | null {
     horaPartido: hora,
     estado,
     fnbMatchId:
-      typeof fila["fnbMatchId"] === "string"
-        ? (fila["fnbMatchId"] as string)
-        : null,
+      typeof fnbMatchId === "string" ? (fnbMatchId as string) : null,
     fnbUniversallyId:
-      typeof fila["fnbUniversallyId"] === "string"
-        ? (fila["fnbUniversallyId"] as string)
+      typeof fnbUniversallyId === "string"
+        ? (fnbUniversallyId as string)
         : null,
     marcadorLocal:
-      typeof fila["marcadorLocal"] === "number"
-        ? (fila["marcadorLocal"] as number)
-        : null,
+      typeof marcadorLocal === "number" ? (marcadorLocal as number) : null,
     marcadorVisitante:
-      typeof fila["marcadorVisitante"] === "number"
-        ? (fila["marcadorVisitante"] as number)
+      typeof marcadorVisitante === "number"
+        ? (marcadorVisitante as number)
         : null,
     origenResultado:
-      fila["origenResultado"] === "manual" || fila["origenResultado"] === "fnb"
-        ? (fila["origenResultado"] as "manual" | "fnb")
+      origenResultado === "manual" || origenResultado === "fnb"
+        ? (origenResultado as "manual" | "fnb")
         : null,
-    lastCalendarSync: aFecha(fila["lastCalendarSync"]),
-    lastResultSync: aFecha(fila["lastResultSync"]),
+    lastCalendarSync: aFecha(v(fila, "last_calendar_sync", "lastCalendarSync")),
+    lastResultSync: aFecha(v(fila, "last_result_sync", "lastResultSync")),
   };
+}
+
+function aResultado(fila: Record<string, unknown>): ResultadoJugadorRow | null {
+  const jornadaId = v(fila, "jornada_id", "jornadaId");
+  if (typeof jornadaId !== "string") {
+    return null;
+  }
+  return {
+    ...(fila as unknown as Record<string, unknown>),
+    jornadaId,
+    jugadorId: v(fila, "jugador_id", "jugadorId"),
+  } as unknown as ResultadoJugadorRow;
+}
+
+function aAlineacion(fila: Record<string, unknown>): AlineacionRow | null {
+  const id = fila["id"];
+  if (typeof id !== "string") {
+    return null;
+  }
+  return {
+    ...(fila as unknown as Record<string, unknown>),
+    managerId: v(fila, "manager_id", "managerId"),
+    jornadaId: v(fila, "jornada_id", "jornadaId"),
+    capitanJugadorId: v(fila, "capitan_jugador_id", "capitanJugadorId"),
+    instanteInicio: v(fila, "instante_inicio", "instanteInicio"),
+  } as unknown as AlineacionRow;
+}
+
+function aSeleccion(
+  fila: Record<string, unknown>,
+): AlineacionSeleccionRow | null {
+  const alineacionId = v(fila, "alineacion_id", "alineacionId");
+  if (typeof alineacionId !== "string") {
+    return null;
+  }
+  return {
+    ...(fila as unknown as Record<string, unknown>),
+    alineacionId,
+    jugadorId: v(fila, "jugador_id", "jugadorId"),
+    posicionAlineada: v(fila, "posicion_alineada", "posicionAlineada"),
+  } as unknown as AlineacionSeleccionRow;
 }
 
 function ultimaCalculadaIdDe(jornadas: readonly JornadaRow[]): string | null {
@@ -148,7 +197,7 @@ export async function leerHomeBD(
   const { data: filasResultados, error: errorResultados } = (await db
     .from("resultado_jugador")
     .select("*")
-    .eq("jornadaId", ultimaId)) as unknown as {
+    .eq("jornada_id", ultimaId)) as unknown as {
     readonly data: unknown;
     readonly error: { readonly message: string } | null;
   };
@@ -156,17 +205,14 @@ export async function leerHomeBD(
     throw new Error(`[home] resultado_jugador: ${errorResultados.message}`);
   }
   const resultadosUltima = ((filasResultados ?? []) as unknown as Array<
-    ResultadoJugadorRow
-  >).filter(
-    (r): r is ResultadoJugadorRow =>
-      typeof r === "object" &&
-      r !== null &&
-      typeof (r as { jornadaId?: unknown }).jornadaId === "string",
-  );
+    Record<string, unknown>
+  >)
+    .map((f) => aResultado(f))
+    .filter((r): r is ResultadoJugadorRow => r !== null);
   const { data: filasAline, error: errorAline } = (await db
     .from("alineacion")
     .select("*")
-    .eq("jornadaId", ultimaId)) as unknown as {
+    .eq("jornada_id", ultimaId)) as unknown as {
     readonly data: unknown;
     readonly error: { readonly message: string } | null;
   };
@@ -174,20 +220,17 @@ export async function leerHomeBD(
     throw new Error(`[home] alineacion: ${errorAline.message}`);
   }
   const alineacionesUltima = ((filasAline ?? []) as unknown as Array<
-    AlineacionRow
-  >).filter(
-    (r): r is AlineacionRow =>
-      typeof r === "object" &&
-      r !== null &&
-      typeof (r as { id?: unknown }).id === "string",
-  );
+    Record<string, unknown>
+  >)
+    .map((f) => aAlineacion(f))
+    .filter((r): r is AlineacionRow => r !== null);
   let seleccionesUltima: AlineacionSeleccionRow[] = [];
   if (alineacionesUltima.length > 0) {
     const ids = alineacionesUltima.map((a) => a.id);
     const { data: filasSel, error: errorSel } = (await db
       .from("alineacion_seleccion")
       .select("*")
-      .in("alineacionId", ids)) as unknown as {
+      .in("alineacion_id", ids)) as unknown as {
       readonly data: unknown;
       readonly error: { readonly message: string } | null;
     };
@@ -195,13 +238,10 @@ export async function leerHomeBD(
       throw new Error(`[home] alineacion_seleccion: ${errorSel.message}`);
     }
     seleccionesUltima = ((filasSel ?? []) as unknown as Array<
-      AlineacionSeleccionRow
-    >).filter(
-      (r): r is AlineacionSeleccionRow =>
-        typeof r === "object" &&
-        r !== null &&
-        typeof (r as { alineacionId?: unknown }).alineacionId === "string",
-    );
+      Record<string, unknown>
+    >)
+      .map((f) => aSeleccion(f))
+      .filter((r): r is AlineacionSeleccionRow => r !== null);
   }
   const { data: filasUsuarios } = (await db
     .from("usuario")

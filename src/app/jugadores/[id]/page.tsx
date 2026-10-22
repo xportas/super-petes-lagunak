@@ -112,16 +112,18 @@ async function ContenidoFicha(props: {
       const db = obtenerClienteService();
       const { data: filasJornada } = await db
         .from("jornada")
-        .select("id,numeroJornada,horaPartido,estado,rival");
+        .select("id,numero_jornada,hora_partido,estado,rival");
       const jornadas = ((filasJornada ?? []) as unknown as Array<{
         readonly id: string;
-        readonly numeroJornada: number;
-        readonly horaPartido: string;
+        readonly numero_jornada?: number;
+        readonly numeroJornada?: number;
+        readonly hora_partido?: string;
+        readonly horaPartido?: string;
         readonly estado: string;
         readonly rival?: string;
       }>)
         .map((f) => {
-          const hora = aFecha(f.horaPartido);
+          const hora = aFecha(f.hora_partido ?? f.horaPartido);
           if (hora === null) {
             return null;
           }
@@ -135,7 +137,7 @@ async function ContenidoFicha(props: {
           }
           return {
             jornadaId: f.id,
-            numeroJornada: f.numeroJornada,
+            numeroJornada: f.numero_jornada ?? f.numeroJornada ?? 0,
             horaPartido: hora,
             estado: f.estado as
               | "pendiente"

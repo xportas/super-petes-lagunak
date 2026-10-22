@@ -15,6 +15,15 @@ function aFecha(valor: unknown): Date | null {
   return null;
 }
 
+function campo(
+  fila: Record<string, unknown>,
+  snake: string,
+  camel: string,
+): unknown {
+  const porSnake = fila[snake];
+  return porSnake !== undefined ? porSnake : fila[camel];
+}
+
 function aJugador(fila: Record<string, unknown>): JugadorRow | null {
   if (typeof fila["id"] !== "string") {
     return null;
@@ -22,43 +31,49 @@ function aJugador(fila: Record<string, unknown>): JugadorRow | null {
   if (typeof fila["nombre"] !== "string") {
     return null;
   }
-  const fechaAlta = aFecha(fila["fechaAlta"]);
+  const fechaAlta = aFecha(campo(fila, "fecha_alta", "fechaAlta"));
   if (fechaAlta === null) {
     return null;
   }
-  const pos = fila["posicionesValidas"];
+  const pos = campo(fila, "posiciones_validas", "posicionesValidas");
   const posiciones =
     Array.isArray(pos) && pos.length === 2
       ? (pos as unknown as readonly [Posicion, Posicion])
       : null;
+  const nombreFnbRaw = campo(fila, "nombre_fnb", "nombreFnb");
+  const nombrePeteRaw = campo(fila, "nombre_pete", "nombrePete");
+  const imgPeteRaw = campo(fila, "img_pete", "imgPete");
+  const fnbUuidRaw = campo(fila, "fnb_uuid", "fnbUuid");
+  const estadoSanitarioRaw = campo(
+    fila,
+    "estado_sanitario",
+    "estadoSanitario",
+  );
+  const fechaBajaRaw = campo(fila, "fecha_baja", "fechaBaja");
   return {
     id: fila["id"] as string,
     nombre: fila["nombre"] as string,
     nombreFnb:
-      typeof fila["nombreFnb"] === "string"
-        ? (fila["nombreFnb"] as string)
+      typeof nombreFnbRaw === "string"
+        ? (nombreFnbRaw as string)
         : (fila["nombre"] as string),
     dorsal:
       typeof fila["dorsal"] === "number" ? (fila["dorsal"] as number) : null,
     posicionesValidas: posiciones,
     nombrePete:
-      typeof fila["nombrePete"] === "string"
-        ? (fila["nombrePete"] as string)
-        : null,
+      typeof nombrePeteRaw === "string" ? (nombrePeteRaw as string) : null,
     img: typeof fila["img"] === "string" ? (fila["img"] as string) : "",
-    imgPete:
-      typeof fila["imgPete"] === "string" ? (fila["imgPete"] as string) : "",
+    imgPete: typeof imgPeteRaw === "string" ? (imgPeteRaw as string) : "",
     descripcion:
       typeof fila["descripcion"] === "string"
         ? (fila["descripcion"] as string)
         : "",
-    fnbUuid:
-      typeof fila["fnbUuid"] === "string" ? (fila["fnbUuid"] as string) : null,
+    fnbUuid: typeof fnbUuidRaw === "string" ? (fnbUuidRaw as string) : null,
     estadoSanitario:
-      fila["estadoSanitario"] === "lesionado" ? "lesionado" : "disponible",
+      estadoSanitarioRaw === "lesionado" ? "lesionado" : "disponible",
     activo: fila["activo"] === true,
     fechaAlta,
-    fechaBaja: aFecha(fila["fechaBaja"]),
+    fechaBaja: aFecha(fechaBajaRaw),
   };
 }
 
@@ -102,18 +117,18 @@ export async function upsertJugadorDB(
   const db = cliente ?? obtenerClienteService();
   const fila = {
     nombre: args.nombre,
-    nombreFnb: args.nombreFnb,
+    nombre_fnb: args.nombreFnb,
     dorsal: args.dorsal,
-    posicionesValidas: args.posicionesValidas,
-    nombrePete: args.nombrePete,
+    posiciones_validas: args.posicionesValidas,
+    nombre_pete: args.nombrePete,
     img: args.img,
-    imgPete: args.imgPete,
+    img_pete: args.imgPete,
     descripcion: args.descripcion,
-    fnbUuid: args.fnbUuid,
-    estadoSanitario: args.estadoSanitario,
+    fnb_uuid: args.fnbUuid,
+    estado_sanitario: args.estadoSanitario,
     activo: args.activo,
-    fechaAlta: args.fechaAlta.toISOString(),
-    fechaBaja: args.fechaBaja ? args.fechaBaja.toISOString() : null,
+    fecha_alta: args.fechaAlta.toISOString(),
+    fecha_baja: args.fechaBaja ? args.fechaBaja.toISOString() : null,
   };
   if (args.id !== undefined) {
     const { data, error } = (await db
@@ -164,7 +179,7 @@ export async function darBajaJugadorDB(
   const db = cliente ?? obtenerClienteService();
   const { error } = (await db
     .from("jugador")
-    .update({ activo: false, fechaBaja: fechaBaja.toISOString() })
+    .update({ activo: false, fecha_baja: fechaBaja.toISOString() })
     .eq("id", id)) as unknown as {
     readonly error: { readonly message: string } | null;
   };

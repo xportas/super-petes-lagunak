@@ -36,20 +36,32 @@ function aFecha(valor: unknown): Date | null {
   return null;
 }
 
-interface FilaJornada {
-  readonly id: string;
-  readonly numeroJornada: number;
-  readonly horaPartido: string | Date;
-  readonly estado: string;
-  readonly rival?: string;
+function campo(
+  fila: Record<string, unknown>,
+  snake: string,
+  camel: string,
+): unknown {
+  const porSnake = fila[snake];
+  return porSnake !== undefined ? porSnake : fila[camel];
 }
 
-function filaAJornada(f: FilaJornada): JornadaEquipo | null {
-  const hora = aFecha(f.horaPartido);
+function filaAJornada(f: Record<string, unknown>): JornadaEquipo | null {
+  const id = campo(f, "id", "id");
+  const numeroJornada = campo(f, "numero_jornada", "numeroJornada");
+  const horaRaw = campo(f, "hora_partido", "horaPartido");
+  const estadoRaw = campo(f, "estado", "estado");
+  const rivalRaw = campo(f, "rival", "rival");
+  const hora = aFecha(horaRaw);
   if (hora === null) {
     return null;
   }
-  const estado = f.estado as EstadoJornada;
+  if (typeof id !== "string") {
+    return null;
+  }
+  if (typeof numeroJornada !== "number") {
+    return null;
+  }
+  const estado = estadoRaw as EstadoJornada;
   if (
     estado !== "pendiente" &&
     estado !== "calculada" &&
@@ -59,11 +71,11 @@ function filaAJornada(f: FilaJornada): JornadaEquipo | null {
     return null;
   }
   return {
-    jornadaId: f.id,
-    numeroJornada: f.numeroJornada,
+    jornadaId: id,
+    numeroJornada,
     horaPartido: hora,
     estado,
-    rival: typeof f.rival === "string" ? f.rival : "",
+    rival: typeof rivalRaw === "string" ? rivalRaw : "",
   };
 }
 
@@ -95,8 +107,8 @@ export async function listarJornadas(): Promise<JornadaEquipo[]> {
   const db = obtenerClienteService();
   const { data } = await db
     .from("jornada")
-    .select("id,numeroJornada,horaPartido,estado,rival");
-  const filas = ((data ?? []) as unknown as FilaJornada[]);
+    .select("id,numero_jornada,hora_partido,estado,rival");
+  const filas = ((data ?? []) as unknown as Array<Record<string, unknown>>);
   const out: JornadaEquipo[] = [];
   for (const f of filas) {
     const j = filaAJornada(f);
@@ -125,13 +137,13 @@ export async function getJornadaPorId(
   const db = obtenerClienteService();
   const { data } = await db
     .from("jornada")
-    .select("id,numeroJornada,horaPartido,estado,rival")
+    .select("id,numero_jornada,hora_partido,estado,rival")
     .eq("id", jornadaId)
     .maybeSingle();
   if (data === null || data === undefined) {
     return null;
   }
-  return filaAJornada(data as unknown as FilaJornada);
+  return filaAJornada(data as unknown as Record<string, unknown>);
 }
 
 export interface FichaPlantilla {
@@ -145,17 +157,23 @@ export async function getPlantillaPorIds(
   const db = obtenerClienteService();
   const { data } = await db
     .from("jugador")
-    .select("id,activo,posicionesValidas")
+    .select("id,activo,posiciones_validas")
     .in("id", [...ids]);
   const mapa = new Map<string, FichaPlantilla>();
-  for (const f of ((data ?? []) as unknown as Array<{
-    readonly id: string;
-    readonly activo: boolean;
-    readonly posicionesValidas: readonly [Posicion, Posicion] | null;
-  }>)) {
-    mapa.set(f.id, {
-      activo: f.activo,
-      posicionesValidas: f.posicionesValidas,
+  for (const f of ((data ?? []) as unknown as Array<Record<string, unknown>>)) {
+    const id = campo(f, "id", "id");
+    const activo = f["activo"];
+    const posicionesValidas = campo(
+      f,
+      "posiciones_validas",
+      "posicionesValidas",
+    ) as readonly [Posicion, Posicion] | null;
+    if (typeof id !== "string") {
+      continue;
+    }
+    mapa.set(id, {
+      activo: activo === true,
+      posicionesValidas,
     });
   }
   return mapa;
@@ -168,26 +186,40 @@ export async function getAlineacion(
   const db = obtenerClienteService();
   const { data: aline } = await db
     .from("alineacion")
-    .select("id,entrenador,capitanJugadorId")
-    .eq("managerId", managerId)
-    .eq("jornadaId", jornadaId)
+    .select("id,entrenador,capitan_jugador_id")
+    .eq("manager_id", managerId)
+    .eq("jornada_id", jornadaId)
     .maybeSingle();
   if (aline === null || aline === undefined) {
     return null;
   }
-  const fila = aline as unknown as {
-    readonly id: string;
-    readonly entrenador: EntrenadorSlug;
-    readonly capitanJugadorId: string;
-  };
+  const fila = aline as unknown as Record<string, unknown>;
+  const filaId = campo(fila, "id", "id");
+  const filaEntrenador = fila["entrenador"];
+  const filaCapitan = campo(fila, "capitan_jugador_id", "capitanJugadorId");
+  if (
+    typeof filaId !== "string" ||
+    (filaEntrenador !== "maider" && filaEntrenador !== "pater") ||
+    typeof filaCapitan !== "string"
+  ) {
+    return null;
+  }
   const { data: sels } = await db
     .from("alineacion_seleccion")
-    .select("jugadorId,posicionAlineada")
-    .eq("alineacionId", fila.id);
-  const lista = ((sels ?? []) as unknown as Array<{
-    readonly jugadorId: string;
-    readonly posicionAlineada: SlotPos;
-  }>);
+    .select("jugador_id,posicion_alineada")
+    .eq("alineacion_id", filaId);
+  const lista = ((sels ?? []) as unknown as Array<Record<string, unknown>>)
+    .map((s) => ({
+      jugadorId: campo(s, "jugador_id", "jugadorId"),
+      posicionAlineada: campo(s, "posicion_alineada", "posicionAlineada"),
+    }))
+    .filter(
+      (
+        s,
+      ): s is { readonly jugadorId: string; readonly posicionAlineada: SlotPos } =>
+        typeof s.jugadorId === "string" &&
+        typeof s.posicionAlineada === "string",
+    );
   if (lista.length !== 5) {
     return null;
   }
@@ -200,8 +232,8 @@ export async function getAlineacion(
     slots[slot] = hallada.jugadorId;
   }
   return {
-    entrenador: fila.entrenador,
-    capitanId: fila.capitanJugadorId,
+    entrenador: filaEntrenador,
+    capitanId: filaCapitan,
     slots,
   };
 }
@@ -220,8 +252,8 @@ export async function upsertAlineacion(args: UpsertAlineacionArgs): Promise<void
   const { data: existente } = await db
     .from("alineacion")
     .select("id")
-    .eq("managerId", args.managerId)
-    .eq("jornadaId", args.jornadaId)
+    .eq("manager_id", args.managerId)
+    .eq("jornada_id", args.jornadaId)
     .maybeSingle();
   let alineacionId: string | null = null;
   if (existente !== null && existente !== undefined) {
@@ -230,20 +262,20 @@ export async function upsertAlineacion(args: UpsertAlineacionArgs): Promise<void
       .from("alineacion")
       .update({
         entrenador: args.entrenador,
-        capitanJugadorId: args.capitanId,
-        instanteInicio: args.instanteInicio.toISOString(),
+        capitan_jugador_id: args.capitanId,
+        instante_inicio: args.instanteInicio.toISOString(),
       })
       .eq("id", alineacionId);
-    await db.from("alineacion_seleccion").delete().eq("alineacionId", alineacionId);
+    await db.from("alineacion_seleccion").delete().eq("alineacion_id", alineacionId);
   } else {
     const { data: creada, error } = await db
       .from("alineacion")
       .insert({
-        managerId: args.managerId,
-        jornadaId: args.jornadaId,
+        manager_id: args.managerId,
+        jornada_id: args.jornadaId,
         entrenador: args.entrenador,
-        capitanJugadorId: args.capitanId,
-        instanteInicio: args.instanteInicio.toISOString(),
+        capitan_jugador_id: args.capitanId,
+        instante_inicio: args.instanteInicio.toISOString(),
       })
       .select("id")
       .single();
@@ -253,9 +285,9 @@ export async function upsertAlineacion(args: UpsertAlineacionArgs): Promise<void
     alineacionId = (creada as unknown as { readonly id: string }).id;
   }
   const filas = SLOTS_FIJOS.map((slot) => ({
-    alineacionId,
-    jugadorId: args.slots[slot],
-    posicionAlineada: slot,
+    alineacion_id: alineacionId,
+    jugador_id: args.slots[slot],
+    posicion_alineada: slot,
   }));
   const { error: errorSel } = await db
     .from("alineacion_seleccion")
@@ -272,18 +304,23 @@ export async function getRachasPrevias(
   const db = obtenerClienteService();
   const { data: jornadas } = await db
     .from("jornada")
-    .select("id,numeroJornada,horaPartido,estado");
-  const listaJornadas = ((jornadas ?? []) as unknown as FilaJornada[])
+    .select("id,numero_jornada,hora_partido,estado");
+  const listaJornadas = ((jornadas ?? []) as unknown as Array<Record<string, unknown>>)
     .map((f) => filaAJornada(f))
     .filter((j): j is JornadaEquipo => j !== null);
   const { data: alineaciones } = await db
     .from("alineacion")
-    .select("id,jornadaId")
-    .eq("managerId", managerId);
-  const filasAline = ((alineaciones ?? []) as unknown as Array<{
-    readonly id: string;
-    readonly jornadaId: string;
-  }>);
+    .select("id,jornada_id")
+    .eq("manager_id", managerId);
+  const filasAline = ((alineaciones ?? []) as unknown as Array<Record<string, unknown>>)
+    .map((a) => ({
+      id: campo(a, "id", "id"),
+      jornadaId: campo(a, "jornada_id", "jornadaId"),
+    }))
+    .filter(
+      (a): a is { readonly id: string; readonly jornadaId: string } =>
+        typeof a.id === "string" && typeof a.jornadaId === "string",
+    );
   const porJornada = new Map<string, string>();
   for (const a of filasAline) {
     porJornada.set(a.jornadaId, a.id);
@@ -293,12 +330,17 @@ export async function getRachasPrevias(
     const ids = filasAline.map((a) => a.id);
     const { data: sels } = await db
       .from("alineacion_seleccion")
-      .select("alineacionId,jugadorId")
-      .in("alineacionId", ids);
-    selecciones = ((sels ?? []) as unknown as Array<{
-      readonly alineacionId: string;
-      readonly jugadorId: string;
-    }>);
+      .select("alineacion_id,jugador_id")
+      .in("alineacion_id", ids);
+    selecciones = ((sels ?? []) as unknown as Array<Record<string, unknown>>)
+      .map((s) => ({
+        alineacionId: campo(s, "alineacion_id", "alineacionId"),
+        jugadorId: campo(s, "jugador_id", "jugadorId"),
+      }))
+      .filter(
+        (s): s is { readonly alineacionId: string; readonly jugadorId: string } =>
+          typeof s.alineacionId === "string" && typeof s.jugadorId === "string",
+      );
   }
   const alineadosPorJornada = new Map<string, Set<string>>();
   for (const s of selecciones) {

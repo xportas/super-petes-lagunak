@@ -2,6 +2,7 @@
 // Nunca importar desde 'use client'.
 import {
   eliminarFilaRateLimit,
+  mapearUsuarioRow,
   obtenerClienteService,
   revocarTodasDeUsuarioDB,
 } from "@/src/lib/supabase/auth";
@@ -39,9 +40,9 @@ export async function listarUsuariosAdmin(
   if (error) {
     throw new Error(`[admin usuarios] listar: ${error.message}`);
   }
-  return ((data ?? []) as unknown as Array<UsuarioRow>).filter(
-    (u) => u.rol !== "admin",
-  );
+  return ((data ?? []) as unknown as Array<unknown>)
+    .map(mapearUsuarioRow)
+    .filter((u): u is UsuarioRow => u !== null && u.rol !== "admin");
 }
 
 export async function aplicarTemporalDB(
@@ -54,7 +55,7 @@ export async function aplicarTemporalDB(
   const db = cliente ?? obtenerClienteService();
   const { error } = (await db
     .from("usuario")
-    .update({ passwordHash, esTemporal: true })
+    .update({ password_hash: passwordHash, es_temporal: true })
     .eq("id", usuarioId)) as unknown as {
     readonly error: { readonly message: string } | null;
   };

@@ -8,6 +8,176 @@ import type {
 
 export const NOMBRE_COOKIE_SESION = "spl_sesion" as const;
 
+function comoRegistro(valor: unknown): Record<string, unknown> | null {
+  if (typeof valor === "object" && valor !== null) {
+    return valor as Record<string, unknown>;
+  }
+  return null;
+}
+
+function leerTexto(
+  fila: Record<string, unknown>,
+  snake: string,
+  camel: string,
+): string | null {
+  const v = fila[snake] ?? fila[camel];
+  return typeof v === "string" ? v : null;
+}
+
+function leerFecha(
+  fila: Record<string, unknown>,
+  snake: string,
+  camel: string,
+): Date | null {
+  const v = fila[snake] ?? fila[camel];
+  if (v instanceof Date) {
+    return Number.isNaN(v.getTime()) ? null : v;
+  }
+  if (typeof v === "string") {
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+
+function leerFechaNula(
+  fila: Record<string, unknown>,
+  snake: string,
+  camel: string,
+): Date | null {
+  const v = fila[snake] ?? fila[camel] ?? null;
+  if (v === null) {
+    return null;
+  }
+  if (v instanceof Date) {
+    return Number.isNaN(v.getTime()) ? null : v;
+  }
+  if (typeof v === "string") {
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+
+export function mapearUsuarioRow(fila: unknown): UsuarioRow | null {
+  const r = comoRegistro(fila);
+  if (r === null) {
+    return null;
+  }
+  const id = leerTexto(r, "id", "id");
+  const username = leerTexto(r, "username", "username");
+  const usernameNormalizado = leerTexto(
+    r,
+    "username_normalizado",
+    "usernameNormalizado",
+  );
+  const passwordHash = leerTexto(r, "password_hash", "passwordHash");
+  const creadoAt = leerFecha(r, "creado_at", "creadoAt");
+  if (
+    id === null ||
+    username === null ||
+    usernameNormalizado === null ||
+    passwordHash === null ||
+    creadoAt === null
+  ) {
+    return null;
+  }
+  const rol = r["rol"];
+  if (rol !== "manager" && rol !== "admin") {
+    return null;
+  }
+  const esTemporal = (r["es_temporal"] ?? r["esTemporal"]) === true;
+  const paso = r["onboarding_paso"] ?? r["onboardingPaso"];
+  return {
+    id,
+    username,
+    usernameNormalizado,
+    passwordHash,
+    esTemporal,
+    onboardingPaso: typeof paso === "number" ? paso : 0,
+    onboardingCompletadoAt: leerFechaNula(
+      r,
+      "onboarding_completado_at",
+      "onboardingCompletadoAt",
+    ),
+    rol,
+    creadoAt,
+  };
+}
+
+function mapearSesionRow(fila: unknown): SesionRow | null {
+  const r = comoRegistro(fila);
+  if (r === null) {
+    return null;
+  }
+  const id = leerTexto(r, "id", "id");
+  const usuarioId = leerTexto(r, "usuario_id", "usuarioId");
+  const tokenHash = leerTexto(r, "token_hash", "tokenHash");
+  const expiraAt = leerFecha(r, "expira_at", "expiraAt");
+  const ultimaRenovacionAt = leerFecha(
+    r,
+    "ultima_renovacion_at",
+    "ultimaRenovacionAt",
+  );
+  if (
+    id === null ||
+    usuarioId === null ||
+    tokenHash === null ||
+    expiraAt === null ||
+    ultimaRenovacionAt === null
+  ) {
+    return null;
+  }
+  return {
+    id,
+    usuarioId,
+    tokenHash,
+    expiraAt,
+    ultimaRenovacionAt,
+    revocadaAt: leerFechaNula(r, "revocada_at", "revocadaAt"),
+  };
+}
+
+function mapearRateLimitRow(fila: unknown): RateLimitRow | null {
+  const r = comoRegistro(fila);
+  if (r === null) {
+    return null;
+  }
+  const alcance = leerTexto(r, "alcance", "alcance");
+  const sujeto = leerTexto(r, "sujeto", "sujeto");
+  const intentos = r["intentos"];
+  const primerFalloAt = leerFecha(r, "primer_fallo_at", "primerFalloAt");
+  if (
+    alcance === null ||
+    sujeto === null ||
+    typeof intentos !== "number" ||
+    primerFalloAt === null
+  ) {
+    return null;
+  }
+  return {
+    alcance,
+    sujeto,
+    intentos,
+    primerFalloAt,
+    bloqueadoHasta: leerFechaNula(r, "bloqueado_hasta", "bloqueadoHasta"),
+  };
+}
+
+function mapearInvitacionRow(fila: unknown): InvitacionRow | null {
+  const r = comoRegistro(fila);
+  if (r === null) {
+    return null;
+  }
+  const id = leerTexto(r, "id", "id");
+  const codigo = leerTexto(r, "codigo", "codigo");
+  const creadaAt = leerFecha(r, "creada_at", "creadaAt");
+  if (id === null || codigo === null || creadaAt === null) {
+    return null;
+  }
+  return { id, codigo, vigente: r["vigente"] === true, creadaAt };
+}
+
 function leerEnv(nombre: string): string | null {
   const v = process.env[nombre];
   if (typeof v === "string" && v.length > 0) {
@@ -35,7 +205,7 @@ export async function buscarUsuarioPorNorm(
   const { data, error } = await db
     .from("usuario")
     .select("*")
-    .eq("usernameNormalizado", norm)
+    .eq("username_normalizado", norm)
     .maybeSingle();
   if (error) {
     throw new Error(`[supabase] buscarUsuarioPorNorm: ${error.message}`);
@@ -43,7 +213,11 @@ export async function buscarUsuarioPorNorm(
   if (data === null) {
     return null;
   }
-  return data as UsuarioRow;
+  const fila = mapearUsuarioRow(data);
+  if (fila === null) {
+    throw new Error("[supabase] buscarUsuarioPorNorm: fila inválida");
+  }
+  return fila;
 }
 
 export async function buscarUsuarioPorId(
@@ -62,7 +236,11 @@ export async function buscarUsuarioPorId(
   if (data === null) {
     return null;
   }
-  return data as UsuarioRow;
+  const fila = mapearUsuarioRow(data);
+  if (fila === null) {
+    throw new Error("[supabase] buscarUsuarioPorId: fila inválida");
+  }
+  return fila;
 }
 
 export async function crearUsuario(
@@ -78,11 +256,11 @@ export async function crearUsuario(
     .from("usuario")
     .insert({
       username: entrada.usernameDisplay,
-      usernameNormalizado: entrada.usernameNorm,
-      passwordHash: entrada.hashPassword,
-      esTemporal: false,
-      onboardingPaso: 1,
-      onboardingCompletadoAt: null,
+      username_normalizado: entrada.usernameNorm,
+      password_hash: entrada.hashPassword,
+      es_temporal: false,
+      onboarding_paso: 1,
+      onboarding_completado_at: null,
       rol: "manager",
     })
     .select("*")
@@ -90,7 +268,11 @@ export async function crearUsuario(
   if (error) {
     throw new Error(`[supabase] crearUsuario: ${error.message}`);
   }
-  return data as UsuarioRow;
+  const fila = mapearUsuarioRow(data);
+  if (fila === null) {
+    throw new Error("[supabase] crearUsuario: fila inválida");
+  }
+  return fila;
 }
 
 export async function buscarInvitacionActiva(
@@ -105,7 +287,9 @@ export async function buscarInvitacionActiva(
   if (error) {
     throw new Error(`[supabase] buscarInvitacionActiva: ${error.message}`);
   }
-  const filas = (data ?? []) as InvitacionRow[];
+  const filas = ((data ?? []) as unknown as Array<unknown>)
+    .map(mapearInvitacionRow)
+    .filter((f): f is InvitacionRow => f !== null);
   for (const fila of filas) {
     if (typeof fila.codigo === "string") {
       if (fila.codigo.trim().toLowerCase() === codigoNorm) {
@@ -134,7 +318,11 @@ export async function leerFilaRateLimit(
   if (data === null) {
     return null;
   }
-  return data as RateLimitRow;
+  const fila = mapearRateLimitRow(data);
+  if (fila === null) {
+    throw new Error("[supabase] leerFilaRateLimit: fila inválida");
+  }
+  return fila;
 }
 
 export async function guardarFilaRateLimit(
@@ -153,8 +341,8 @@ export async function guardarFilaRateLimit(
       alcance: fila.alcance,
       sujeto: fila.sujeto,
       intentos: fila.intentos,
-      primerFalloAt: fila.primerFalloAt.toISOString(),
-      bloqueadoHasta: fila.bloqueadoHasta
+      primer_fallo_at: fila.primerFalloAt.toISOString(),
+      bloqueado_hasta: fila.bloqueadoHasta
         ? fila.bloqueadoHasta.toISOString()
         : null,
     },
@@ -194,18 +382,22 @@ export async function crearSesionDB(
   const { data, error } = await db
     .from("sesion")
     .insert({
-      usuarioId: entrada.usuarioId,
-      tokenHash: entrada.tokenHash,
-      expiraAt: entrada.expiraAt.toISOString(),
-      ultimaRenovacionAt: entrada.ultimaRenovacionAt.toISOString(),
-      revocadaAt: null,
+      usuario_id: entrada.usuarioId,
+      token_hash: entrada.tokenHash,
+      expira_at: entrada.expiraAt.toISOString(),
+      ultima_renovacion_at: entrada.ultimaRenovacionAt.toISOString(),
+      revocada_at: null,
     })
     .select("*")
     .single();
   if (error) {
     throw new Error(`[supabase] crearSesionDB: ${error.message}`);
   }
-  return data as SesionRow;
+  const fila = mapearSesionRow(data);
+  if (fila === null) {
+    throw new Error("[supabase] crearSesionDB: fila inválida");
+  }
+  return fila;
 }
 
 export async function buscarSesionPorId(
@@ -224,7 +416,11 @@ export async function buscarSesionPorId(
   if (data === null) {
     return null;
   }
-  return data as SesionRow;
+  const fila = mapearSesionRow(data);
+  if (fila === null) {
+    throw new Error("[supabase] buscarSesionPorId: fila inválida");
+  }
+  return fila;
 }
 
 export async function renovarSesionDB(
@@ -237,8 +433,8 @@ export async function renovarSesionDB(
   const { error } = await db
     .from("sesion")
     .update({
-      expiraAt: expiraAt.toISOString(),
-      ultimaRenovacionAt: ultimaRenovacionAt.toISOString(),
+      expira_at: expiraAt.toISOString(),
+      ultima_renovacion_at: ultimaRenovacionAt.toISOString(),
     })
     .eq("id", id);
   if (error) {
@@ -254,7 +450,7 @@ export async function revocarSesionDB(
   const db = cliente ?? obtenerClienteService();
   const { error } = await db
     .from("sesion")
-    .update({ revocadaAt: ahora.toISOString() })
+    .update({ revocada_at: ahora.toISOString() })
     .eq("id", id);
   if (error) {
     throw new Error(`[supabase] revocarSesionDB: ${error.message}`);
@@ -270,10 +466,10 @@ export async function revocarTodasMenosDB(
   const db = cliente ?? obtenerClienteService();
   const { error } = await db
     .from("sesion")
-    .update({ revocadaAt: ahora.toISOString() })
-    .eq("usuarioId", usuarioId)
+    .update({ revocada_at: ahora.toISOString() })
+    .eq("usuario_id", usuarioId)
     .neq("id", exceptoId)
-    .is("revocadaAt", null);
+    .is("revocada_at", null);
   if (error) {
     throw new Error(`[supabase] revocarTodasMenosDB: ${error.message}`);
   }
@@ -287,9 +483,9 @@ export async function revocarTodasDeUsuarioDB(
   const db = cliente ?? obtenerClienteService();
   const { error } = await db
     .from("sesion")
-    .update({ revocadaAt: ahora.toISOString() })
-    .eq("usuarioId", usuarioId)
-    .is("revocadaAt", null);
+    .update({ revocada_at: ahora.toISOString() })
+    .eq("usuario_id", usuarioId)
+    .is("revocada_at", null);
   if (error) {
     throw new Error(`[supabase] revocarTodasDeUsuarioDB: ${error.message}`);
   }
@@ -303,7 +499,7 @@ export async function marcarTemporal(
   const db = cliente ?? obtenerClienteService();
   const { error } = await db
     .from("usuario")
-    .update({ esTemporal })
+    .update({ es_temporal: esTemporal })
     .eq("id", usuarioId);
   if (error) {
     throw new Error(`[supabase] marcarTemporal: ${error.message}`);
@@ -319,7 +515,7 @@ export async function actualizarPassword(
   const db = cliente ?? obtenerClienteService();
   const { error } = await db
     .from("usuario")
-    .update({ passwordHash: hashPassword, esTemporal })
+    .update({ password_hash: hashPassword, es_temporal: esTemporal })
     .eq("id", usuarioId);
   if (error) {
     throw new Error(`[supabase] actualizarPassword: ${error.message}`);
@@ -336,8 +532,8 @@ export async function actualizarOnboarding(
   const { error } = await db
     .from("usuario")
     .update({
-      onboardingPaso: paso,
-      onboardingCompletadoAt: completadoAt
+      onboarding_paso: paso,
+      onboarding_completado_at: completadoAt
         ? completadoAt.toISOString()
         : null,
     })

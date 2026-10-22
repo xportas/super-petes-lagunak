@@ -46,17 +46,6 @@ function formatearCierre(horaPartido: Date): string {
   return fmt.format(cierre);
 }
 
-interface FilaJugador {
-  readonly id: string;
-  readonly nombre: string;
-  readonly nombrePete: string | null;
-  readonly img: string;
-  readonly imgPete: string;
-  readonly posicionesValidas: readonly [Posicion, Posicion] | null;
-  readonly estadoSanitario: string;
-  readonly activo: boolean;
-}
-
 async function ContenidoEquipo(): Promise<React.JSX.Element> {
   await connection();
   const titulo = traducir("es", "ui.equipo.titulo");
@@ -105,16 +94,18 @@ async function ContenidoEquipo(): Promise<React.JSX.Element> {
     const db = obtenerClienteService();
     const { data: filasJornada } = await db
       .from("jornada")
-      .select("id,numeroJornada,horaPartido,estado,rival");
+      .select("id,numero_jornada,hora_partido,estado,rival");
     const lista = ((filasJornada ?? []) as unknown as Array<{
       readonly id: string;
-      readonly numeroJornada: number;
-      readonly horaPartido: string | Date;
+      readonly numero_jornada?: number;
+      readonly numeroJornada?: number;
+      readonly hora_partido?: string | Date;
+      readonly horaPartido?: string | Date;
       readonly estado: string;
       readonly rival?: string;
     }>)
       .map((f) => {
-        const hora = aFecha(f.horaPartido);
+        const hora = aFecha(f.hora_partido ?? f.horaPartido);
         if (hora === null) {
           return null;
         }
@@ -129,7 +120,7 @@ async function ContenidoEquipo(): Promise<React.JSX.Element> {
         }
         return {
           jornadaId: f.id,
-          numeroJornada: f.numeroJornada,
+          numeroJornada: f.numero_jornada ?? f.numeroJornada,
           horaPartido: hora,
           estado,
           rival: typeof f.rival === "string" ? f.rival : "",
@@ -139,16 +130,29 @@ async function ContenidoEquipo(): Promise<React.JSX.Element> {
     jornadas = lista;
     const { data: filasJugador } = await db
       .from("jugador")
-      .select("id,nombre,nombrePete,img,imgPete,posicionesValidas,estadoSanitario,activo");
-    jugadores = ((filasJugador ?? []) as unknown as FilaJugador[]).map((f) => ({
+      .select("id,nombre,nombre_pete,img,img_pete,posiciones_validas,estado_sanitario,activo");
+    jugadores = ((filasJugador ?? []) as unknown as Array<{
+      readonly id: string;
+      readonly nombre: string;
+      readonly nombre_pete?: string | null;
+      readonly nombrePete?: string | null;
+      readonly img: string;
+      readonly img_pete?: string;
+      readonly imgPete?: string;
+      readonly posiciones_validas?: readonly [Posicion, Posicion] | null;
+      readonly posicionesValidas?: readonly [Posicion, Posicion] | null;
+      readonly estado_sanitario?: string;
+      readonly estadoSanitario?: string;
+      readonly activo: boolean;
+    }>).map((f) => ({
       id: f.id,
       nombre: f.nombre,
-      nombrePete: f.nombrePete,
+      nombrePete: f.nombre_pete ?? f.nombrePete ?? null,
       img: f.img,
-      imgPete: f.imgPete,
-      posicionesValidas: f.posicionesValidas,
+      imgPete: f.img_pete ?? f.imgPete ?? "",
+      posicionesValidas: f.posiciones_validas ?? f.posicionesValidas ?? null,
       estadoSanitario:
-        f.estadoSanitario === "lesionado" ? "lesionado" : "disponible",
+        (f.estado_sanitario ?? f.estadoSanitario) === "lesionado" ? "lesionado" : "disponible",
       activo: f.activo,
     }));
   } catch {
