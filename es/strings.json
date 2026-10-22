@@ -150,6 +150,57 @@
       "reintentar": "Reintentar",
       "cargando": "Cargando…"
     },
+    "admin": {
+      "titulo": "Admin",
+      "tabs": {
+        "jornadas": "Jornadas",
+        "jugadores": "Jugadores",
+        "resultados": "Resultados",
+        "usuarios": "Usuarios",
+        "invitacion": "Invitación"
+      },
+      "jornadas": {
+        "titulo": "Jornadas",
+        "nueva": "Nueva jornada",
+        "editar": "Editar jornada",
+        "eliminar": "Eliminar jornada",
+        "rival": "Rival",
+        "hora": "Hora del partido",
+        "local_visitante": "Local o visitante",
+        "numero_auto": "Nº liga auto",
+        "guardar": "Guardar jornada",
+        "reimportar": "Re-importar desde FNB",
+        "recalcular": "Recalcular jornada",
+        "sincronizar_calendario": "Sincronizar calendario FNB",
+        "sincronizar_acta": "Sincronizar acta",
+        "pegar_url": "Pegar URL del partido"
+      },
+      "jugadores": {
+        "titulo": "Jugadores",
+        "nuevo": "Nuevo jugador",
+        "baja": "Dar de baja",
+        "activar": "Activar",
+        "pendientes": "Pendientes",
+        "posicion_pendiente": "Posición pendiente",
+        "sin_descripcion": "Sin descripción"
+      },
+      "resultados": {
+        "titulo": "Resultados",
+        "manual": "Carga manual",
+        "prerelleno_revisar": "Revisar pre-relleno antes de guardar",
+        "origen_fnb": "Origen FNB",
+        "origen_manual": "Origen manual",
+        "papel_aviso": "Jornada en papel: excluida sin manual posterior",
+        "confirmar": "Confirmar guardado"
+      },
+      "usuarios": {
+        "titulo": "Usuarios",
+        "temporal_copiar": "Copiar temporal",
+        "revocado": "Sesiones revocadas",
+        "invitacion_rotar": "Rotar invitación",
+        "mostrar_una_vez": "Mostrar una sola vez"
+      }
+    },
     "equipo": {
       "titulo": "Mi quinteto",      "jornada": "J{num} · {rival}",
       "cierre_en": "Cierre en {time}",
@@ -226,7 +277,19 @@
       "red": "Error de red, reintenta sin perder tu selección"
     },
     "admin": {
-      "no_juega": "El admin no juega"
+      "no_juega": "El admin no juega",
+      "sin_rival_hora": "Falta rival u hora",
+      "menos_de_5": "No se puede dejar menos de 5 elegibles",
+      "excluyente_lesion_expulsion": "Lesionado y expulsado son excluyentes",
+      "cero_forzado": "No-jugado exige valoración 0",
+      "incompleta_bloquea": "Acta incompleta: falta una fila",
+      "url_invalida": "URL FNB inválida",
+      "no_lagunak": "Ese partido no es de Lagunak",
+      "duplicada": "Ese partido ya pertenece a otra jornada",
+      "fnb_caida": "FNB no responde: reintenta, el manual sigue operativo",
+      "papel_sin_manual": "Jornada en papel sin carga manual posterior",
+      "no_admin": "Solo admin",
+      "idempotente_reintento": "Ya procesado: reintento ignorado"
     },
     "calculo": {
       "dato_ausente": "Falta la valoración o el estado de un jugador",
@@ -272,6 +335,17 @@
       "temporal_distinta": "La nueva debe ser distinta de la temporal",
       "nueva_distinta": "La nueva debe ser distinta de la actual",
       "temporal_invalida": "Clave temporal inválida"
+    },
+    "fnb": {
+      "no_responde": "FNB no responde: reintenta, el manual sigue operativo",
+      "clave_rotada": "Clave FNB rotada: reintenta, el manual sigue operativo",
+      "url_invalida": "URL FNB inválida",
+      "no_pertenece": "Ese partido no es de Lagunak",
+      "id_duplicado": "Ese partido ya pertenece a otra jornada",
+      "sin_acta_en_gracia": "Sin acta digital todavía: pendiente de acta, el manual sigue operativo",
+      "nombre_pendiente": "Nombre pendiente de vinculación manual",
+      "manual_bloquea": "La carga manual prevalece: usa Re-importar para pisarla",
+      "hora_ininterpretable": "Hora del partido no interpretable"
     },
     "carga": "Error al cargar",
     "reintentar": "Reintentar"

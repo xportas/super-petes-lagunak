@@ -1,0 +1,98 @@
+{
+  "teams": [
+    {
+      "teamIdExtern": 11659,
+      "players": [
+        {
+          "uuid": "c66dee66-eb38-11e9-83ca-0216824770c2",
+          "name": "MARIO SARASA GIL",
+          "dorsal": "8",
+          "timePlayed": 18,
+          "data": { "valoration": 1, "personal": 1, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "c663ea09-eb38-11e9-83ca-0216824770c2",
+          "name": "INARI ITURRI CILVETI",
+          "dorsal": "10",
+          "timePlayed": 25,
+          "data": { "valoration": 6, "personal": 2, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "c66df5a9-eb38-11e9-83ca-0216824770c2",
+          "name": "IKER BALDA AFONSO",
+          "dorsal": "12",
+          "timePlayed": 21,
+          "data": { "valoration": 12, "personal": 2, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "c67324d5-eb38-11e9-83ca-0216824770c2",
+          "name": "IÑIGO ORTEGA CARCAMO",
+          "dorsal": "14",
+          "timePlayed": 20,
+          "data": { "valoration": 7, "personal": 1, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "9fb20b1e-9742-43fc-a9e2-ddeef9fbeae5",
+          "name": "XABIER PORTAS GONZALEZ",
+          "dorsal": "15",
+          "timePlayed": 12,
+          "data": { "valoration": 2, "personal": 0, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "d441b014-9ee3-49e8-a1d0-b4b561dbf362",
+          "name": "MARCOS GOMEZ ARNEDO",
+          "dorsal": "16",
+          "timePlayed": 15,
+          "data": { "valoration": 0, "personal": 5, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "6d3c74db-5426-42ad-8c5c-cc276a0489a4",
+          "name": "ANDONI ESTIRADO GAISAN",
+          "dorsal": "17",
+          "timePlayed": 22,
+          "data": { "valoration": 8, "personal": 3, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "c66df169-eb38-11e9-83ca-0216824770c2",
+          "name": "JAVIER BRINGAS BASTERRA",
+          "dorsal": "21",
+          "timePlayed": 14,
+          "data": { "valoration": 1, "personal": 1, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "579eb47a-d2f5-4125-81ec-2bdf9d050bd6",
+          "name": "OSKAR ZURDO FERNANDEZ",
+          "dorsal": "22",
+          "timePlayed": 16,
+          "data": { "valoration": -1, "personal": 2, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "c66df3c0-eb38-11e9-83ca-0216824770c2",
+          "name": "ASIER VALENCIA ARBIZU",
+          "dorsal": "23",
+          "timePlayed": 24,
+          "data": { "valoration": 13, "personal": 1, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        },
+        {
+          "uuid": "c6684685-eb38-11e9-83ca-0216824770c2",
+          "name": "MARC CATALAN FEIJOO",
+          "dorsal": "30",
+          "timePlayed": 11,
+          "data": { "valoration": -1, "personal": 0, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        }
+      ]
+    },
+    {
+      "teamIdExtern": 11763,
+      "players": [
+        {
+          "uuid": "rival-1",
+          "name": "RIVAL UNO",
+          "dorsal": "4",
+          "timePlayed": 20,
+          "data": { "valoration": 9, "personal": 1, "unsportsmanslike": 0, "disqualification": 0, "technique": 0, "scuffle": 0, "coachTechnical": 0 }
+        }
+      ]
+    }
+  ]
+}

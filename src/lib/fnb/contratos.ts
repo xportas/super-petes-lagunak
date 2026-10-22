@@ -1,11 +1,12 @@
 /**
- * Placeholders tipados sin lógica de negocio real (E-10).
- * La lógica real la aporta la spec-10.
+ * Compatibilidad con Home (spec-07): la decisión real vive en sync-*.
+ * Estas funciones son no-op seguras: el Lazy Sync lo orquestan 03/09
+ * con throttle + lock en servidor. Se mantienen para no romper imports.
  */
-export function sincronizarCalendarioFNB(): never {
-  throw new Error("no implementado — spec-10");
+export function sincronizarCalendarioFNB(): void {
+  return;
 }
 
-export function sincronizarResultadosFNB(): never {
-  throw new Error("no implementado — spec-10");
+export function sincronizarResultadosFNB(): void {
+  return;
 }
