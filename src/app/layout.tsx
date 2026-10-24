@@ -49,12 +49,15 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className="min-h-full flex flex-col">
-        <MobileShell>
+      <body className="flex h-dvh flex-col overflow-hidden">
+        <MobileShell
+          barraNavegacion={
+            <Suspense fallback={null}>
+              <BottomNav />
+            </Suspense>
+          }
+        >
           {children}
-          <Suspense fallback={null}>
-            <BottomNav />
-          </Suspense>
         </MobileShell>
       </body>
     </html>

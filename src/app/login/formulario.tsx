@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { traducir } from "@/src/lib/i18n";
 import { iniciarSesion } from "./actions";
 
@@ -16,6 +17,8 @@ export function FormularioLogin(): React.JSX.Element {
   const etiquetaUsuario = traducir("es", "ui.auth.username");
   const etiquetaClave = traducir("es", "ui.auth.password");
   const entrar = traducir("es", "ui.auth.entrar");
+  const sinCuenta = traducir("es", "ui.auth.sin_cuenta");
+  const crearCuenta = traducir("es", "ui.auth.crear_cuenta");
   const pedirReset = traducir("es", "ui.auth.pedir_reset");
   const infoReset = traducir("es", "ui.auth.reset_info", {
     username: username.trim().length > 0 ? username.trim() : "-",
@@ -102,6 +105,15 @@ export function FormularioLogin(): React.JSX.Element {
           </button>
         </form>
       </section>
+      <div className="brutal-card flex flex-col gap-2 p-3">
+        <p className="text-center text-sm font-semibold">{sinCuenta}</p>
+        <Link
+          href="/registro"
+          className="tappable brutal-btn brutal-btn-secondary w-full text-sm"
+        >
+          {crearCuenta}
+        </Link>
+      </div>
       <InformacionReset
         etiqueta={pedirReset}
         texto={infoReset}

@@ -44,7 +44,10 @@ export function TopJugadores(props: {
                   ? info.nombrePete
                   : info.nombre;
             const img = props.imagenPorJugador?.get(f.jugadorId);
-            const src = img === undefined ? "/players/placeholder.webp" : normalizarImg(img, "/players/placeholder.webp");
+            const fallback = props.modoPete
+              ? "/players/placeholder-pete.webp"
+              : "/players/placeholder.webp";
+            const src = img === undefined ? fallback : normalizarImg(img, fallback);
             return (
               <li key={f.jugadorId} className="w-full">
                 <Link

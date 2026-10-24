@@ -51,7 +51,7 @@ export function NavActiva(props: {
   return (
     <nav
       aria-label="principal"
-      className="bg-surface/95 border-on-surface sticky bottom-0 z-40 w-full border-t-[2.5px] backdrop-blur-xl"
+      className="bg-surface/95 border-on-surface w-full shrink-0 border-t-[2.5px] backdrop-blur-xl"
     >
       <div className="flex flex-row items-center gap-1 px-2 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))]">
         {items.map((item) => {

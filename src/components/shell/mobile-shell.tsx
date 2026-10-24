@@ -6,6 +6,7 @@ import { IconoBrutal } from "@/src/components/ui/icono-brutal";
 
 export function MobileShell(props: {
   readonly children: ReactNode;
+  readonly barraNavegacion: ReactNode;
 }): React.JSX.Element {
   const descripcion = traducir("es", "ui.shell.contenedor_desc");
   const titulo = traducir("es", "ui.shell.titulo");
@@ -13,9 +14,9 @@ export function MobileShell(props: {
   return (
     <div
       aria-label={descripcion}
-      className="bg-surface text-on-surface mx-auto flex min-h-dvh w-full min-w-[360px] max-w-[430px] flex-col overflow-x-clip"
+      className="bg-surface text-on-surface mx-auto flex h-dvh w-full min-w-[360px] max-w-[430px] flex-col overflow-hidden"
     >
-      <header className="bg-surface/95 border-on-surface sticky top-0 z-40 border-b-[2.5px] pt-[env(safe-area-inset-top)] backdrop-blur-md">
+      <header className="bg-surface/95 border-on-surface z-40 shrink-0 border-b-[2.5px] pt-[env(safe-area-inset-top)] backdrop-blur-md">
         <div className="flex min-h-[64px] items-center justify-between gap-2 px-4 py-2">
           <div className="flex min-w-0 items-center gap-2">
             <span className="bg-primary-container border-on-surface flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border-[2px] shadow-[2px_2px_0px_var(--ink-shadow)]">
@@ -41,7 +42,10 @@ export function MobileShell(props: {
           </Link>
         </div>
       </header>
-      {props.children}
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        {props.children}
+      </div>
+      {props.barraNavegacion}
     </div>
   );
 }

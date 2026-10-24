@@ -107,20 +107,24 @@ async function ContenidoHome(): Promise<React.JSX.Element> {
     );
   }
 
-  // Nombres de jugadores para TopJugadores (todos, no solo activos).
+  // Nombres e imágenes de jugadores para TopJugadores (todos, no solo activos).
   const nombres = new Map<
     string,
     { readonly nombre: string; readonly nombrePete: string | null }
   >();
+  const imagenPorJugador = new Map<string, string>();
   const posiciones = new Map<string, readonly [Posicion, Posicion] | null>();
   try {
     const db = obtenerClienteService();
-    const { data } = await db.from("jugador").select("id,nombre,nombre_pete,posiciones_validas");
+    const { data } = await db.from("jugador").select("id,nombre,nombre_pete,posiciones_validas,img,img_pete");
     for (const f of ((data ?? []) as unknown as Array<{
       readonly id: string;
       readonly nombre: string;
       readonly nombre_pete?: string | null;
       readonly nombrePete?: string | null;
+      readonly img?: string | null;
+      readonly imgPete?: string | null;
+      readonly img_pete?: string | null;
       readonly posiciones_validas?: readonly [Posicion, Posicion] | null;
       readonly posicionesValidas?: readonly [Posicion, Posicion] | null;
     }>)) {
@@ -129,10 +133,19 @@ async function ContenidoHome(): Promise<React.JSX.Element> {
         const posicionesValidas = f.posiciones_validas ?? f.posicionesValidas ?? null;
         nombres.set(f.id, { nombre: f.nombre, nombrePete });
         posiciones.set(f.id, posicionesValidas);
+        const img = typeof f.img === "string" ? f.img : "";
+        const imgPete =
+          typeof f.img_pete === "string"
+            ? f.img_pete
+            : typeof f.imgPete === "string"
+              ? f.imgPete
+              : "";
+        imagenPorJugador.set(f.id, modoPete ? imgPete : img);
       }
     }
   } catch {
     nombres.clear();
+    imagenPorJugador.clear();
     posiciones.clear();
   }
 
@@ -428,7 +441,7 @@ async function ContenidoHome(): Promise<React.JSX.Element> {
         ) : null}
       </section>
       <TopManagers filas={filasManagers} />
-      <TopJugadores filas={filasJugadores} nombres={nombres} modoPete={modoPete} />
+      <TopJugadores filas={filasJugadores} nombres={nombres} modoPete={modoPete} imagenPorJugador={imagenPorJugador} />
       <Link
         href="/jugadores"
         className="tappable brutal-btn brutal-btn-primary w-full px-3 text-sm"

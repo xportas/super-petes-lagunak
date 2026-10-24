@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { traducir } from "@/src/lib/i18n";
 import { registrar } from "./actions";
 
@@ -18,6 +19,8 @@ export function FormularioRegistro(): React.JSX.Element {
   const etiquetaClave = traducir("es", "ui.auth.password");
   const etiquetaCodigo = traducir("es", "ui.auth.codigo_invitacion");
   const crear = traducir("es", "ui.auth.crear_cuenta");
+  const conCuenta = traducir("es", "ui.auth.con_cuenta");
+  const entrar = traducir("es", "ui.auth.entrar");
   const eInvitacion = traducir("es", "errors.auth.invitacion");
   const eFormato = traducir("es", "errors.auth.username_formato");
   const eDuplicado = traducir("es", "errors.auth.username_duplicado");
@@ -123,6 +126,15 @@ export function FormularioRegistro(): React.JSX.Element {
           </button>
         </form>
       </section>
+      <div className="brutal-card flex flex-col gap-2 p-3">
+        <p className="text-center text-sm font-semibold">{conCuenta}</p>
+        <Link
+          href="/login"
+          className="tappable brutal-btn brutal-btn-secondary w-full text-sm"
+        >
+          {entrar}
+        </Link>
+      </div>
     </main>
   );
 }
