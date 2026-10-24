@@ -63,16 +63,15 @@ export function NavActiva(props: {
               key={item.ruta}
               href={item.ruta}
               aria-current={activo ? "page" : undefined}
+              aria-label={etiqueta}
+              title={etiqueta}
               className={
                 activo
-                  ? "tappable bg-primary-container text-on-primary-fixed border-on-surface flex min-h-[48px] min-w-[44px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl border-[2px] px-1 text-center shadow-[2px_2px_0px_var(--ink-shadow)]"
-                  : "tappable text-on-surface-variant flex min-h-[48px] min-w-[44px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-center"
+                  ? "tappable bg-primary-container text-on-primary-fixed border-on-surface flex min-h-[48px] min-w-[44px] flex-1 items-center justify-center rounded-xl border-[2px] px-1 shadow-[2px_2px_0px_var(--ink-shadow)]"
+                  : "tappable text-on-surface-variant flex min-h-[48px] min-w-[44px] flex-1 items-center justify-center rounded-xl px-1"
               }
             >
-              <IconoBrutal nombre={iconoPara(item.ruta)} clase="h-5 w-5" />
-              <span className="font-display text-[11px] leading-[12px] font-bold tracking-[0.06em] uppercase">
-                {etiqueta}
-              </span>
+              <IconoBrutal nombre={iconoPara(item.ruta)} clase="h-6 w-6" />
             </a>
           );
         })}
