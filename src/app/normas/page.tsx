@@ -11,6 +11,7 @@ import {
   PENALIZACION_SIN_QUINTETO,
 } from "@/src/lib/scoring/constantes";
 import { Bloque } from "./bloque";
+import { LeyendaIconos } from "./leyenda-iconos";
 import { TablaRacha } from "./tabla-racha";
 import { EjemploPete } from "./ejemplo-pete";
 
@@ -41,6 +42,7 @@ export default function PaginaNormas(): React.JSX.Element {
           {b === "racha" ? <TablaRacha /> : null}
         </section>
       ))}
+      <LeyendaIconos />
       <Suspense fallback={null}>
         <EjemploPete />
       </Suspense>

@@ -54,10 +54,11 @@ export function BloquePartido(props: {
         </div>
         <a
           href="/normas#cierre"
-          className="tappable bg-surface-container-lowest border-on-surface flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-[2px] px-2 text-sm font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+          className="tappable bg-surface-container-lowest border-on-surface inline-flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] shadow-[1px_1px_0px_var(--ink-shadow)]"
           aria-label="?"
+          title="?"
         >
-          <IconoBrutal nombre="ayuda" clase="h-5 w-5" />
+          <IconoBrutal nombre="ayuda" clase="h-3 w-3" />
         </a>
       </div>
       <p className="text-on-surface-variant flex items-center gap-1 text-xs">

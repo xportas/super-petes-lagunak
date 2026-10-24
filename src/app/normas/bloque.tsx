@@ -17,7 +17,6 @@ function textoPara(bloque: BloqueNormas): string {
   if (bloque === "cierre") {
     return traducir("es", "ui.normas.cierre_texto", {
       horas: HORAS_CIERRE,
-      zona: "Europe/Madrid",
     });
   }
   if (bloque === "base") {
