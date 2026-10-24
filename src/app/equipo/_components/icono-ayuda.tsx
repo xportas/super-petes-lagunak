@@ -35,12 +35,12 @@ export function IconoAyuda(props: {
         aria-expanded={abierto}
         aria-label={etiqueta}
         onClick={() => setAbierto((v) => !v)}
-        className="tappable flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border px-2 text-sm"
+        className="tappable bg-surface-container-lowest border-on-surface flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-[2px] px-2 text-sm font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
       >
         ?
       </button>
       {abierto ? (
-        <span className="ml-2 inline-flex min-h-[44px] items-center rounded border px-2 text-sm">
+        <span className="bg-surface-container-lowest border-on-surface ml-2 inline-flex min-h-[44px] items-center rounded-lg border-[2px] px-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
           <a
             href={`/normas#${ancla}`}
             className="tappable flex min-h-[44px] items-center underline"

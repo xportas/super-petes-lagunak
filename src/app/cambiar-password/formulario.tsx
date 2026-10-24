@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { traducir } from "@/src/lib/i18n";
 import { cambiarPassword } from "./actions";
 import { cerrarSesion } from "@/src/app/login/actions";
@@ -59,46 +60,63 @@ export function FormularioCambiar(): React.JSX.Element {
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col gap-4 px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      <h1 className="pt-8 text-xl font-bold">{titulo}</h1>
-      <form onSubmit={enviar} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          <span>{etiquetaActual}</span>
-          <input
-            className="min-h-[44px] w-full rounded border px-3"
-            name="actual"
-            type="password"
-            autoComplete="current-password"
-            value={actual}
-            onChange={(e) => setActual(e.target.value)}
+      <section className="brutal-card-lg mt-8 flex flex-col gap-3 p-4">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <span className="flex items-center gap-2">
+          <Image
+            src="/players/escudo-lgnk.jpg"
+            alt=""
+            width={48}
+            height={48}
+            className="border-on-surface h-12 w-12 rounded-xl border-[2px] object-cover shadow-[2px_2px_0px_var(--ink-shadow)]"
+            priority
           />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span>{etiquetaNueva}</span>
-          <input
-            className="min-h-[44px] w-full rounded border px-3"
-            name="nueva"
-            type="password"
-            autoComplete="new-password"
-            value={nueva}
-            onChange={(e) => setNueva(e.target.value)}
-          />
-        </label>
-        {error !== null ? <p role="alert">{error}</p> : null}
+          <span className="brutal-title text-[22px] leading-[26px]">{titulo}</span>
+        </span>
+        <form onSubmit={enviar} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-semibold">{etiquetaActual}</span>
+            <input
+              className="brutal-input"
+              name="actual"
+              type="password"
+              autoComplete="current-password"
+              value={actual}
+              onChange={(e) => setActual(e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-semibold">{etiquetaNueva}</span>
+            <input
+              className="brutal-input"
+              name="nueva"
+              type="password"
+              autoComplete="new-password"
+              value={nueva}
+              onChange={(e) => setNueva(e.target.value)}
+            />
+          </label>
+          {error !== null ? (
+            <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
+              {error}
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={ocupado}
+            className="tappable brutal-btn brutal-btn-primary w-full disabled:opacity-50"
+          >
+            {guardar}
+          </button>
+        </form>
         <button
-          type="submit"
-          disabled={ocupado}
-          className="tappable min-h-[44px] w-full rounded font-semibold"
+          type="button"
+          onClick={salirSesion}
+          className="tappable brutal-btn brutal-btn-ghost w-full text-sm"
         >
-          {guardar}
+          {salir}
         </button>
-      </form>
-      <button
-        type="button"
-        onClick={salirSesion}
-        className="tappable min-h-[44px] w-full rounded border"
-      >
-        {salir}
-      </button>
+      </section>
     </main>
   );
 }

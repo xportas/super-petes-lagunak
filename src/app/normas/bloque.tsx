@@ -121,11 +121,11 @@ export function Bloque(props: {
   const titulo = tituloPara(props.bloque);
   const texto = textoPara(props.bloque);
   return (
-    <details className="w-full rounded border">
-      <summary className="tappable flex min-h-[44px] cursor-pointer items-center px-3 font-semibold">
+    <details className="brutal-card w-full">
+      <summary className="tappable brutal-title flex min-h-[48px] cursor-pointer items-center px-3 text-[16px] leading-[20px]">
         {titulo}
       </summary>
-      <p className="px-3 pb-3">{texto}</p>
+      <p className="border-t-[2px] border-[var(--ink-border)] px-3 pt-2 pb-3 text-sm">{texto}</p>
     </details>
   );
 }

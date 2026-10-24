@@ -419,16 +419,19 @@ async function ContenidoHome(): Promise<React.JSX.Element> {
   const verPlantilla = traducir("es", "ui.home.ver_plantilla");
 
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-      {bloqueCuenta}
-      {jornadaPartido !== null ? (
-        <BloquePartido jornada={jornadaPartido} esUltimo={esUltimo} />
-      ) : null}
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <section aria-label="jornada" className="brutal-card-lg flex w-full flex-col gap-2 p-3">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        {bloqueCuenta}
+        {jornadaPartido !== null ? (
+          <BloquePartido jornada={jornadaPartido} esUltimo={esUltimo} />
+        ) : null}
+      </section>
       <TopManagers filas={filasManagers} />
       <TopJugadores filas={filasJugadores} nombres={nombres} modoPete={modoPete} />
       <Link
         href="/jugadores"
-        className="tappable flex min-h-[44px] items-center justify-center rounded border px-3 text-sm underline"
+        className="tappable brutal-btn brutal-btn-primary w-full px-3 text-sm"
       >
         {verPlantilla}
       </Link>

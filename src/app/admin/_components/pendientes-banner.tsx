@@ -11,7 +11,7 @@ export function PendientesBanner(props: {
   const texto = traducir("es", "ui.admin.jugadores.pendientes");
   const posicion = traducir("es", "ui.admin.jugadores.posicion_pendiente");
   return (
-    <p role="alert" className="min-h-[44px] w-full rounded border px-3 py-3 text-sm">
+    <p role="alert" className="bg-primary-container text-on-primary-fixed border-on-surface min-h-[44px] w-full rounded-xl border-[2.5px] px-3 py-3 text-sm font-bold shadow-[3px_3px_0px_var(--ink-shadow)]">
       {`${texto}: ${props.cantidad} · ${posicion}`}
     </p>
   );

@@ -1,5 +1,6 @@
 import { traducir } from "@/src/lib/i18n";
 import type { JornadaRow } from "@/src/lib/supabase/tipos";
+import { IconoBrutal } from "@/src/components/ui/icono-brutal";
 
 function formatearFechaHora(hora: Date): string {
   const fmt = new Intl.DateTimeFormat("es-ES", {
@@ -28,25 +29,41 @@ export function BloquePartido(props: {
         ? (props.jornada.municipio as string)
         : porConfirmar;
   const fecha = formatearFechaHora(props.jornada.horaPartido);
-  const iconoLocal = props.jornada.esLocal ? "🏠" : "✈️";
+  const textoLocal = traducir(
+    "es",
+    props.jornada.esLocal ? "ui.home.local" : "ui.home.visitante",
+  );
   return (
-    <section aria-label={rival} className="flex w-full flex-col gap-2 rounded border px-3 py-3">
+    <section aria-label={rival} className="flex w-full flex-col gap-2">
       {props.esUltimo ? (
-        <p className="text-sm font-bold">{ultimo}</p>
+        <p className="brutal-chip brutal-chip-live w-fit">{ultimo}</p>
       ) : null}
-      <p className="text-sm">{fecha}</p>
-      <p className="flex min-h-[44px] items-center gap-2 text-base">
-        <span aria-hidden="true">{iconoLocal}</span>
-        <span>{rival}</span>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="brutal-title text-[22px] leading-[26px] break-words">
+            {rival}
+          </p>
+          <p className="flex flex-wrap items-center gap-1 text-sm">
+            <span className="brutal-chip bg-surface-container border-on-surface border-[1.5px]">
+              {fecha}
+            </span>
+            <span className="brutal-chip bg-surface-container border-on-surface border-[1.5px]">
+              {lugar}
+            </span>
+          </p>
+        </div>
+        <a
+          href="/normas#cierre"
+          className="tappable bg-surface-container-lowest border-on-surface flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-[2px] px-2 text-sm font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+          aria-label="?"
+        >
+          <IconoBrutal nombre="ayuda" clase="h-5 w-5" />
+        </a>
+      </div>
+      <p className="text-on-surface-variant flex items-center gap-1 text-xs">
+        <IconoBrutal nombre={props.jornada.esLocal ? "home" : "balon"} clase="h-4 w-4" />
+        <span>{textoLocal}</span>
       </p>
-      <p className="text-sm">{lugar}</p>
-      <a
-        href="/normas#cierre"
-        className="tappable flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border px-3 text-sm"
-        aria-label="?"
-      >
-        ?
-      </a>
     </section>
   );
 }

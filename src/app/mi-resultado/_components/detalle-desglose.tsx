@@ -44,10 +44,10 @@ export function DetalleDesglose(props: {
   return (
     <div className="flex w-full flex-col gap-2">
       <p className="flex min-h-[44px] flex-wrap items-center justify-between gap-2 text-sm">
-        <span>{etiquetaEntrenador}</span>
+        <span className="brutal-chip brutal-chip-live">{etiquetaEntrenador}</span>
         <a
           href="/normas#orden"
-          className="tappable flex min-h-[44px] items-center underline"
+          className="tappable flex min-h-[44px] items-center text-xs underline"
         >
           {verNormas}
         </a>
@@ -84,24 +84,34 @@ export function DetalleDesglose(props: {
           return (
             <li
               key={linea.jugadorId}
-              className="flex w-full flex-col gap-1 rounded border px-3 py-2 text-sm"
+              className="bg-surface-container-low border-on-surface flex w-full flex-col gap-1 rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]"
             >
-              <span className="font-semibold break-words">
-                {nombre} {linea.posicionAlineada}
-                {capitan === null ? null : ` ${capitan}`} {icono}
-                {marcaExpulsado === null ? null : ` ${marcaExpulsado}`}
+              <span className="flex flex-wrap items-center gap-1 font-semibold break-words">
+                <span className="brutal-chip brutal-chip-pos">{linea.posicionAlineada}</span>
+                <span className="min-w-0 flex-1 truncate">{nombre}</span>
+                {capitan === null ? null : (
+                  <span className="brutal-chip brutal-chip-live">{capitan}</span>
+                )}
+                <span aria-hidden="true" className="text-xs">{icono}</span>
+                {marcaExpulsado === null ? null : (
+                  <span className="brutal-chip brutal-chip-bad">{marcaExpulsado}</span>
+                )}
               </span>
-              <span className="break-words">
-                {base} {efecto} {pos} {racha} {subtotal}
+              <span className="flex flex-wrap gap-1 break-words">
+                <span className="brutal-chip bg-surface-container-lowest border-on-surface border-[1.5px]">{base}</span>
+                <span className="brutal-chip bg-surface-container-lowest border-on-surface border-[1.5px]">{efecto}</span>
+                <span className="brutal-chip brutal-chip-ok">{pos}</span>
+                <span className={linea.penalizacionRacha === 0 ? "brutal-chip bg-surface-container border-on-surface border-[1.5px]" : "brutal-chip brutal-chip-bad"}>{racha}</span>
+                <span className="brutal-chip bg-surface-container border-on-surface border-[1.5px]">{subtotal}</span>
               </span>
             </li>
           );
         })}
       </ul>
-      <p className="flex min-h-[44px] flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold">
-        {textoMvp === null ? null : <span>{textoMvp}</span>}
-        {textoExpulsion === null ? null : <span>{textoExpulsion}</span>}
-        <span>{textoTotal}</span>
+      <p className="flex min-h-[44px] flex-wrap items-center gap-2 text-sm font-semibold">
+        {textoMvp === null ? null : <span className="brutal-chip brutal-chip-ok">{textoMvp}</span>}
+        {textoExpulsion === null ? null : <span className="brutal-chip brutal-chip-bad">{textoExpulsion}</span>}
+        <span className="brutal-chip brutal-chip-live tabular-brutal">{textoTotal}</span>
       </p>
     </div>
   );

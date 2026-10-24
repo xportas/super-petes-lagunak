@@ -32,7 +32,7 @@ export function JugadorFila(props: {
     props.jugador.posicionesValidas === null
       ? posicionPendiente
       : `[${props.jugador.posicionesValidas[0]},${props.jugador.posicionesValidas[1]}]`;
-  const icono = props.jugador.estadoSanitario === "lesionado" ? "🚑" : "✅";
+  const lesionado = props.jugador.estadoSanitario === "lesionado";
   const imgSrc = normalizarImg(
     props.modoPete ? props.jugador.imgPete : props.jugador.img,
     props.modoPete
@@ -43,18 +43,28 @@ export function JugadorFila(props: {
     <li className="w-full">
       <Link
         href={`/jugadores/${props.jugador.id}`}
-        className="tappable flex min-h-[44px] items-center gap-3 rounded border px-3 py-2"
+        className="tappable brutal-card flex min-h-[44px] items-center gap-3 p-2"
       >
         <Image
           src={imgSrc}
-          alt={nombre}
-          width={44}
-          height={44}
-          className="h-[44px] w-[44px] shrink-0 rounded object-cover"
+          alt=""
+          width={52}
+          height={52}
+          className="border-on-surface h-[52px] w-[52px] shrink-0 rounded-xl border-[2px] object-cover shadow-[2px_2px_0px_var(--ink-shadow)]"
         />
-        <span className="flex flex-1 flex-col">
-          <span className="font-semibold">{nombre}</span>
-          <span className="text-sm">{`${dorsal} · ${posiciones} · ${icono}`}</span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="font-display truncate text-[16px] leading-[20px] font-bold uppercase">
+            {nombre}
+          </span>
+          <span className="mt-0.5 flex flex-wrap items-center gap-1 text-xs">
+            <span className="brutal-chip brutal-chip-pos">{dorsal}</span>
+            <span className="brutal-chip bg-surface-container border-on-surface border-[1.5px]">{posiciones}</span>
+          </span>
+        </span>
+        <span className={lesionado ? "brutal-chip brutal-chip-bad shrink-0" : "brutal-chip brutal-chip-ok shrink-0"}>
+          {lesionado
+            ? traducir("es", "ui.ficha.lesionado")
+            : traducir("es", "ui.ficha.disponible")}
         </span>
       </Link>
     </li>

@@ -59,15 +59,15 @@ export function CambiarPassword(): React.JSX.Element {
   }
 
   return (
-    <details className="w-full rounded border">
-      <summary className="tappable flex min-h-[44px] cursor-pointer items-center px-3">
+    <details className="brutal-card w-full">
+      <summary className="tappable brutal-title flex min-h-[48px] cursor-pointer items-center px-3 text-[16px] leading-[20px]">
         {resumen}
       </summary>
-      <form onSubmit={(e) => void enviar(e)} className="flex flex-col gap-3 p-3">
+      <form onSubmit={(e) => void enviar(e)} className="flex flex-col gap-3 border-t-[2px] border-[var(--ink-border)] p-3">
         <label className="flex flex-col gap-1">
-          <span>{etiquetaActual}</span>
+          <span className="text-sm font-semibold">{etiquetaActual}</span>
           <input
-            className="min-h-[44px] w-full rounded border px-3"
+            className="brutal-input"
             name="actual"
             type="password"
             autoComplete="current-password"
@@ -76,9 +76,9 @@ export function CambiarPassword(): React.JSX.Element {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span>{etiquetaNueva}</span>
+          <span className="text-sm font-semibold">{etiquetaNueva}</span>
           <input
-            className="min-h-[44px] w-full rounded border px-3"
+            className="brutal-input"
             name="nueva"
             type="password"
             autoComplete="new-password"
@@ -87,9 +87,9 @@ export function CambiarPassword(): React.JSX.Element {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span>{etiquetaNueva}</span>
+          <span className="text-sm font-semibold">{etiquetaNueva}</span>
           <input
-            className="min-h-[44px] w-full rounded border px-3"
+            className="brutal-input"
             name="confirmar"
             type="password"
             autoComplete="new-password"
@@ -97,12 +97,18 @@ export function CambiarPassword(): React.JSX.Element {
             onChange={(e) => setConfirmar(e.target.value)}
           />
         </label>
-        {error !== null ? <p role="alert">{error}</p> : null}
-        {ok ? <p role="status">{guardar}</p> : null}
+        {error !== null ? (
+          <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
+            {error}
+          </p>
+        ) : null}
+        {ok ? (
+          <p role="status" className="brutal-chip brutal-chip-ok w-fit">{guardar}</p>
+        ) : null}
         <button
           type="submit"
           disabled={ocupado}
-          className="tappable min-h-[44px] w-full rounded font-semibold"
+          className="tappable brutal-btn brutal-btn-primary w-full disabled:opacity-50"
         >
           {guardar}
         </button>

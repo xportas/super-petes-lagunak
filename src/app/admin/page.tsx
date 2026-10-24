@@ -120,8 +120,8 @@ async function ContenidoAdmin(props: {
       filas = [];
     }
     return (
-      <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-        <h1 className="text-xl font-bold">{titulo}</h1>
+      <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+        <section className="brutal-card-lg flex flex-col gap-2 p-3"><span className="brutal-hazard-bar" aria-hidden="true" /><h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1></section>
         <TabsAdmin activa={props.tab} />
         <UsuariosTable filas={filas} />
       </main>
@@ -135,8 +135,8 @@ async function ContenidoAdmin(props: {
       vigente = null;
     }
     return (
-      <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-        <h1 className="text-xl font-bold">{titulo}</h1>
+      <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+        <section className="brutal-card-lg flex flex-col gap-2 p-3"><span className="brutal-hazard-bar" aria-hidden="true" /><h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1></section>
         <TabsAdmin activa={props.tab} />
         <InvitacionPanel vigente={vigente} />
       </main>
@@ -144,8 +144,8 @@ async function ContenidoAdmin(props: {
   }
   if (props.tab === "jugadores") {
     return (
-      <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-        <h1 className="text-xl font-bold">{titulo}</h1>
+      <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+        <section className="brutal-card-lg flex flex-col gap-2 p-3"><span className="brutal-hazard-bar" aria-hidden="true" /><h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1></section>
         <TabsAdmin activa={props.tab} />
         <PendientesBanner cantidad={pendientes} />
         <JugadorForm />
@@ -153,9 +153,9 @@ async function ContenidoAdmin(props: {
           {jugadores.map((j) => (
             <li
               key={j.id}
-              className="flex min-h-[44px] items-center rounded border px-3 py-2 text-sm"
+              className="brutal-card flex min-h-[44px] items-center px-3 py-2 text-sm"
             >
-              <span className="flex-1">{j.nombre}</span>
+              <span className="flex-1 truncate font-semibold">{j.nombre}</span>
             </li>
           ))}
         </ul>
@@ -165,8 +165,8 @@ async function ContenidoAdmin(props: {
   if (props.tab === "resultados") {
     const primera = jornadas[0] ?? null;
     return (
-      <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-        <h1 className="text-xl font-bold">{titulo}</h1>
+      <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+        <section className="brutal-card-lg flex flex-col gap-2 p-3"><span className="brutal-hazard-bar" aria-hidden="true" /><h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1></section>
         <TabsAdmin activa={props.tab} />
         <PendientesBanner cantidad={pendientes} />
         {primera === null ? null : (
@@ -184,17 +184,17 @@ async function ContenidoAdmin(props: {
     );
   }
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-      <h1 className="text-xl font-bold">{titulo}</h1>
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <section className="brutal-card-lg flex flex-col gap-2 p-3"><span className="brutal-hazard-bar" aria-hidden="true" /><h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1></section>
       <TabsAdmin activa={props.tab} />
       <JornadaForm />
       <ul className="flex flex-col gap-2">
         {jornadas.map((j) => (
           <li
             key={j.id}
-            className="flex min-h-[44px] items-center rounded border px-3 py-2 text-sm"
+            className="brutal-card flex min-h-[44px] items-center px-3 py-2 text-sm"
           >
-            <span className="flex-1">{j.rival}</span>
+            <span className="flex-1 truncate font-semibold">{j.rival}</span>
           </li>
         ))}
       </ul>

@@ -10,7 +10,9 @@
       "top_managers": "Top 3 Managers",
       "top_jugadores": "Top 3 Jugadores",
       "sin_datos": "Sin datos",
-      "ultimo_partido": "Último partido"
+      "ultimo_partido": "Último partido",
+      "local": "Local",
+      "visitante": "Visitante"
     },
     "jugadores": {
       "titulo": "Plantilla",
@@ -67,7 +69,9 @@
     },
     "shell": {
       "contenedor_desc": "Contenedor principal de la aplicación",
-      "volver": "Volver"
+      "volver": "Volver",
+      "titulo": "Super Petes Lagunak",
+      "ver_plantilla": "Ver plantilla"
     },
     "nav": {
       "home": "Home",
@@ -248,7 +252,13 @@
         "maider": "Maider",
         "pater": "Páter",
         "maider_info": "Maider: x{factor} solo BASE del capitán",
-        "pater_info": "Páter: suelo 1 +1 a los 5"
+        "pater_info": "Páter: suelo 1 +1 a los 5",
+        "seleccionado": "Entrenador oficial seleccionado",
+        "activo": "Activo"
+      },
+      "pista": {
+        "titulo": "Pista principal",
+        "ayuda": "Toca para cambiar"
       },
       "ayuda": {
         "base": "Ver base",

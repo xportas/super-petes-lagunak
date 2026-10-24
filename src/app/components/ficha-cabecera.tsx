@@ -19,7 +19,7 @@ export function FichaCabecera(props: {
   readonly jugador: JugadorRow;
   readonly modoPete: boolean;
 }): React.JSX.Element {
-  const sinDorsal = traducir("es", "ui.ficha.sin_dorsal");
+  const sinDorsal = traducir("es", "ui.jugadores.sin_dorsal");
   const sinDescripcion = traducir("es", "ui.ficha.sin_descripcion");
   const posicionPendiente = traducir("es", "ui.jugadores.posicion_pendiente");
   const nombre =
@@ -43,21 +43,31 @@ export function FichaCabecera(props: {
       ? sinDescripcion
       : props.jugador.descripcion;
   return (
-    <section aria-label={nombre} className="flex w-full flex-col gap-2 rounded border px-3 py-3">
-      <div className="flex items-center gap-3">
-        <Image
-          src={imgSrc}
-          alt={nombre}
-          width={64}
-          height={64}
-          className="h-[64px] w-[64px] shrink-0 rounded object-cover"
-        />
-        <div className="flex flex-col">
-          <h1 className="text-xl font-bold">{nombre}</h1>
-          <p className="text-sm">{`${dorsal} · ${posiciones}`}</p>
+    <section aria-label={nombre} className="brutal-card-lg flex w-full flex-col gap-2 p-3">
+      <span className="brutal-hazard-bar" aria-hidden="true" />
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="brutal-chip brutal-chip-pos w-fit">
+            {dorsal} · {posiciones}
+          </span>
+          <h1 className="font-display text-[32px] leading-[36px] font-bold tracking-[-0.03em] break-words uppercase">
+            {nombre}
+          </h1>
         </div>
       </div>
-      <p className="text-sm">{descripcion}</p>
+      <div className="bg-surface-container border-on-surface overflow-hidden rounded-lg border-[2px] shadow-[2px_2px_0px_var(--ink-shadow)]">
+        <Image
+          src={imgSrc}
+          alt=""
+          width={640}
+          height={360}
+          className="h-56 w-full object-cover object-top"
+          priority
+        />
+      </div>
+      <blockquote className="bg-surface-container-low border-on-surface rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
+        {descripcion}
+      </blockquote>
     </section>
   );
 }

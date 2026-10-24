@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { traducir } from "@/src/lib/i18n";
 import { registrar } from "./actions";
 
@@ -59,52 +60,69 @@ export function FormularioRegistro(): React.JSX.Element {
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col gap-4 px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      <h1 className="pt-8 text-xl font-bold">{titulo}</h1>
-      <form onSubmit={enviar} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          <span>{etiquetaUsuario}</span>
-          <input
-            className="min-h-[44px] w-full rounded border px-3"
-            name="username"
-            autoComplete="username"
-            autoCapitalize="none"
-            autoCorrect="off"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+      <section className="brutal-card-lg mt-8 flex flex-col gap-3 p-4">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <span className="flex items-center gap-2">
+          <Image
+            src="/players/escudo-lgnk.jpg"
+            alt=""
+            width={48}
+            height={48}
+            className="border-on-surface h-12 w-12 rounded-xl border-[2px] object-cover shadow-[2px_2px_0px_var(--ink-shadow)]"
+            priority
           />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span>{etiquetaClave}</span>
-          <input
-            className="min-h-[44px] w-full rounded border px-3"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span>{etiquetaCodigo}</span>
-          <input
-            className="min-h-[44px] w-full rounded border px-3"
-            name="codigo"
-            autoCapitalize="none"
-            autoCorrect="off"
-            inputMode="text"
-            value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
-          />
-        </label>
-        {error !== null ? <p role="alert">{error}</p> : null}
-        <button
-          type="submit"
-          disabled={ocupado}
-          className="tappable min-h-[44px] w-full rounded font-semibold"
-        >
-          {crear}
-        </button>
-      </form>
+          <span className="brutal-title text-[22px] leading-[26px]">{titulo}</span>
+        </span>
+        <form onSubmit={enviar} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-semibold">{etiquetaUsuario}</span>
+            <input
+              className="brutal-input"
+              name="username"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-semibold">{etiquetaClave}</span>
+            <input
+              className="brutal-input"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-semibold">{etiquetaCodigo}</span>
+            <input
+              className="brutal-input"
+              name="codigo"
+              autoCapitalize="none"
+              autoCorrect="off"
+              inputMode="text"
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value)}
+            />
+          </label>
+          {error !== null ? (
+            <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
+              {error}
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={ocupado}
+            className="tappable brutal-btn brutal-btn-primary w-full disabled:opacity-50"
+          >
+            {crear}
+          </button>
+        </form>
+      </section>
     </main>
   );
 }

@@ -49,23 +49,31 @@ export function Interruptores(props: {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <span>{etiquetaPete}</span>
+        <span className="text-sm font-semibold">{etiquetaPete}</span>
         <button
           type="button"
           aria-pressed={pete === "1"}
           onClick={() => cambiarPete(pete === "1" ? "0" : "1")}
-          className="tappable min-h-[44px] min-w-[44px] rounded border px-4"
+          className={
+            pete === "1"
+              ? "tappable bg-primary-container border-on-surface min-h-[44px] min-w-[44px] rounded-lg border-[2px] px-4 font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+              : "tappable bg-surface-container-low border-on-surface min-h-[44px] min-w-[44px] rounded-lg border-[2px] px-4 shadow-[2px_2px_0px_var(--ink-shadow)]"
+          }
         >
           {pete === "1" ? etiquetaOn : etiquetaOff}
         </button>
       </div>
       <div className="flex items-center justify-between gap-2">
-        <span>{etiquetaTema}</span>
+        <span className="text-sm font-semibold">{etiquetaTema}</span>
         <button
           type="button"
           aria-pressed={tema === "light"}
           onClick={() => cambiarTema(tema === "light" ? "dark" : "light")}
-          className="tappable min-h-[44px] min-w-[44px] rounded border px-4"
+          className={
+            tema === "dark"
+              ? "tappable bg-primary-container border-on-surface min-h-[44px] min-w-[44px] rounded-lg border-[2px] px-4 font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+              : "tappable bg-surface-container-low border-on-surface min-h-[44px] min-w-[44px] rounded-lg border-[2px] px-4 shadow-[2px_2px_0px_var(--ink-shadow)]"
+          }
         >
           {tema === "light" ? etiquetaClaro : etiquetaOscuro}
         </button>
@@ -85,7 +93,7 @@ export function BotonCerrarSesion(): React.JSX.Element {
     <button
       type="button"
       onClick={() => void salir()}
-      className="tappable min-h-[44px] w-full rounded border"
+      className="tappable brutal-btn brutal-btn-danger w-full"
     >
       {etiqueta}
     </button>

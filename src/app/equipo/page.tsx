@@ -76,9 +76,11 @@ async function ContenidoEquipo(): Promise<React.JSX.Element> {
   if (usuario.rol === "admin") {
     const textoAdmin = traducir("es", "errors.admin.no_juega");
     return (
-      <main className="flex w-full flex-col gap-4 px-4 pt-8">
-        <h1 className="text-xl font-bold">{titulo}</h1>
-        <p role="alert" className="min-h-[44px] rounded border px-3 py-3">
+      <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+        <section className="brutal-card-lg flex flex-col gap-2 p-3">
+          <h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1>
+        </section>
+        <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface min-h-[44px] rounded-xl border-[2.5px] px-3 py-3 text-sm font-bold shadow-[3px_3px_0px_var(--ink-shadow)]">
           {textoAdmin}
         </p>
       </main>
@@ -163,9 +165,11 @@ async function ContenidoEquipo(): Promise<React.JSX.Element> {
   if (activa === null) {
     const vacio = traducir("es", "ui.equipo.vacio_cerrado");
     return (
-      <main className="flex w-full flex-col gap-4 px-4 pt-8">
-        <h1 className="text-xl font-bold">{titulo}</h1>
-        <p className="min-h-[44px] rounded border px-3 py-3">{vacio}</p>
+      <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+        <section className="brutal-card-lg flex flex-col gap-2 p-3">
+          <h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1>
+        </section>
+        <p className="brutal-card min-h-[44px] px-3 py-3 text-sm">{vacio}</p>
       </main>
     );
   }
@@ -194,12 +198,15 @@ async function ContenidoEquipo(): Promise<React.JSX.Element> {
         time: formatearCierre(activa.horaPartido),
       });
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8">
-      <h1 className="text-xl font-bold">{titulo}</h1>
-      <p aria-live="polite" className="flex min-h-[44px] flex-col text-sm">
-        <span>{etiquetaJornada}</span>
-        <span>{textoCierre}</span>
-      </p>
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <section aria-label={titulo} className="brutal-card-lg flex w-full flex-col gap-2 p-3">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1>
+        <p aria-live="polite" className="flex flex-col gap-1 text-sm">
+          <span className="brutal-chip brutal-chip-live w-fit tabular-brutal">{etiquetaJornada}</span>
+          <span className="text-on-surface-variant text-xs">{textoCierre}</span>
+        </p>
+      </section>
       <EquipoEditor
         jornadaId={activa.jornadaId}
         jugadores={jugadores}

@@ -120,10 +120,10 @@ export function ActaForm(props: {
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <p className="min-h-[44px] text-sm">{tOrigen}</p>
-      <form onSubmit={preRellenar} className="flex gap-2">
+      <p className="brutal-chip bg-surface-container border-on-surface w-fit border-[1.5px] text-xs">{tOrigen}</p>
+      <form onSubmit={preRellenar} className="brutal-card flex gap-2 p-2">
         <input
-          className="min-h-[44px] flex-1 rounded border px-3 text-base"
+          className="brutal-input flex-1"
           value={url}
           onChange={(ev) => setUrl(ev.target.value)}
           placeholder={tPegar}
@@ -134,7 +134,7 @@ export function ActaForm(props: {
         <button
           type="submit"
           disabled={ocupado}
-          className="tappable min-h-[44px] rounded border px-3 text-sm"
+          className="tappable brutal-btn brutal-btn-ghost min-h-[44px] shrink-0 px-3 text-xs disabled:opacity-50"
         >
           {tPegar}
         </button>
@@ -143,11 +143,11 @@ export function ActaForm(props: {
         {filas.map((f) => {
           const esNoJugo = f.estado !== "jugo";
           return (
-            <li key={f.jugadorId} className="flex flex-col gap-1 rounded border p-2">
-              <span className="text-sm">{f.nombre}</span>
+            <li key={f.jugadorId} className="brutal-card flex flex-col gap-2 p-2">
+              <span className="truncate text-sm font-semibold">{f.nombre}</span>
               <div className="flex gap-2">
                 <select
-                  className="min-h-[44px] flex-1 rounded border px-2 text-base"
+                  className="brutal-input flex-1"
                   value={f.estado}
                   onChange={(ev) =>
                     cambiarEstado(f.jugadorId, ev.target.value as FilaEditable["estado"])
@@ -159,7 +159,7 @@ export function ActaForm(props: {
                   <option value="dnp">dnp</option>
                 </select>
                 <input
-                  className="min-h-[44px] w-20 rounded border px-2 text-base"
+                  className="brutal-input w-20 shrink-0"
                   type="number"
                   step={1}
                   value={f.valoracion}
@@ -173,12 +173,16 @@ export function ActaForm(props: {
           );
         })}
       </ul>
-      {error !== null ? <p role="alert" className="text-sm">{error}</p> : null}
+      {error !== null ? (
+        <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
+          {error}
+        </p>
+      ) : null}
       <button
         type="button"
         disabled={ocupado}
         onClick={guardar}
-        className="tappable min-h-[44px] w-full rounded border px-3 text-sm font-semibold"
+        className="tappable brutal-btn brutal-btn-primary w-full text-sm disabled:opacity-50"
       >
         {tGuardar}
       </button>
@@ -186,7 +190,7 @@ export function ActaForm(props: {
         type="button"
         disabled={ocupado}
         onClick={reimportar}
-        className="tappable min-h-[44px] w-full rounded border px-3 text-sm"
+        className="tappable brutal-btn brutal-btn-ghost w-full text-sm disabled:opacity-50"
       >
         {tReimportar}
       </button>

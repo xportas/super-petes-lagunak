@@ -19,7 +19,6 @@ import {
   construirGeneral,
   construirTotales,
   esZonaRoja,
-  medallaPorPuesto,
   type ActaJugadorTotales,
   type AlineacionTotales,
   type SeleccionTotales,
@@ -43,17 +42,16 @@ function aFecha(valor: unknown): Date | null {
 }
 
 function claseMedalla(puesto: number): string {
-  const medalla = medallaPorPuesto(puesto);
-  if (medalla === "oro") {
-    return "bg-amber-200 dark:bg-amber-900";
+  if (puesto === 1) {
+    return "bg-primary-container text-on-primary-fixed border-on-surface";
   }
-  if (medalla === "plata") {
-    return "bg-slate-200 dark:bg-slate-700";
+  if (puesto === 2) {
+    return "bg-surface-container-high text-on-surface border-on-surface";
   }
-  if (medalla === "bronce") {
-    return "bg-orange-200 dark:bg-orange-900";
+  if (puesto === 3) {
+    return "bg-[#ffd9b3] text-on-surface border-on-surface dark:bg-amber-900/60 dark:text-amber-50";
   }
-  return "";
+  return "bg-surface-container-lowest text-on-surface border-on-surface";
 }
 
 async function ContenidoClasificacion(): Promise<React.JSX.Element> {
@@ -244,15 +242,62 @@ async function ContenidoClasificacion(): Promise<React.JSX.Element> {
     totalN > 6 ? (general.filas[totalN - 3]?.acumulado ?? 0) : 0;
 
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-      <h1 className="text-xl font-bold">{titulo}</h1>
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <section className="bg-surface-container-highest border-on-surface flex items-center justify-between rounded-xl border-[2.5px] p-3 shadow-[3px_3px_0px_var(--ink-shadow)]">
+        <h1 className="brutal-title text-[18px] leading-[22px]">{titulo}</h1>
+      </section>
       {hayColores ? null : (
-        <p className="flex min-h-[44px] items-center text-sm">{sinDatos}</p>
+        <p className="brutal-card flex min-h-[44px] items-center px-3 text-sm">{sinDatos}</p>
       )}
-      <ol className="flex w-full flex-col gap-1">
+      {general.miManagerId !== null && general.filas.some((f) => f.managerId === general.miManagerId) ? (
+        <section aria-label={tu} className="brutal-card-lg flex flex-col gap-2 p-3">
+          {general.filas.filter((f) => f.managerId === general.miManagerId).map((f) => (
+            <div key={f.managerId} className="flex items-center gap-2">
+              <span className="font-display tabular-brutal bg-primary-container text-on-primary-fixed border-on-surface flex h-9 min-w-[44px] items-center justify-center rounded-lg border-[2px] px-2 text-[22px] leading-[26px] font-bold shadow-[2px_2px_0px_var(--ink-shadow)]">
+                #{f.puesto}
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="flex items-center gap-1 truncate font-bold">
+                  <span className="truncate">{f.username}</span>
+                  <span className="brutal-chip brutal-chip-live shrink-0">{tu}</span>
+                </span>
+                <span className="tabular-brutal text-sm">{traducir("es", "ui.resultados.fila_puntos", { puntos: f.acumulado, puesto: f.puesto })}</span>
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : null}
+      {hayColores && general.filas.length >= 3 ? (
+        <section aria-label="podio" className="flex flex-col gap-2">
+          <div className="grid grid-cols-3 items-end gap-2 pt-6">
+            {[general.filas[1], general.filas[0], general.filas[2]].map((f, i) => {
+              if (f === undefined) {
+                return <span key={i} />;
+              }
+              const central = i === 1;
+              return (
+                <div key={f.managerId} className="flex flex-col items-center">
+                  <span aria-hidden="true" className={`font-display tabular-brutal mb-1 flex h-6 w-6 items-center justify-center rounded-full border-[1.5px] border-[var(--ink-border)] text-[12px] font-bold shadow-[1px_1px_0px_var(--ink-shadow)] ${central ? "bg-primary-container text-on-primary-fixed" : i === 0 ? "bg-surface-container-highest text-on-surface" : "bg-tertiary-container text-on-tertiary-container"}`}>
+                    {central ? 1 : i === 0 ? 2 : 3}
+                  </span>
+                  <div className={`flex w-full flex-col items-center justify-between px-1 pt-2 pb-1 text-center ${central ? "bg-primary-container text-on-primary-fixed border-on-surface h-36 rounded-t-xl border-[2.5px] shadow-[4px_4px_0px_var(--ink-shadow)]" : "bg-surface-container-lowest text-on-surface border-on-surface rounded-t-xl border-[2px] shadow-[3px_3px_0px_var(--ink-shadow)]"} ${i === 0 ? "h-28" : central ? "" : "h-24"}`}>
+                    <span className="flex w-full flex-col">
+                      <span className="truncate text-xs font-bold">{f.username}</span>
+                    </span>
+                    <span className="bg-surface-container-lowest text-on-surface flex w-full flex-col rounded px-1 py-0.5 shadow-[2px_2px_0px_var(--ink-shadow)]">
+                      <span className="font-display tabular-brutal block text-sm leading-tight font-bold">{f.acumulado}</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+      <ol className="flex w-full flex-col gap-2">
         {general.filas.map((f) => {
           const esMia = f.managerId === general.miManagerId;
-          const medalla = hayColores ? claseMedalla(f.puesto) : "";
+          const medalla = hayColores ? claseMedalla(f.puesto) : "bg-surface-container-lowest text-on-surface border-on-surface";
           const roja =
             hayColores &&
             esZonaRoja({
@@ -260,7 +305,7 @@ async function ContenidoClasificacion(): Promise<React.JSX.Element> {
               umbralRojo,
               totalN,
             })
-              ? "bg-red-100 dark:bg-red-950"
+              ? "bg-tertiary-container text-on-tertiary-container"
               : "";
           const texto = traducir("es", "ui.resultados.fila_puntos", {
             puntos: f.acumulado,
@@ -271,11 +316,19 @@ async function ContenidoClasificacion(): Promise<React.JSX.Element> {
               key={f.managerId}
               aria-current={esMia ? "true" : undefined}
               aria-label={esMia ? `${f.username} ${tu}` : f.username}
-              className={`flex min-h-[44px] items-center gap-2 rounded border px-3 text-sm ${medalla} ${roja} ${esMia ? "font-bold" : ""}`}
+              className={`border-[2px] ${roja !== "" ? roja : medalla} flex min-h-[44px] items-center gap-2 rounded-xl px-3 py-2 text-sm shadow-[3px_3px_0px_var(--ink-shadow)] ${esMia ? "font-bold" : ""}`}
             >
-              <span className="break-words">
+              <span aria-hidden="true" className="font-display tabular-brutal bg-surface-container-lowest text-on-surface flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-[2px] border-[var(--ink-border)] text-[14px] font-bold shadow-[1px_1px_0px_var(--ink-shadow)]">
+                {f.puesto}
+              </span>
+              <span className="min-w-0 flex-1 break-words">
                 {f.username} {texto}
-                {esMia ? ` ${tu}` : null}
+                {esMia ? (
+                  <span className="brutal-chip brutal-chip-live ml-1">{tu}</span>
+                ) : null}
+              </span>
+              <span className="font-display tabular-brutal shrink-0 text-[16px] leading-[20px] font-bold">
+                {f.acumulado}
               </span>
             </li>
           );

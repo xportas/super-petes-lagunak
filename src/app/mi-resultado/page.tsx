@@ -302,10 +302,13 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
   const verNormas = traducir("es", "ui.resultados.ver_normas");
 
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-      <h1 className="text-xl font-bold">{titulo}</h1>
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <section className="brutal-card-lg flex flex-col gap-2 p-3">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1>
+      </section>
       {historial.destacada === null ? (
-        <p className="flex min-h-[44px] items-center text-sm">{sinDatos}</p>
+        <p className="brutal-card flex min-h-[44px] items-center px-3 text-sm">{sinDatos}</p>
       ) : (
         <Destacada
           desglose={historial.destacada}
@@ -314,9 +317,9 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
         />
       )}
       <section aria-label={historialTitulo} className="flex w-full flex-col gap-2">
-        <h2 className="text-base font-bold">{historialTitulo}</h2>
+        <h2 className="brutal-title text-[18px] leading-[22px]">{historialTitulo}</h2>
         {filas.length === 0 ? (
-          <p className="flex min-h-[44px] items-center text-sm">{sinDatos}</p>
+          <p className="brutal-card flex min-h-[44px] items-center px-3 text-sm">{sinDatos}</p>
         ) : (
           <HistorialAcordeon filas={filas} />
         )}
@@ -327,7 +330,7 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
             <p
               key={a.jornadaId}
               role="status"
-              className="flex min-h-[44px] flex-wrap items-center gap-2 text-sm"
+              className="brutal-card flex min-h-[44px] flex-wrap items-center gap-2 px-3 py-2 text-sm"
             >
               <span>
                 {traducir("es", "ui.resultados.aviso_excluida", {
@@ -336,7 +339,7 @@ async function ContenidoMiResultado(): Promise<React.JSX.Element> {
               </span>
               <a
                 href="/normas#orden"
-                className="tappable flex min-h-[44px] items-center underline"
+                className="tappable flex min-h-[44px] items-center text-xs underline"
               >
                 {verNormas}
               </a>

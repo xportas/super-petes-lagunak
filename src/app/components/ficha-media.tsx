@@ -8,12 +8,12 @@ import { TooltipNormas } from "./tooltip-normas";
 
 function iconoActa(estado: "jugo" | "lesionado" | "no_convocado" | "dnp"): string {
   if (estado === "jugo") {
-    return "✅";
+    return traducir("es", "ui.resultados.icono_jugo");
   }
   if (estado === "lesionado") {
-    return "🚑";
+    return traducir("es", "ui.resultados.icono_lesionado");
   }
-  return "❌";
+  return traducir("es", "ui.resultados.icono_ausente");
 }
 
 export function FichaMedia(props: {
@@ -32,17 +32,21 @@ export function FichaMedia(props: {
       ? sinDatos
       : `${props.ultima.base} ${iconoActa(props.ultima.estado)} (${props.ultima.jornadaEtiqueta})`;
   return (
-    <section className="flex w-full flex-col gap-2 rounded border px-3 py-3">
-      <div className="flex min-h-[44px] flex-col justify-center gap-1">
-        <h2 className="text-base font-bold">{tituloMedia}</h2>
-        <p className="flex items-center gap-2 text-sm">
-          <span>{textoMedia}</span>
-          <TooltipNormas ancla="base" />
+    <section className="grid w-full grid-cols-2 gap-2">
+      <div className="bg-primary-container text-on-primary-fixed border-on-surface flex flex-col items-center rounded-xl border-[2.5px] p-2 shadow-[3px_3px_0px_var(--ink-shadow)]">
+        <h2 className="font-display text-[10px] leading-[14px] font-bold tracking-[0.06em] uppercase">
+          {tituloMedia}
+        </h2>
+        <p className="font-display tabular-brutal text-[24px] leading-[28px] font-bold">
+          {textoMedia}
         </p>
+        <TooltipNormas ancla="base" />
       </div>
-      <div className="flex min-h-[44px] flex-col justify-center gap-1">
-        <h2 className="text-base font-bold">{tituloUltima}</h2>
-        <p className="text-sm">{textoUltima}</p>
+      <div className="brutal-card flex flex-col items-center p-2 text-center">
+        <h2 className="font-display text-[10px] leading-[14px] font-bold tracking-[0.06em] uppercase">
+          {tituloUltima}
+        </h2>
+        <p className="tabular-brutal text-sm font-bold">{textoUltima}</p>
       </div>
     </section>
   );

@@ -31,6 +31,8 @@ import { FichaMedia } from "@/src/app/components/ficha-media";
 import { FichaEstado } from "@/src/app/components/ficha-estado";
 import { FichaEvolucion } from "@/src/app/components/ficha-evolucion";
 import { GraficaEvolucion } from "@/src/app/components/grafica-evolucion";
+import { IconoBrutal } from "@/src/components/ui/icono-brutal";
+import Link from "next/link";
 
 function aFecha(valor: unknown): Date | null {
   if (valor instanceof Date) {
@@ -183,17 +185,23 @@ async function ContenidoFicha(props: {
   const etiquetaBaja = traducir("es", "ui.jugadores.baja");
 
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <Link href="/jugadores" className="tappable brutal-btn brutal-btn-ghost w-fit px-3 text-sm">
+        <span className="flex items-center gap-1">
+          <IconoBrutal nombre="atras" clase="h-4 w-4" />
+          {traducir("es", "ui.jugadores.volver")}
+        </span>
+      </Link>
       {!jugador.activo ? (
-        <p role="status" className="flex min-h-[44px] items-center rounded border px-3 text-sm font-bold">
+        <p role="status" className="bg-tertiary-container text-on-tertiary-container border-on-surface flex min-h-[44px] items-center rounded-xl border-[2.5px] px-3 text-sm font-bold shadow-[3px_3px_0px_var(--ink-shadow)]">
           {etiquetaBaja}
         </p>
       ) : null}
       <FichaCabecera jugador={jugador} modoPete={modoPete} />
       <FichaMedia media={media} ultima={ultima} />
       <FichaEstado estado={estado} />
-      <FichaEvolucion filas={evolucion} />
       <GraficaEvolucion filas={evolucion} />
+      <FichaEvolucion filas={evolucion} />
     </main>
   );
 }

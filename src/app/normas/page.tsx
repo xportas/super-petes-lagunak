@@ -29,11 +29,14 @@ export default function PaginaNormas(): React.JSX.Element {
   const titulo = traducir("es", "ui.normas.titulo");
   const fuente = traducir("es", "ui.normas.fuente");
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8">
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
       <MarcadorConstantes />
-      <h1 className="text-xl font-bold">{titulo}</h1>
+      <section className="brutal-card-lg flex flex-col gap-2 p-3">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1>
+      </section>
       {ORDEN_BLOQUES.map((b) => (
-        <section key={b} id={b} className="flex flex-col gap-2">
+        <section key={b} id={b} className="flex scroll-mt-24 flex-col gap-2">
           <Bloque bloque={b} />
           {b === "racha" ? <TablaRacha /> : null}
         </section>
@@ -41,7 +44,7 @@ export default function PaginaNormas(): React.JSX.Element {
       <Suspense fallback={null}>
         <EjemploPete />
       </Suspense>
-      <p className="pb-8 text-sm">{fuente}</p>
+      <p className="text-on-surface-variant px-1 text-xs">{fuente}</p>
     </main>
   );
 }

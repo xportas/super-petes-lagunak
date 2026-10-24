@@ -35,35 +35,36 @@ export function Paso2(): React.JSX.Element {
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold">{titulo}</h2>
-      <p>{texto}</p>
+    <section className="brutal-card-lg flex flex-col gap-3 p-3">
+      <span className="brutal-hazard-bar" aria-hidden="true" />
+      <h2 className="brutal-title text-[18px] leading-[22px]">{titulo}</h2>
+      <p className="text-sm">{texto}</p>
       <Link
         href={enlace}
-        className="tappable flex min-h-[44px] items-center justify-center rounded border"
+        className="tappable brutal-btn brutal-btn-ghost w-full text-sm"
       >
         {enlace}
       </Link>
-      <label className="flex min-h-[44px] flex-row items-center gap-2">
+      <label className="bg-surface-container-low border-on-surface flex min-h-[44px] flex-row items-center gap-2 rounded-lg border-[2px] px-3 shadow-[2px_2px_0px_var(--ink-shadow)]">
         <input
           type="checkbox"
-          className="h-[24px] w-[24px]"
+          className="border-on-surface h-6 w-6 rounded border-[2.5px] accent-[#00e676]"
           checked={entendido}
           onChange={(e) => setEntendido(e.target.checked)}
         />
-        <span>{textoConfirmar}</span>
+        <span className="text-sm font-semibold">{textoConfirmar}</span>
       </label>
       <button
         type="button"
         onClick={confirmarPaso}
         disabled={!entendido || ocupado}
-        className="tappable min-h-[44px] w-full rounded font-semibold"
+        className="tappable brutal-btn brutal-btn-primary w-full text-sm disabled:opacity-50"
       >
         {textoConfirmar}
       </button>
       <Link
         href="/onboarding?paso=1"
-        className="tappable flex min-h-[44px] items-center justify-center rounded border"
+        className="tappable brutal-btn brutal-btn-ghost w-full text-sm"
       >
         {volver}
       </Link>

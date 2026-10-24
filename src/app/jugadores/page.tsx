@@ -14,8 +14,11 @@ async function ContenidoJugadores(): Promise<React.JSX.Element> {
   const titulo = traducir("es", "ui.jugadores.titulo");
 
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-      <h1 className="text-xl font-bold">{titulo}</h1>
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <section className="brutal-card-lg flex flex-col gap-2 p-3">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1>
+      </section>
       <ul className="flex w-full flex-col gap-2">
         {plantilla.map((j) => (
           <JugadorFila key={j.id} jugador={j} modoPete={modoPete} />

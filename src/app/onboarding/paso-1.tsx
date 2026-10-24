@@ -31,12 +31,12 @@ export function Paso1(props: {
   if (props.modo !== "requerido") {
     const texto = props.modo === "cierre_pasado" ? cierrePasado : sinJornada;
     return (
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{titulo}</h2>
-        <p>{texto}</p>
+      <section className="brutal-card flex flex-col gap-3 p-3">
+        <h2 className="brutal-title text-[18px] leading-[22px]">{titulo}</h2>
+        <p className="text-sm">{texto}</p>
         <Link
           href="/onboarding?paso=2"
-          className="tappable flex min-h-[44px] items-center justify-center rounded border font-semibold"
+          className="tappable brutal-btn brutal-btn-primary w-full text-sm"
         >
           {irPaso2}
         </Link>
@@ -121,24 +121,28 @@ function SelectorQuinteto(props: {
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="brutal-card flex flex-col gap-3 p-3">
       <ul className="flex flex-col gap-2">
         {props.jugadores.map((j) => {
           const activo = seleccion.includes(j.id);
           const etiqueta =
             props.modoPete && j.nombrePete !== null ? j.nombrePete : j.nombre;
           return (
-            <li key={j.id}>
+            <li key={j.id} className="bg-surface-container-low border-on-surface rounded-xl border-[2px] p-2 shadow-[2px_2px_0px_var(--ink-shadow)]">
               <button
                 type="button"
                 onClick={() => alternar(j.id)}
                 aria-pressed={activo}
-                className="tappable min-h-[44px] w-full rounded border px-3 text-left"
+                className={
+                  activo
+                    ? "tappable bg-primary-container border-on-surface min-h-[44px] w-full rounded-lg border-[2px] px-3 text-left text-sm font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+                    : "tappable bg-surface-container-lowest border-on-surface min-h-[44px] w-full rounded-lg border-[2px] px-3 text-left text-sm shadow-[2px_2px_0px_var(--ink-shadow)]"
+                }
               >
                 {etiqueta}
               </button>
               {activo ? (
-                <div className="flex flex-row flex-wrap gap-1 pt-1">
+                <div className="flex flex-row flex-wrap gap-1 pt-2">
                   {POSICIONES.map((p) => (
                     <button
                       key={p}
@@ -147,7 +151,11 @@ function SelectorQuinteto(props: {
                         setPosiciones({ ...posiciones, [j.id]: p })
                       }
                       aria-pressed={posiciones[j.id] === p}
-                      className="tappable min-h-[44px] min-w-[44px] rounded border px-2"
+                      className={
+                        posiciones[j.id] === p
+                          ? "tappable bg-secondary-container border-on-surface flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border-[2px] px-2 text-sm font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+                          : "tappable bg-surface-container-lowest border-on-surface flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border-[2px] px-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]"
+                      }
                     >
                       {p}
                     </button>
@@ -165,7 +173,11 @@ function SelectorQuinteto(props: {
             type="button"
             onClick={() => setEntrenador(e)}
             aria-pressed={entrenador === e}
-            className="tappable min-h-[44px] flex-1 rounded border"
+            className={
+              entrenador === e
+                ? "tappable bg-primary-container border-on-surface min-h-[44px] flex-1 rounded-lg border-[2.5px] px-2 text-sm font-bold shadow-[3px_3px_0px_var(--ink-shadow)]"
+                : "tappable bg-surface-container-lowest border-on-surface min-h-[44px] flex-1 rounded-lg border-[2px] px-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]"
+            }
           >
             {e}
           </button>
@@ -178,18 +190,26 @@ function SelectorQuinteto(props: {
             type="button"
             onClick={() => setCapitan(id)}
             aria-pressed={capitan === id}
-            className="tappable min-h-[44px] min-w-[44px] rounded border px-2"
+            className={
+              capitan === id
+                ? "tappable bg-secondary-container border-on-surface min-h-[44px] min-w-[44px] rounded-lg border-[2px] px-2 text-xs font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+                : "tappable bg-surface-container-lowest border-on-surface min-h-[44px] min-w-[44px] rounded-lg border-[2px] px-2 text-xs shadow-[2px_2px_0px_var(--ink-shadow)]"
+            }
           >
             {id.slice(0, 4)}
           </button>
         ))}
       </div>
-      {error !== null ? <p role="alert">{error}</p> : null}
+      {error !== null ? (
+        <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
+          {error}
+        </p>
+      ) : null}
       <button
         type="button"
         onClick={guardar}
         disabled={ocupado}
-        className="tappable min-h-[44px] w-full rounded font-semibold"
+        className="tappable brutal-btn brutal-btn-primary w-full text-sm disabled:opacity-50"
       >
         {irPaso2}
       </button>

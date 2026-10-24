@@ -11,6 +11,8 @@ export function FichaEstado(props: {
   const baja = traducir("es", "ui.ficha.baja");
   const sinPenalizacion = traducir("es", "ui.ficha.sin_penalizacion");
   const noAplica = traducir("es", "ui.ficha.no_aplica");
+  const esLesion = props.estado.lineaSanitaria === "lesionado";
+  const esBaja = props.estado.lineaSanitaria !== "disponible" && props.estado.lineaSanitaria !== "lesionado";
   const lineaSanitaria =
     props.estado.lineaSanitaria === "disponible"
       ? disponible
@@ -25,15 +27,22 @@ export function FichaEstado(props: {
         : traducir("es", "ui.ficha.racha", {
             n: props.estado.lineaRacha.penalizacion,
           });
+  const hayRacha =
+    props.estado.lineaRacha.tipo !== "no_aplica" &&
+    props.estado.lineaRacha.penalizacion !== 0;
   return (
-    <section aria-label={titulo} className="flex w-full flex-col gap-2 rounded border px-3 py-3">
-      <h2 className="text-base font-bold">{titulo}</h2>
+    <section aria-label={titulo} className="brutal-card flex w-full flex-col gap-2 p-3">
+      <h2 className="brutal-title text-[18px] leading-[22px]">{titulo}</h2>
       <p className="flex min-h-[44px] flex-wrap items-center gap-2 text-sm">
-        <span>{lineaSanitaria}</span>
+        <span className={esLesion || esBaja ? "brutal-chip brutal-chip-bad" : "brutal-chip brutal-chip-ok"}>
+          {lineaSanitaria}
+        </span>
         <TooltipNormas ancla="base" />
       </p>
       <p className="flex min-h-[44px] flex-wrap items-center gap-2 text-sm">
-        <span>{lineaRacha}</span>
+        <span className={hayRacha ? "brutal-chip brutal-chip-bad" : "brutal-chip bg-surface-container border-on-surface border-[1.5px]"}>
+          {lineaRacha}
+        </span>
         <TooltipNormas ancla="racha" />
       </p>
     </section>

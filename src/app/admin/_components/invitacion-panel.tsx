@@ -32,15 +32,21 @@ export function InvitacionPanel(props: {
   }
 
   return (
-    <div className="flex w-full flex-col gap-3">
+    <div className="brutal-card flex w-full flex-col gap-3 p-3">
       <p className="min-h-[44px] text-sm">{tUnaVez}</p>
-      {codigo !== null ? <p className="min-h-[44px] text-sm">{codigo}</p> : null}
-      {error !== null ? <p role="alert" className="text-sm">{error}</p> : null}
+      {codigo !== null ? (
+        <p className="brutal-chip brutal-chip-live tabular-brutal w-fit break-all">{codigo}</p>
+      ) : null}
+      {error !== null ? (
+        <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
+          {error}
+        </p>
+      ) : null}
       <button
         type="button"
         disabled={ocupado}
         onClick={rotar}
-        className="tappable min-h-[44px] w-full rounded border px-3 text-sm font-semibold"
+        className="tappable brutal-btn brutal-btn-primary w-full text-sm disabled:opacity-50"
       >
         {tRotar}
       </button>

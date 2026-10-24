@@ -8,14 +8,14 @@ export default function ErrorMiResultado(props: {
   const mensaje = traducir("es", "errors.resultados.bd");
   const reintentar = traducir("es", "ui.comun.reintentar");
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8 pb-8">
-      <p role="alert" className="flex min-h-[44px] items-center text-sm">
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface flex min-h-[44px] items-center rounded-xl border-[2.5px] px-3 text-sm font-bold shadow-[3px_3px_0px_var(--ink-shadow)]">
         {mensaje}
       </p>
       <button
         type="button"
         onClick={() => props.reset()}
-        className="tappable flex min-h-[44px] items-center justify-center rounded border px-3 text-sm"
+        className="tappable brutal-btn brutal-btn-primary w-full text-sm"
       >
         {reintentar}
       </button>

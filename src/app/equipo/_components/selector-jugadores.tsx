@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { traducir } from "@/src/lib/i18n";
 import type { JugadorElegibleEquipo } from "../_lib/preview-equipo";
 import type { SlotPos } from "../_lib/validacion-equipo";
@@ -31,6 +32,19 @@ function coincideFiltroPos(
     return validas.some((v) => esExterior(v));
   }
   return validas.includes(filtro);
+}
+
+function normalizarImg(path: string, fallback: string): string {
+  if (path.trim().length === 0) {
+    return fallback;
+  }
+  if (path.startsWith("public/")) {
+    return `/${path.slice("public/".length)}`;
+  }
+  if (path.startsWith("/")) {
+    return path;
+  }
+  return `/${path}`;
 }
 
 export function SelectorJugadores(props: {
@@ -70,10 +84,11 @@ export function SelectorJugadores(props: {
       onClick={props.alCerrar}
     >
       <div
-        className="flex max-h-[80dvh] w-full min-w-[360px] max-w-[430px] flex-col gap-2 overflow-hidden rounded-t-2xl bg-[var(--background)] px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
+        className="brutal-sheet flex max-h-[80dvh] w-full min-w-[360px] max-w-[430px] flex-col gap-2 overflow-hidden px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold">{titulo}</h2>
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <h2 className="brutal-title text-[18px] leading-[22px]">{titulo}</h2>
         <div className="flex flex-row flex-wrap gap-1">
           {FILTROS_POS.map((p) => (
             <button
@@ -81,7 +96,11 @@ export function SelectorJugadores(props: {
               type="button"
               aria-pressed={filtro === p}
               onClick={() => setFiltro(p)}
-              className="tappable flex min-h-[44px] min-w-[44px] items-center justify-center rounded border px-2"
+              className={
+                filtro === p
+                  ? "tappable bg-primary-container border-on-surface flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border-[2px] px-2 text-sm font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+                  : "tappable bg-surface-container-lowest border-on-surface flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border-[2px] px-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]"
+              }
             >
               {p === "TODOS" ? textoTodos : p}
             </button>
@@ -91,11 +110,15 @@ export function SelectorJugadores(props: {
           type="button"
           aria-pressed={soloDisponibles}
           onClick={() => setSoloDisponibles((v) => !v)}
-          className="tappable flex min-h-[44px] items-center rounded border px-3"
+          className={
+            soloDisponibles
+              ? "tappable bg-secondary-container border-on-surface flex min-h-[44px] items-center rounded-lg border-[2px] px-3 text-sm font-bold shadow-[2px_2px_0px_var(--ink-shadow)]"
+              : "tappable bg-surface-container-lowest border-on-surface flex min-h-[44px] items-center rounded-lg border-[2px] px-3 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]"
+          }
         >
           {textoSolo}
         </button>
-        <ul className="flex flex-col gap-1 overflow-y-auto pb-2">
+        <ul className="flex flex-col gap-2 overflow-y-auto pb-2" style={{ overscrollBehavior: "contain" }}>
           {filtrados.map((j) => {
             const ocupadoEn = props.ocupados[j.id];
             const ocupado = ocupadoEn !== undefined;
@@ -107,16 +130,34 @@ export function SelectorJugadores(props: {
                 : traducir("es", "ui.equipo.selector.ocupado", {
                     slot: ocupadoEn,
                   });
+            const imgSrc = normalizarImg(
+              props.modoPete ? j.imgPete : j.img,
+              props.modoPete ? "/players/placeholder-pete.webp" : "/players/placeholder.webp",
+            );
+            const posiciones =
+              j.posicionesValidas === null
+                ? ""
+                : `[${j.posicionesValidas[0]},${j.posicionesValidas[1]}]`;
             return (
               <li key={j.id}>
                 <button
                   type="button"
                   disabled={ocupado}
                   onClick={() => props.alElegir(j.id)}
-                  className="tappable flex min-h-[44px] w-full items-center justify-between gap-2 rounded border px-3 text-left disabled:opacity-50"
+                  className="tappable bg-surface-container-lowest border-on-surface flex min-h-[44px] w-full items-center gap-2 rounded-xl border-[2px] px-2 py-1.5 text-left shadow-[2px_2px_0px_var(--ink-shadow)] disabled:opacity-50"
                 >
-                  <span>{etiqueta}</span>
-                  {ocupado ? <span className="text-xs">{textoOcupado}</span> : null}
+                  <Image
+                    src={imgSrc}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="border-on-surface h-10 w-10 shrink-0 rounded-full border-[2px] object-cover"
+                  />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-sm font-semibold">{etiqueta}</span>
+                    <span className="text-on-surface-variant text-xs">{posiciones}</span>
+                  </span>
+                  {ocupado ? <span className="brutal-chip bg-surface-container border-on-surface shrink-0 border-[1.5px] text-xs">{textoOcupado}</span> : null}
                 </button>
               </li>
             );
@@ -126,7 +167,7 @@ export function SelectorJugadores(props: {
         <button
           type="button"
           onClick={props.alCerrar}
-          className="tappable flex min-h-[44px] items-center justify-center rounded border font-semibold"
+          className="tappable brutal-btn brutal-btn-ghost min-h-[44px] w-full"
         >
           {textoCerrar}
         </button>

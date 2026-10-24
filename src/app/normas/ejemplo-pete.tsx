@@ -46,8 +46,8 @@ export function EjemploPete(): React.JSX.Element {
       ? "/players/placeholder-pete.webp"
       : "/players/placeholder.webp";
   return (
-    <section aria-label={nota} className="flex flex-col gap-2 rounded border p-3">
-      <p>{nota}</p>
+    <section aria-label={nota} className="brutal-card flex flex-col gap-2 p-3">
+      <p className="text-sm">{nota}</p>
       <div className="flex items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -55,9 +55,9 @@ export function EjemploPete(): React.JSX.Element {
           alt=""
           width={64}
           height={64}
-          className="h-16 w-16 rounded"
+          className="border-on-surface h-16 w-16 rounded-xl border-[2px] object-cover shadow-[2px_2px_0px_var(--ink-shadow)]"
         />
-        <span className="flex min-h-[44px] items-center">{nombre}</span>
+        <span className="font-display flex min-h-[44px] items-center text-[16px] leading-[20px] font-bold uppercase">{nombre}</span>
       </div>
     </section>
   );

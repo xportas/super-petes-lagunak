@@ -40,11 +40,11 @@ export function JornadaForm(): React.JSX.Element {
   }
 
   return (
-    <form onSubmit={enviar} className="flex w-full flex-col gap-3">
+    <form onSubmit={enviar} className="brutal-card flex w-full flex-col gap-3 p-3">
       <label className="flex flex-col gap-1">
-        <span className="text-sm">{tRival}</span>
+        <span className="text-sm font-semibold">{tRival}</span>
         <input
-          className="min-h-[44px] w-full rounded border px-3 text-base"
+          className="brutal-input"
           value={rival}
           onChange={(ev) => setRival(ev.target.value)}
           autoCapitalize="none"
@@ -52,18 +52,18 @@ export function JornadaForm(): React.JSX.Element {
         />
       </label>
       <label className="flex flex-col gap-1">
-        <span className="text-sm">{tHora}</span>
+        <span className="text-sm font-semibold">{tHora}</span>
         <input
-          className="min-h-[44px] w-full rounded border px-3 text-base"
+          className="brutal-input"
           type="datetime-local"
           value={hora}
           onChange={(ev) => setHora(ev.target.value)}
         />
       </label>
       <label className="flex flex-col gap-1">
-        <span className="text-sm">{tLocal}</span>
+        <span className="text-sm font-semibold">{tLocal}</span>
         <select
-          className="min-h-[44px] w-full rounded border px-3 text-base"
+          className="brutal-input"
           value={local}
           onChange={(ev) => setLocal(ev.target.value)}
         >
@@ -71,11 +71,15 @@ export function JornadaForm(): React.JSX.Element {
           <option value="visitante">visitante</option>
         </select>
       </label>
-      {error !== null ? <p role="alert" className="text-sm">{error}</p> : null}
+      {error !== null ? (
+        <p role="alert" className="bg-tertiary-container text-on-tertiary-container border-on-surface rounded-lg border-[2px] px-3 py-2 text-sm shadow-[2px_2px_0px_var(--ink-shadow)]">
+          {error}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={ocupado}
-        className="tappable min-h-[44px] w-full rounded border px-3 text-sm font-semibold"
+        className="tappable brutal-btn brutal-btn-primary w-full text-sm disabled:opacity-50"
       >
         {tGuardar}
       </button>

@@ -32,7 +32,7 @@ export function GraficaEvolucion(props: {
       ? null
       : `M ${puntos.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" L ")}`;
   return (
-    <div className="grafica-scroll w-full overflow-x-auto rounded border">
+    <div className="brutal-card grafica-scroll w-full overflow-x-auto p-2">
       <svg
         viewBox={`0 0 ${ANCHO} ${ALTO}`}
         role="img"
@@ -43,13 +43,37 @@ export function GraficaEvolucion(props: {
           x2={ANCHO - MARGEN}
           y1={yCero}
           y2={yCero}
-          strokeWidth={1}
+          stroke="var(--ink-border)"
+          strokeWidth={2}
         />
-        {linea !== null ? <path d={linea} fill="none" strokeWidth={2} /> : null}
+        {linea !== null ? (
+          <path
+            d={linea}
+            fill="none"
+            stroke="var(--ink-border)"
+            strokeWidth={3}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        ) : null}
         {puntos.map((p) => (
           <g key={p.etiqueta}>
-            <circle cx={p.x} cy={p.y} r={4} />
-            <text x={p.x} y={ALTO - 1} textAnchor="middle" fontSize={9}>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r={5}
+              fill="var(--primary-container)"
+              stroke="var(--ink-border)"
+              strokeWidth={2}
+            />
+            <text
+              x={p.x}
+              y={ALTO - 1}
+              textAnchor="middle"
+              fontSize={9}
+              fill="var(--on-surface)"
+              fontWeight={700}
+            >
               {p.etiqueta}
             </text>
           </g>

@@ -19,7 +19,7 @@ export function PreviewModificadores(props: {
     const aviso = traducir("es", "ui.equipo.aviso.lesion_ocupa");
     return (
       <span className="flex min-h-[44px] flex-wrap items-center gap-2 text-sm">
-        <span>{texto}</span>
+        <span className="brutal-chip brutal-chip-bad">{texto}</span>
         <IconoAyuda tipo="base" />
         <span className="text-xs">{aviso}</span>
       </span>
@@ -30,7 +30,7 @@ export function PreviewModificadores(props: {
     const aviso = traducir("es", "ui.equipo.aviso.baja_conserva");
     return (
       <span className="flex min-h-[44px] flex-wrap items-center gap-2 text-sm">
-        <span>{texto}</span>
+        <span className="brutal-chip brutal-chip-bad">{texto}</span>
         <IconoAyuda tipo="base" />
         <span className="text-xs">{aviso}</span>
       </span>
@@ -47,7 +47,7 @@ export function PreviewModificadores(props: {
   return (
     <span className="flex min-h-[44px] flex-wrap items-center gap-2 text-sm">
       {preview.muestraMas5 ? (
-        <span className="inline-flex items-center gap-1">
+        <span className="brutal-chip brutal-chip-ok inline-flex items-center gap-1">
           <span>
             {traducir("es", "ui.equipo.preview.mas5", {
               bonus: BONUS_POSICION,
@@ -57,12 +57,12 @@ export function PreviewModificadores(props: {
         </span>
       ) : null}
       {preview.penalizacionRacha === null ? (
-        <span className="inline-flex items-center gap-1">
+        <span className="brutal-chip bg-surface-container border-on-surface inline-flex items-center gap-1 border-[1.5px]">
           <span>{traducir("es", "ui.equipo.preview.estreno")}</span>
           <IconoAyuda tipo="racha" />
         </span>
       ) : (
-        <span className="inline-flex items-center gap-1">
+        <span className="brutal-chip brutal-chip-bad inline-flex items-center gap-1">
           <span>
             {traducir("es", "ui.equipo.preview.racha", {
               n: preview.penalizacionRacha,

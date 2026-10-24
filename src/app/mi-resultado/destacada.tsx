@@ -12,8 +12,9 @@ export function Destacada(props: {
 }): React.JSX.Element {
   const titulo = traducir("es", "ui.resultados.destacada_titulo");
   return (
-    <section aria-label={titulo} className="flex w-full flex-col gap-2">
-      <h2 className="text-base font-bold">{titulo}</h2>
+    <section aria-label={titulo} className="brutal-card-lg flex w-full flex-col gap-2 p-3">
+      <span className="brutal-hazard-bar" aria-hidden="true" />
+      <h2 className="brutal-title text-[18px] leading-[22px]">{titulo}</h2>
       <DetalleDesglose
         desglose={props.desglose}
         nombres={props.nombres}

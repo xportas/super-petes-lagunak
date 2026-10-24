@@ -214,7 +214,10 @@ async function ContenidoOnboarding(props: {
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col gap-4 px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      <h1 className="pt-8 text-xl font-bold">{titulo}</h1>
+      <section className="brutal-card-lg mt-8 flex flex-col gap-2 p-3">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1>
+      </section>
       {paso === 1 ? (
         <Paso1
           jugadores={jugadores}

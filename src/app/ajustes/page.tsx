@@ -60,17 +60,22 @@ async function ContenidoAjustes(): Promise<React.JSX.Element> {
   const etiquetaNormas = traducir("es", "ui.ajustes.normas");
   const textoIdioma = traducir("es", "ui.ajustes.idioma", { idioma: "ES" });
   return (
-    <main className="flex w-full flex-col gap-4 px-4 pt-8">
-      <h1 className="text-xl font-bold">{titulo}</h1>
+    <main className="flex w-full flex-col gap-4 px-4 pt-4 pb-28">
+      <section className="brutal-card-lg flex flex-col gap-2 p-3">
+        <span className="brutal-hazard-bar" aria-hidden="true" />
+        <h1 className="brutal-title text-[22px] leading-[26px]">{titulo}</h1>
+      </section>
       <a
         href="/normas"
-        className="tappable flex min-h-[44px] items-center rounded border px-3"
+        className="tappable brutal-btn brutal-btn-primary w-full px-3 text-sm"
       >
         {etiquetaNormas}
       </a>
-      <Interruptores inicialPete={modoPete} inicialTema={tema} />
+      <section className="brutal-card flex flex-col gap-3 p-3">
+        <Interruptores inicialPete={modoPete} inicialTema={tema} />
+      </section>
       <CambiarPassword />
-      <p className="flex min-h-[44px] items-center">{textoIdioma}</p>
+      <p className="brutal-card flex min-h-[44px] items-center px-3 text-sm">{textoIdioma}</p>
       <BotonCerrarSesion />
     </main>
   );
